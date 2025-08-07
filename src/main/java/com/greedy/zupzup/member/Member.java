@@ -14,7 +14,7 @@ import jakarta.persistence.*;
 public class Member extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberId;
+    private Long id;
 
     @Column(nullable = false)
     private String email;

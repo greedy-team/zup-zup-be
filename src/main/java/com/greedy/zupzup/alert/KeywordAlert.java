@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public class KeywordAlert extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long keywordAlertId;
+    private Long id;
 
     @Column(name = "lost_area")
     private String lostArea;

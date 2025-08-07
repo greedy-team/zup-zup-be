@@ -26,7 +26,7 @@ public class LostItemImage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lostItemImageId;
+    private Long id;
 
     @Column(name = "image_key", nullable = false)
     private String imageKey;

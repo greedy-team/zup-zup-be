@@ -32,7 +32,7 @@ public class LostItem extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lostItemId;
+    private Long id;
 
     @Column(name = "find_area", nullable = false)
     private String findArea;

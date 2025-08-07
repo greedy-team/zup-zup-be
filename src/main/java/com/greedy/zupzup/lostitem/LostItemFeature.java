@@ -29,7 +29,7 @@ public class LostItemFeature extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lostItemFeatureId;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lost_item_id", nullable = false)

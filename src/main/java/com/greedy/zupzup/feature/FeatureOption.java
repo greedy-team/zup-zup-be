@@ -26,7 +26,7 @@ public class FeatureOption extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long featureOptionId;
+    private Long id;
 
     @Column(name = "option_value", nullable = false)
     private String optionValue;

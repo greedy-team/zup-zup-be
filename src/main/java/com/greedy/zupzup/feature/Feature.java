@@ -27,7 +27,7 @@ public class Feature extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long featureId;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
