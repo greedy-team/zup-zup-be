@@ -28,11 +28,11 @@ public class LostItemImage extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_key", nullable = false)
+    @Column(nullable = false)
     private String imageKey;
 
-    @Column(name = "image_order", nullable = false)
-    private Integer order;
+    @Column(nullable = false)
+    private Integer imageOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lost_item_id", nullable = false)

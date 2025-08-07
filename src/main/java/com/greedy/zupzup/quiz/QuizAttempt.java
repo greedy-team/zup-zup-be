@@ -40,6 +40,6 @@ public class QuizAttempt extends BaseTimeEntity {
     @JoinColumn(name = "lost_item_id", nullable = false)
     private LostItem lostItem;
 
-    @Column(name = "is_correct", nullable = false)
+    @Column(nullable = false)
     private Boolean isCorrect;
 }

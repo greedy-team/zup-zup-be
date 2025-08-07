@@ -34,23 +34,22 @@ public class LostItem extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "find_area", nullable = false)
+    @Column(nullable = false)
     private String findArea;
 
-    @Column(name = "location_detail", nullable = false)
+    @Column(nullable = false)
     private String locationDetail;
 
     @Column
     private String description;
 
-    @Column(name = "deposit_area", nullable = false)
+    @Column(nullable = false)
     private String depositArea;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LostItemStatus status;
 
-    @Column(name = "pledged_at")
     private LocalDate pledgedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

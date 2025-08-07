@@ -29,10 +29,9 @@ public class KeywordAlert extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "lost_area")
     private String lostArea;
 
-    @Column(name = "lost_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate lostDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

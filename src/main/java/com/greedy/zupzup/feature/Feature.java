@@ -32,7 +32,7 @@ public class Feature extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "quiz_question", nullable = false)
+    @Column(nullable = false)
     private String quizQuestion;
 
     @ManyToOne(fetch = FetchType.LAZY)

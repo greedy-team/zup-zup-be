@@ -26,13 +26,13 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Provider provider;
 
-    @Column(name = "provider_id", nullable = false)
+    @Column(nullable = false)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @Column(name = "email_consent", nullable = false)
+    @Column(nullable = false)
     private boolean emailConsent;
 }

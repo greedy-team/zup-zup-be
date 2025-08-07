@@ -28,6 +28,6 @@ public class Category extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "icon_url", nullable = false)
+    @Column(nullable = false)
     private String iconUrl;
 }
