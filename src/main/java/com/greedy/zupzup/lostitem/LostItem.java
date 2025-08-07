@@ -1,0 +1,67 @@
+package com.greedy.zupzup.lostitem;
+
+import com.greedy.zupzup.category.Category;
+import com.greedy.zupzup.global.BaseTimeEntity;
+import com.greedy.zupzup.member.Member;
+import com.greedy.zupzup.schoolarea.SchoolArea;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "lost_item")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class LostItem extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long lostItemId;
+
+    @Column(name = "find_area", nullable = false)
+    private String findArea;
+
+    @Column(name = "location_detail", nullable = false)
+    private String locationDetail;
+
+    @Column
+    private String description;
+
+    @Column(name = "deposit_area", nullable = false)
+    private String depositArea;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LostItemStatus status;
+
+    @Column(name = "pledged_at")
+    private LocalDate pledgedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "finder_id", nullable = false)
+    private Member finder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_area_id", nullable = false)
+    private SchoolArea schoolArea;
+}
