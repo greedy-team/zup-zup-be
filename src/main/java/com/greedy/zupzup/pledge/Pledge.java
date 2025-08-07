@@ -19,8 +19,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "pledge",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"lost_item_id"}))
+@Table(name = "pledge")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -35,6 +34,6 @@ public class Pledge extends BaseTimeEntity {
     private Member owner;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lost_item_id", nullable = false)
+    @JoinColumn(name = "lost_item_id", nullable = false, unique = true)
     private LostItem lostItem;
 }

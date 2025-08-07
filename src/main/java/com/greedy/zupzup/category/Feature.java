@@ -1,16 +1,19 @@
-package com.greedy.zupzup.feature;
+package com.greedy.zupzup.category;
 
-import com.greedy.zupzup.category.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,4 +41,9 @@ public class Feature extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @OneToMany(mappedBy = "feature",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<FeatureOption> options = new ArrayList<>();
 }

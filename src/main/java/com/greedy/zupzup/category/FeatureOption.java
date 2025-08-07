@@ -1,4 +1,4 @@
-package com.greedy.zupzup.feature;
+package com.greedy.zupzup.category;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
