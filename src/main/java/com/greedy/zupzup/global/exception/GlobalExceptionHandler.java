@@ -1,0 +1,142 @@
+package com.greedy.zupzup.global.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.stream.Collectors;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    /**
+     * 어플리케이션 로직에서 발생시킨 예외를 처리합니다.
+     */
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex, HttpServletRequest request) {
+        ExceptionCode code = ex.getCode();
+        log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
+        return createErrorResponse(ex.getCode(), request.getRequestURI());
+    }
+
+    /**
+     * @Valid 유효성 검사 실패 시 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex,
+                                                                   HttpServletRequest request) {
+        // 어떤 필드에서 오류가 났는지에 대한 detail 정보 작성
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ExceptionCode code = CommonException.INVALID_INPUT_VALUE;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, request.getRequestURI());
+    }
+
+    /**
+     * @RequestBody JSON 파싱 실패 등 Request Body를 읽을 수 없을 때 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        ExceptionCode code = CommonException.INVALID_REQUEST_BODY;
+        loggingClientError(code, code.getDetail(), request.getRequestURI());
+        return createErrorResponse(code, request.getRequestURI());
+    }
+
+    /**
+     * 서버가 지원하지 않는 Content-Type으로 요청 시 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+        String detail = String.format("지원하는 Media Type은 '%s' 입니다.", ex.getSupportedMediaTypes());
+        ExceptionCode code = CommonException.UNSUPPORTED_MEDIA_TYPE;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * @RequestParam 필수 요청 파라미터 누락시 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParams(MissingServletRequestParameterException ex,
+                                                             HttpServletRequest request) {
+        String name = ex.getParameterName(); // 누락된 파라미터 이름
+        String expectType = ex.getParameterType();
+        String detail = String.format("필수 쿼리 파라미터 '%s'(%s)가 누락되었습니다.", name, expectType);
+        ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * @RequestParam 쿼리 파라미터의 타입이 일치하지 않을 때 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+                                                            HttpServletRequest request) {
+        String paramName = ex.getName();
+        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없는 타입";
+        String detail = String.format("쿼리 파라미터 '%s'는 '%s' 타입이어야 합니다.", paramName, requiredType);
+        ExceptionCode code = CommonException.QUERY_PARAMETER_TYPE_MISMATCH;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * 지원하지 않는 HTTP 메서드 호출 시 예외를 처리합니다.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+        String detail = String.format("해당 엔드포인트는 '%s' 메소드를 지원하지 않습니다.", e.getMethod());
+        ExceptionCode code = CommonException.METHOD_NOT_ALLOWED;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * 알 수 없는 오류로 인한 예외를 처리합니다.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> exceptionHandler(Exception ex, HttpServletRequest request) {
+        CommonException code = CommonException.INTERNAL_SERVER_ERROR;
+        log.error("예상하지 못한 예외 발생 | ", ex);
+        return createErrorResponse(code, request.getRequestURI());
+    }
+
+
+    private ResponseEntity<ErrorResponse> createErrorResponse(ExceptionCode code, String instance) {
+        ErrorResponse errorResponse = ErrorResponse.of(code, instance);
+        return ResponseEntity
+                .status(code.getHttpStatus())
+                .body(errorResponse);
+    }
+
+    private ResponseEntity<ErrorResponse> createErrorResponse(ExceptionCode code, String detail, String instance) {
+        ErrorResponse errorResponse = ErrorResponse.of(code, detail, instance);
+        return ResponseEntity
+                .status(code.getHttpStatus())
+                .body(errorResponse);
+    }
+
+    private void loggingClientError(ExceptionCode code, String detail, String instance) {
+        log.info("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+                code.getHttpStatus().value(), code.getTitle(), detail, instance);
+    }
+}
