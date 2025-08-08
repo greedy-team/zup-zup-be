@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
      * 알 수 없는 오류로 인한 예외를 처리합니다.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> runtimeExceptionHandler(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> exceptionHandler(Exception ex, HttpServletRequest request) {
         CommonException code = CommonException.INTERNAL_SERVER_ERROR;
         log.error("예상하지 못한 예외 발생 | ", ex);
         return createErrorResponse(code, request.getRequestURI());
