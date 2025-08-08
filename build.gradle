@@ -32,6 +32,10 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// 구역 데이터를 다루기 위한 모듈들
+	implementation 'org.hibernate.orm:hibernate-spatial:6.5.2.Final'
+	implementation 'org.locationtech.jts:jts-core:1.19.0'
 }
 
 tasks.named('test') {
