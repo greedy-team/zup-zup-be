@@ -23,6 +23,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex, HttpServletRequest request) {
+        ExceptionCode code = ex.getCode();
+        log.warn("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
         return createErrorResponse(ex.getCode(), request.getRequestURI());
     }
 
@@ -38,6 +41,8 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
 
         ExceptionCode code = CommonException.INVALID_INPUT_VALUE;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
         return createErrorResponse(code, detail, request.getRequestURI());
     }
 
@@ -47,6 +52,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         ExceptionCode code = CommonException.INVALID_REQUEST_BODY;
+        loggingClientError(code, code.getDetail(), request.getRequestURI());
         return createErrorResponse(code, request.getRequestURI());
     }
 
@@ -57,7 +63,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
         String detail = String.format("지원하는 Media Type은 '%s' 입니다.", ex.getSupportedMediaTypes());
         ExceptionCode code = CommonException.UNSUPPORTED_MEDIA_TYPE;
-        return createErrorResponse(code, detail, request.getRequestURI());
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
     }
 
     /**
@@ -70,7 +78,9 @@ public class GlobalExceptionHandler {
         String expectType = ex.getParameterType();
         String detail = String.format("필수 쿼리 파라미터 '%s'(%s)가 누락되었습니다.", name, expectType);
         ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
-        return createErrorResponse(code, detail, request.getRequestURI());
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
     }
 
     /**
@@ -83,7 +93,9 @@ public class GlobalExceptionHandler {
         String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "알 수 없는 타입";
         String detail = String.format("쿼리 파라미터 '%s'는 '%s' 타입이어야 합니다.", paramName, requiredType);
         ExceptionCode code = CommonException.QUERY_PARAMETER_TYPE_MISMATCH;
-        return createErrorResponse(code, detail, request.getRequestURI());
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
     }
 
     /**
@@ -93,7 +105,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
         String detail = String.format("해당 엔드포인트는 '%s' 메소드를 지원하지 않습니다.", e.getMethod());
         ExceptionCode code = CommonException.METHOD_NOT_ALLOWED;
-        return createErrorResponse(code, detail, request.getRequestURI());
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
     }
 
     /**
@@ -101,8 +115,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> runtimeExceptionHandler(Exception ex, HttpServletRequest request) {
-        log.error("예상하지 못한 예외가 발생했습니다.", ex);
         CommonException code = CommonException.INTERNAL_SERVER_ERROR;
+        log.error("예상하지 못한 예외 발생 | ", ex);
         return createErrorResponse(code, request.getRequestURI());
     }
 
@@ -119,5 +133,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(code.getHttpStatus())
                 .body(errorResponse);
+    }
+
+    private void loggingClientError(ExceptionCode code, String detail, String instance) {
+        log.warn("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+                code.getHttpStatus().value(), code.getTitle(), detail, instance);
     }
 }
