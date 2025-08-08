@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex, HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
-        log.warn("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+        log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
         return createErrorResponse(ex.getCode(), request.getRequestURI());
     }
@@ -136,7 +136,7 @@ public class GlobalExceptionHandler {
     }
 
     private void loggingClientError(ExceptionCode code, String detail, String instance) {
-        log.warn("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
+        log.info("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), detail, instance);
     }
 }
