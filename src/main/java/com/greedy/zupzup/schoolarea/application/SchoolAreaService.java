@@ -11,6 +11,8 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SchoolAreaService {
@@ -24,4 +26,8 @@ public class SchoolAreaService {
         return schoolAreaRepository.getZoneByPoint(userPoint);
     }
 
+    @Transactional(readOnly = true)
+    public List<SchoolArea> findAllAreas() {
+        return schoolAreaRepository.findAll();
+    }
 }
