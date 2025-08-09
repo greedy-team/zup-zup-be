@@ -11,6 +11,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -108,6 +109,17 @@ public class GlobalExceptionHandler {
         String instance = request.getRequestURI();
         loggingClientError(code, detail, instance);
         return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * 서버가 지원하지 않는 엔드포인트 요청시 예외를 처리합니다.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e, HttpServletRequest request) {
+        String instance = request.getRequestURI();
+        ExceptionCode code = CommonException.ENDPOINT_NOT_FOUND;
+        loggingClientError(code, code.getDetail(), instance);
+        return createErrorResponse(code, instance);
     }
 
     /**

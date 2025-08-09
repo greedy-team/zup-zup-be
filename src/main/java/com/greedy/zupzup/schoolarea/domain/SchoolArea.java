@@ -1,4 +1,4 @@
-package com.greedy.zupzup.schoolarea;
+package com.greedy.zupzup.schoolarea.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Polygon;
 
 @Entity
 @Table(name = "school_area")
@@ -28,6 +29,11 @@ public class SchoolArea extends BaseTimeEntity {
     @Column(nullable = false)
     private String areaName;
 
-    @Column(nullable = false)
-    private String area;
+    @Column(nullable = false, columnDefinition = "POLYGON SRID 4326")
+    private Polygon area;
+
+    public SchoolArea(String areaName, Polygon area) {
+        this.areaName = areaName;
+        this.area = area;
+    }
 }
