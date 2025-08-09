@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem;
 
-import com.greedy.zupzup.category.Category;
+import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
 import com.greedy.zupzup.member.Member;
 import com.greedy.zupzup.schoolarea.SchoolArea;

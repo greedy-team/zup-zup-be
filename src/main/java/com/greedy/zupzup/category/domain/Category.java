@@ -1,4 +1,4 @@
-package com.greedy.zupzup.category;
+package com.greedy.zupzup.category.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.CascadeType;

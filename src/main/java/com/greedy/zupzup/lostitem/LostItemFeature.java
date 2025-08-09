@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem;
 
-import com.greedy.zupzup.category.Feature;
-import com.greedy.zupzup.category.FeatureOption;
+import com.greedy.zupzup.category.domain.Feature;
+import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
