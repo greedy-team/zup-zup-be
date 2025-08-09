@@ -31,4 +31,9 @@ public class SchoolArea extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "POLYGON SRID 4326")
     private Polygon area;
+
+    public SchoolArea(String areaName, Polygon area) {
+        this.areaName = areaName;
+        this.area = area;
+    }
 }
