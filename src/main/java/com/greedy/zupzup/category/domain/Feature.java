@@ -45,5 +45,6 @@ public class Feature extends BaseTimeEntity {
     @OneToMany(mappedBy = "feature",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @Builder.Default
     private List<FeatureOption> options = new ArrayList<>();
 }

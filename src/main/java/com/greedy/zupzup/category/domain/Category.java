@@ -38,5 +38,6 @@ public class Category extends BaseTimeEntity {
     @OneToMany(mappedBy = "category",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @Builder.Default
     private List<Feature> features = new ArrayList<>();
 }
