@@ -1,7 +1,7 @@
 package com.greedy.zupzup.category.presentation;
 
 import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
-import com.greedy.zupzup.category.application.CategoryQueryService;
+import com.greedy.zupzup.category.application.CategoryService;
 import com.greedy.zupzup.category.presentation.dto.CategoryFeaturesResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/categories")
-public class CategoryQueryController {
+public class CategoryController {
 
-    private final CategoryQueryService categoryQueryService;
+    private final CategoryService categoryService;
 
     @GetMapping
     public ResponseEntity<CategoriesResponse> categories() {
-        return ResponseEntity.ok(categoryQueryService.getAll());
+        return ResponseEntity.ok(categoryService.getAll());
     }
 
     @GetMapping("/{categoryId}/features")
     public ResponseEntity<CategoryFeaturesResponse> getCategoryFeatures(
             @PathVariable Long categoryId
     ) {
-        return ResponseEntity.ok(categoryQueryService.getCategoryFeatures(categoryId));
+        return ResponseEntity.ok(categoryService.getCategoryFeatures(categoryId));
     }
 }
