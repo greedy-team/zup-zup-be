@@ -35,10 +35,7 @@ public class LostItem extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String findArea;
-
-    @Column(nullable = false)
-    private String locationDetail;
+    private String foundAreaDetail;
 
     @Column
     private String description;
@@ -53,14 +50,10 @@ public class LostItem extends BaseTimeEntity {
     private LocalDate pledgedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "finder_id", nullable = false)
-    private Member finder;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "school_area_id", nullable = false)
-    private SchoolArea schoolArea;
+    @JoinColumn(name = "found_area_id", nullable = false)
+    private SchoolArea foundArea;
 }
