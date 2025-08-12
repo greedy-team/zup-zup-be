@@ -14,7 +14,7 @@ import com.greedy.zupzup.lostitem.application.dto.CreateLostItemCommand;
 import com.greedy.zupzup.lostitem.application.dto.ItemFeatureOptionCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
-import com.greedy.zupzup.lostitem.domain.LostItemFeatureRepository;
+import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;

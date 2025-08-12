@@ -13,10 +13,10 @@ import java.util.Optional;
 public interface SchoolAreaRepository extends JpaRepository<SchoolArea, Long> {
 
     @Query(value = "SELECT sa FROM SchoolArea sa WHERE ST_Contains(sa.area, :point) = true")
-    Optional<SchoolArea> findZoneByPoint(@Param("point") Point point);
+    Optional<SchoolArea> findSchoolAreaByPoint(@Param("point") Point point);
 
-    default SchoolArea getZoneByPoint(Point point) {
-        return findZoneByPoint(point)
+    default SchoolArea getSchoolAreaByPoint(Point point) {
+        return findSchoolAreaByPoint(point)
                 .orElseThrow(() -> new ApplicationException(SchoolAreaException.SCHOOL_AREA_OUT_OF_BOUND));
     }
 
