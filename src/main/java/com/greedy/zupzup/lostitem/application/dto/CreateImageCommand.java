@@ -1,4 +1,12 @@
 package com.greedy.zupzup.lostitem.application.dto;
 
-public class CreateImageCommand {
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Set;
+
+public record CreateImageCommand(
+        MultipartFile image,
+        int order
+) {
 }
