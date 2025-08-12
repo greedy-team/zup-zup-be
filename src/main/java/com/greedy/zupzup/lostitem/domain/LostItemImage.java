@@ -1,4 +1,4 @@
-package com.greedy.zupzup.lostitem;
+package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;

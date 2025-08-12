@@ -1,4 +1,4 @@
-package com.greedy.zupzup.lostitem;
+package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
