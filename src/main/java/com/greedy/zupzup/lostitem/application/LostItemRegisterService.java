@@ -45,44 +45,47 @@ public class LostItemRegisterService {
     @Transactional
     public LostItem registLostItem(CreateLostItemCommand command) {
 
-        Category category = getCategory(command);
+        Category category = getCategory(command.categoryId());
         List<Pair<Feature, FeatureOption>> itemFeatureAndOptions = getValidFeatureAndOptions(category, command.featureOptions());
 
         SchoolArea foundSchoolArea = schoolAreaRepository.getAreaById(command.foundAreaId());
 
-        LostItem newLostItem = new LostItem(command.foundAreaDetail(), command.description(), command.depositArea(), category, foundSchoolArea);
-        lostItemRepository.save(newLostItem);
-
-        saveLostItemImage(command, newLostItem);
+        LostItem newLostItem = saveLostItem(command, category, foundSchoolArea);
+        saveLostItemImage(command.images(), newLostItem);
         saveLostItemFeatureAndOptions(itemFeatureAndOptions, newLostItem);
 
         return newLostItem;
     }
 
+    private LostItem saveLostItem(CreateLostItemCommand command, Category category, SchoolArea foundSchoolArea) {
+        LostItem newLostItem = new LostItem(command.foundAreaDetail(), command.description(), command.depositArea(), category, foundSchoolArea);
+        lostItemRepository.save(newLostItem);
+        return newLostItem;
+    }
+
+    private void saveLostItemImage(List<CreateImageCommand> images, LostItem newLostItem) {
+        List<LostItemImage> newLostItemImages = images.stream()
+                .map(image -> {
+                    String imageURL = s3ImageFileManager.upload(image.imageFile(), IMAGE_DIRECTORY);
+                    return new LostItemImage(imageURL, image.order(), newLostItem);
+                }).toList();
+        lostItemImageRepository.saveAll(newLostItemImages);
+    }
+
     private void saveLostItemFeatureAndOptions(List<Pair<Feature, FeatureOption>> itemFeatureAndOptions, LostItem newLostItem) {
-        for (Pair<Feature, FeatureOption> itemFeatureAndOption : itemFeatureAndOptions) {
-            LostItemFeature lostItemFeature = new LostItemFeature(newLostItem, itemFeatureAndOption.getFirst(), itemFeatureAndOption.getSecond());
-            lostItemFeatureRepository.save(lostItemFeature);
-        }
+        List<LostItemFeature> newFeatures = itemFeatureAndOptions.stream()
+                .map(featureOption -> new LostItemFeature(newLostItem, featureOption.getFirst(), featureOption.getSecond()))
+                .toList();
+        lostItemFeatureRepository.saveAll(newFeatures);
     }
 
-    private void saveLostItemImage(CreateLostItemCommand command, LostItem newLostItem) {
-        List<CreateImageCommand> images = command.images();
-        for (CreateImageCommand image : images) {
-            String imageURL = s3ImageFileManager.upload(image.imageFile(), IMAGE_DIRECTORY);
-            LostItemImage lostItemImage = new LostItemImage(imageURL, image.order(), newLostItem);
-            lostItemImageRepository.save(lostItemImage);
-        }
-    }
-
-    private Category getCategory(CreateLostItemCommand command) {
-        return categoryRepository.findWithFeaturesById(command.categoryId())
+    private Category getCategory(Long categoryId) {
+        return categoryRepository.findWithFeaturesById(categoryId)
                 .orElseThrow(() -> new ApplicationException(CategoryException.CATEGORY_NOT_FOUND));
     }
 
-
     /**
-     * 등록 요청된 분실물의 테마에 대한 특징과 옵션이 유효한지 검사하고, 유효하다면 해당 특징과 옵션의 쌍(Pair)들을 리스트로 반환합니다.
+     * 등록 요청된 분실물의 카테고리에 대한 특징과 옵션이 유효한지 검사하고, 유효하다면 해당 특징과 옵션의 쌍(Pair)들을 리스트로 반환합니다.
      */
     private List<Pair<Feature, FeatureOption>> getValidFeatureAndOptions(Category category,
                                                                          List<ItemFeatureOptionCommand> requestedFeatureOptions) {
@@ -118,7 +121,5 @@ public class LostItemRegisterService {
                 .findAny()
                 .orElseThrow(() -> new ApplicationException(LostItemFeatureException.INVALID_FEATURE_OPTION));
     }
-
-
 
 }

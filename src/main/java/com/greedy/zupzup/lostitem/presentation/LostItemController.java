@@ -27,7 +27,7 @@ public class LostItemController {
                                                            @RequestPart("lostItemRegisterRequest") LostItemRegisterRequest lostItemRegisterRequest) {
         LostItem lostItem = lostItemRegisterService.registLostItem(lostItemRegisterRequest.toCommand(images));
         return ResponseEntity
-                .created(URI.create("/api/lost-items/"))
+                .created(URI.create("/api/lost-items/" + lostItem.getId()))
                 .body(new LostItemRegisterResponse(lostItem.getId(), "분실물 등록에 성공했습니다."));
     }
 }
