@@ -21,12 +21,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             """)
     Optional<Category> findWithFeaturesById(@Param("id") Long id);
 
-    @Query("""
-                select c
-                from Category c
-                left join fetch c.features f
-                left join fetch f.options o 
-                where c.id = :id
-            """)
-    Optional<Category> findWithFeatureAndOptionById(@Param("id") Long id);
 }

@@ -6,6 +6,7 @@ import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.category.exception.CategoryException;
 import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.category.repository.CategoryRepository;
+import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.application.dto.CreateImageCommand;
@@ -36,6 +37,7 @@ public class LostItemRegisterService {
     private final LostItemRepository lostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
+    private final FeatureOptionRepository featureOptionRepository;
     private final SchoolAreaRepository schoolAreaRepository;
     private final CategoryRepository categoryRepository;
     private final S3ImageFileManager s3ImageFileManager;
@@ -74,7 +76,7 @@ public class LostItemRegisterService {
     }
 
     private Category getCategory(CreateLostItemCommand command) {
-        return categoryRepository.findWithFeatureAndOptionById(command.categoryId())
+        return categoryRepository.findWithFeaturesById(command.categoryId())
                 .orElseThrow(() -> new ApplicationException(CategoryException.CATEGORY_NOT_FOUND));
     }
 
@@ -84,25 +86,35 @@ public class LostItemRegisterService {
      */
     private List<Pair<Feature, FeatureOption>> getValidFeatureAndOptions(Category category,
                                                                          List<ItemFeatureOptionCommand> requestedFeatureOptions) {
+
+        List<FeatureOption> options = getOptions(category);
+
         return requestedFeatureOptions.stream()
                 .map(featureOption -> {
                     Feature existsFeature = getValidFeature(category, featureOption.featureId());
-                    FeatureOption existsOption = getValidFeatureOption(existsFeature, featureOption.optionId());
+                    FeatureOption existsOption = getValidFeatureOption(options, existsFeature.getId(), featureOption.optionId());
                     return Pair.of(existsFeature, existsOption);
                 })
                 .toList();
     }
 
+    private List<FeatureOption> getOptions(Category category) {
+        List<Long> featureIdList = category.getFeatures().stream()
+                .map(Feature::getId)
+                .toList();
+        return featureOptionRepository.findByFeatureIds(featureIdList);
+    }
+
     private Feature getValidFeature(Category category, Long requestedFeatureId) {
         return category.getFeatures().stream()
-                .filter(feature -> feature.getId().equals(requestedFeatureId))
+                .filter(feature -> feature.isValidSelection(requestedFeatureId))
                 .findAny()
                 .orElseThrow(() -> new ApplicationException(CategoryException.INVALID_CATEGORY_FEATURE));
     }
 
-    private FeatureOption getValidFeatureOption(Feature feature, Long requestedOptionId) {
-        return feature.getOptions().stream()
-                .filter(option -> option.getId().equals(requestedOptionId))
+    private FeatureOption getValidFeatureOption(List<FeatureOption> options, Long existsFeatureId , Long requestedOptionId) {
+        return options.stream()
+                .filter(option -> option.isValidSelection(existsFeatureId, requestedOptionId))
                 .findAny()
                 .orElseThrow(() -> new ApplicationException(LostItemFeatureException.INVALID_FEATURE_OPTION));
     }

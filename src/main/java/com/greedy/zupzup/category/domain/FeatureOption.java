@@ -34,4 +34,9 @@ public class FeatureOption extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feature_id", nullable = false)
     private Feature feature;
+
+    public boolean isValidSelection(Long selectedFeatureId, Long selectedOptionId) {
+        return this.feature.getId().equals(selectedFeatureId) && this.id.equals(selectedOptionId);
+    }
+
 }

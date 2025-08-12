@@ -47,4 +47,8 @@ public class Feature extends BaseTimeEntity {
             orphanRemoval = true)
     @Builder.Default
     private List<FeatureOption> options = new ArrayList<>();
+
+    public boolean isValidSelection(Long selectedFeatureId) {
+        return this.id.equals(selectedFeatureId);
+    }
 }
