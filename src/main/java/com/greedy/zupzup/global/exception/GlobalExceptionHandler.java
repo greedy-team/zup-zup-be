@@ -31,6 +31,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * S3, 외부 API 등 외부 인프라와 연동에 실패 시 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(InfrastructureException.class)
+    public ResponseEntity<ErrorResponse> infrastructureExceptionHandler(InfrastructureException ex, HttpServletRequest request) {
+        ExceptionCode code = ex.getCode();
+        log.error("외부 시스템 연동 오류 | code={}, title=\"{}\", detail=\"{}\", instance={} ",
+                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI(), ex);
+        return createErrorResponse(ex.getCode(), request.getRequestURI());
+    }
+
+    /**
      * @Valid 유효성 검사 실패 시 발생하는 예외를 처리합니다.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.exception.CommonException;
+import com.greedy.zupzup.global.exception.InfrastructureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -49,7 +50,7 @@ public class S3ImageFileManager {
 
             return s3Client.getUrl(bucketName, s3ObjectKey).toString();
         } catch (IOException e) {
-            throw new ApplicationException(CommonException.IMAGE_UPLOAD_FAILED);
+            throw new InfrastructureException(CommonException.IMAGE_UPLOAD_FAILED);
         }
     }
 
