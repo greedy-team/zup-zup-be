@@ -39,7 +39,7 @@ public record CreateLostItemCommand(
 
     public static List<CreateImageCommand> toCreateImageCommandListWithValidation(List<MultipartFile> images) {
 
-        if (images == null || images.isEmpty()) {
+        if (images == null || images.isEmpty() || images.size() > 3) {
             throw new ApplicationException(LostItemImageException.INVALID_IMAGE_COUNT);
         }
         // 이미지 순서는 0부터
