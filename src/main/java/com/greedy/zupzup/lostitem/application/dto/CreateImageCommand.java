@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 public record CreateImageCommand(
-        MultipartFile image,
+        MultipartFile imageFile,
         int order
 ) {
 }

@@ -55,4 +55,14 @@ public class LostItem extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "found_area_id", nullable = false)
     private SchoolArea foundArea;
+
+    public LostItem(String foundAreaDetail, String description, String depositArea, Category category, SchoolArea foundArea) {
+        this.foundAreaDetail = foundAreaDetail;
+        this.description = description;
+        this.depositArea = depositArea;
+        this.status = LostItemStatus.REGISTERED;
+        this.pledgedAt = null;
+        this.category = category;
+        this.foundArea = foundArea;
+    }
 }

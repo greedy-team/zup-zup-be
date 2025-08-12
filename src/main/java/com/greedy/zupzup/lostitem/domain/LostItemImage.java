@@ -37,4 +37,10 @@ public class LostItemImage extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lost_item_id", nullable = false)
     private LostItem lostItem;
+
+    public LostItemImage(String imageKey, Integer imageOrder, LostItem lostItem) {
+        this.imageKey = imageKey;
+        this.imageOrder = imageOrder;
+        this.lostItem = lostItem;
+    }
 }

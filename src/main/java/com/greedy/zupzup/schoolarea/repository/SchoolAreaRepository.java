@@ -17,6 +17,11 @@ public interface SchoolAreaRepository extends JpaRepository<SchoolArea, Long> {
 
     default SchoolArea getZoneByPoint(Point point) {
         return findZoneByPoint(point)
+                .orElseThrow(() -> new ApplicationException(SchoolAreaException.SCHOOL_AREA_OUT_OF_BOUND));
+    }
+
+    default SchoolArea getAreaById(Long id) {
+        return findById(id)
                 .orElseThrow(() -> new ApplicationException(SchoolAreaException.SCHOOL_AREA_NOT_FOUND));
     }
 }
