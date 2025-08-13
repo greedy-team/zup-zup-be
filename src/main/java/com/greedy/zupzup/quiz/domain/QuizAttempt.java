@@ -1,4 +1,4 @@
-package com.greedy.zupzup.quiz;
+package com.greedy.zupzup.quiz.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import com.greedy.zupzup.lostitem.domain.LostItem;
