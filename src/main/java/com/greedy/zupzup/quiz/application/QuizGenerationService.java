@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class QuizService {
+public class QuizGenerationService {
 
     private final LostItemRepository lostItemRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
