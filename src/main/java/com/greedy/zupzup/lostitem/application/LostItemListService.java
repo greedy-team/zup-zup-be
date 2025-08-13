@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.application;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemListDto;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.repository.LostItemListProjection;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class LostItemListService {
     private final LostItemRepository lostItemRepository;
 
     @Transactional(readOnly = true)
-    public Page<LostItemListDto> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
+    public Page<LostItemListCommand> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
         int safePage = page == null || page < 1 ? 1 : page;
         int rawLimit = limit == null ? DEFAULT_LIMIT : limit;
         int safeLimit = Math.max(MIN_LIMIT, Math.min(MAX_LIMIT, rawLimit));
@@ -31,6 +31,6 @@ public class LostItemListService {
 
         Page<LostItemListProjection> slice = lostItemRepository.findList(categoryId, schoolAreaId, pageable);
 
-        return slice.map(LostItemListDto::from);
+        return slice.map(LostItemListCommand::from);
     }
 }

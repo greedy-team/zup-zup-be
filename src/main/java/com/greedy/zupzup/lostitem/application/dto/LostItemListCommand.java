@@ -3,7 +3,7 @@ package com.greedy.zupzup.lostitem.application.dto;
 import com.greedy.zupzup.lostitem.repository.LostItemListProjection;
 import java.time.LocalDateTime;
 
-public record LostItemListDto(
+public record LostItemListCommand(
         Long id,
         Long categoryId,
         String categoryName,
@@ -13,8 +13,8 @@ public record LostItemListDto(
         String findArea,
         LocalDateTime createdAt
 ) {
-    public static LostItemListDto from(LostItemListProjection p) {
-        return new LostItemListDto(
+    public static LostItemListCommand from(LostItemListProjection p) {
+        return new LostItemListCommand(
                 p.getId(),
                 p.getCategoryId(),
                 p.getCategoryName(),

@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation;
 
 import com.greedy.zupzup.lostitem.application.LostItemSummaryService;
-import com.greedy.zupzup.lostitem.application.dto.LostItemSummaryDto;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSummaryCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemSummaryResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class LostItemSummaryController {
     public ResponseEntity<LostItemSummaryResponse> getSummary(
             @RequestParam(name = "categoryId", required = false) Long categoryId
     ) {
-        List<LostItemSummaryDto> result = service.getSummary(categoryId);
+        List<LostItemSummaryCommand> result = service.getSummary(categoryId);
 
         List<LostItemSummaryResponse.AreaSummary> areas = result.stream()
                 .map(dto -> new LostItemSummaryResponse.AreaSummary(

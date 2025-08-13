@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation;
 
 import com.greedy.zupzup.lostitem.application.LostItemListService;
-import com.greedy.zupzup.lostitem.application.dto.LostItemListDto;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.PageInfoResponse;
@@ -34,7 +34,7 @@ public class LostItemListController {
             @RequestParam(name = "limit", required = false, defaultValue = "20") @Min(1) @Max(50) Integer limit
     ) {
         {
-            Page<LostItemListDto> result = lostItemListService.getLostItems(categoryId, schoolAreaId, page, limit);
+            Page<LostItemListCommand> result = lostItemListService.getLostItems(categoryId, schoolAreaId, page, limit);
 
             if (result == null)
                 result = org.springframework.data.domain.Page.empty();

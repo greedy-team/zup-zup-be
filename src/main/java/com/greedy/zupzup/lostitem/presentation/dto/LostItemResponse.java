@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemListDto;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 
 public record LostItemResponse(
         Long id,
@@ -12,7 +12,7 @@ public record LostItemResponse(
         String findArea,
         String createdAt
 ) {
-    public static LostItemResponse from(LostItemListDto dto) {
+    public static LostItemResponse from(LostItemListCommand dto) {
         return new LostItemResponse(
                 dto.id(),
                 dto.categoryId(),
