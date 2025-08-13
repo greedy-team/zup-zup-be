@@ -2,6 +2,7 @@ package com.greedy.zupzup.quiz.application;
 
 import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
@@ -29,15 +30,22 @@ public class QuizService {
     private static final int QUIZ_OPTIONS_COUNT = 4;
     private static final int CORRECT_ANSWER_COUNT = 1;
     private static final int NUMBER_OF_WRONG_OPTIONS = QUIZ_OPTIONS_COUNT - CORRECT_ANSWER_COUNT;
+    private static final String ETC_CATEGORY_NAME = "기타";
     private static final String ETC_OPTION_TEXT = "기타";
 
     @Transactional(readOnly = true)
     public List<QuizDto> generateLostItemQuizzes(Long lostItemId, Long memberId) {
         validateQuizGeneration(lostItemId, memberId);
 
+        LostItem lostItem = lostItemRepository.findWithCategoryById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+
+        if (lostItem.isNotQuizCategory()) {
+            return Collections.emptyList();
+        }
+
         List<LostItemFeature> lostItemFeatures = lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(
                 lostItemId);
-
         return lostItemFeatures.stream()
                 .map(this::createQuizDto)
                 .collect(Collectors.toList());
