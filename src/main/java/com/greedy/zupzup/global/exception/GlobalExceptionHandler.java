@@ -1,7 +1,9 @@
 package com.greedy.zupzup.global.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -150,5 +153,28 @@ public class GlobalExceptionHandler {
     private void loggingClientError(ExceptionCode code, String detail, String instance) {
         log.info("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), detail, instance);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponse> handleHandlerMethodValidation(HandlerMethodValidationException ex,
+                                                                       HttpServletRequest request) {
+        String detail = ex.getAllErrors().stream()
+                .map(error -> ((DefaultMessageSourceResolvable) error).getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
+        loggingClientError(code, detail, request.getRequestURI());
+        return createErrorResponse(code, detail, request.getRequestURI());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex,
+                                                                   HttpServletRequest request) {
+        String detail = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
+        loggingClientError(code, detail, request.getRequestURI());
+        return createErrorResponse(code, detail, request.getRequestURI());
     }
 }
