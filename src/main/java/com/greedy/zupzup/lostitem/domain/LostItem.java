@@ -2,6 +2,7 @@ package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
+import com.greedy.zupzup.member.Member;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,12 +50,20 @@ public class LostItem extends BaseTimeEntity {
     private LocalDate pledgedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "finder_id", nullable = false)
+    private Member finder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "found_area_id", nullable = false)
     private SchoolArea foundArea;
+
+    public boolean isNotQuizCategory() {
+        return this.category.isNotQuizCategory();
+    }
 
     public LostItem(String foundAreaDetail, String description, String depositArea, Category category, SchoolArea foundArea) {
         this.foundAreaDetail = foundAreaDetail;
