@@ -1,7 +1,7 @@
 package com.greedy.zupzup.alert;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
-import com.greedy.zupzup.member.Member;
+import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.category.domain.Category;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
