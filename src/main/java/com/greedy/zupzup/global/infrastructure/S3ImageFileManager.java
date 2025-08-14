@@ -1,8 +1,5 @@
 package com.greedy.zupzup.global.infrastructure;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.InfrastructureException;
@@ -10,11 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -23,15 +23,18 @@ public class S3ImageFileManager {
     private static final String PATH_DELIMITER = "/";
     private static final String FILE_EXTENSION_DELIMITER = ".";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;     // 최대 이미지 크기 10MB
-    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif");
 
-    private final AmazonS3 s3Client;
+    private final S3Client s3Client;
     private final String bucketName;
+    private final String imageURLPrefix;
 
-    public S3ImageFileManager(AmazonS3 s3Client,
-                              @Value("${cloud.aws.s3.bucket}") String bucketName) {
+    public S3ImageFileManager(S3Client s3Client,
+                              @Value("${cloud.aws.s3.bucket}") String bucketName,
+                              @Value("${cloud.aws.s3.url.prefix}") String imageURLPrefix) {
         this.s3Client = s3Client;
         this.bucketName = bucketName;
+        this.imageURLPrefix = imageURLPrefix;
     }
 
     public String upload(MultipartFile multipartFile, String directory) {
@@ -41,17 +44,25 @@ public class S3ImageFileManager {
         String originalFilename = multipartFile.getOriginalFilename();
         String s3ObjectKey = directory + PATH_DELIMITER + generateUUIDFileName(originalFilename);
 
-        ObjectMetadata objectMetadata = getObjectMetadata(multipartFile);
-
         try (InputStream inputStream = multipartFile.getInputStream()) {
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, s3ObjectKey, inputStream, objectMetadata);
-            s3Client.putObject(putObjectRequest);
+            PutObjectRequest putObjectRequest = buildPutObjectRequest(multipartFile, s3ObjectKey);
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, multipartFile.getSize()));
 
-            return s3Client.getUrl(bucketName, s3ObjectKey).toString();
-        } catch (IOException e) {
+        } catch (IOException | S3Exception e) {
             throw new InfrastructureException(CommonException.IMAGE_UPLOAD_FAILED);
         }
+
+        return imageURLPrefix + "/" + s3ObjectKey;
+    }
+
+    private PutObjectRequest buildPutObjectRequest(MultipartFile multipartFile, String s3ObjectKey) {
+        return PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(s3ObjectKey)
+                .contentType(multipartFile.getContentType())
+                .contentLength(multipartFile.getSize())
+                .build();
     }
 
     private void validateFile(MultipartFile multipartFile) {
@@ -76,10 +87,4 @@ public class S3ImageFileManager {
         }
     }
 
-    private ObjectMetadata getObjectMetadata(MultipartFile multipartFile) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(multipartFile.getSize());
-        objectMetadata.setContentType(multipartFile.getContentType());
-        return objectMetadata;
-    }
 }

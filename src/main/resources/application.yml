@@ -10,3 +10,5 @@ cloud:
       static: ap-northeast-2
     s3:
       bucket: ${AWS_S3_BUCKET_NAME}
+      url:
+        prefix: "https://${AWS_S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com"
