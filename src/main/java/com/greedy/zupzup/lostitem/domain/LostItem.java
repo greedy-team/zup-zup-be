@@ -2,7 +2,7 @@ package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
-import com.greedy.zupzup.member.Member;
+import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,10 +67,6 @@ public class LostItem extends BaseTimeEntity {
     @OneToMany(mappedBy = "lostItem")
     private List<LostItemImage> images = new ArrayList<>();
 
-    public boolean isNotQuizCategory() {
-        return this.category.isNotQuizCategory();
-    }
-
     public LostItem(String foundAreaDetail, String description, String depositArea, Category category, SchoolArea foundArea) {
         this.foundAreaDetail = foundAreaDetail;
         this.description = description;
@@ -79,5 +75,18 @@ public class LostItem extends BaseTimeEntity {
         this.pledgedAt = null;
         this.category = category;
         this.foundArea = foundArea;
+    }
+
+    public boolean isNotQuizCategory() {
+        return this.category.isNotQuizCategory();
+    }
+
+    public boolean isPledgeable() {
+        return this.status == LostItemStatus.REGISTERED;
+    }
+
+    public void pledge() {
+        this.status = LostItemStatus.PLEDGED;
+        this.pledgedAt = LocalDate.now();
     }
 }
