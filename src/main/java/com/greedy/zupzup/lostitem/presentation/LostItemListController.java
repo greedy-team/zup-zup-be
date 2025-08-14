@@ -3,11 +3,10 @@ package com.greedy.zupzup.lostitem.presentation;
 import com.greedy.zupzup.lostitem.application.LostItemListService;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListQuery;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.PageInfoResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +26,10 @@ public class LostItemListController {
         Page<LostItemListCommand> page = lostItemListService.getLostItems(
                 query.categoryId(), query.schoolAreaId(), query.safePage(), query.safeLimit()
         );
-        return ResponseEntity.ok(LostItemListResponse.of(page));
+
+        List<Long> ids = page.getContent().stream().map(LostItemListCommand::id).toList();
+        Map<Long, String> repImageMap = lostItemListService.getRepresentativeImageMapByItemIds(ids);
+
+        return ResponseEntity.ok(LostItemListResponse.of(page, repImageMap));
     }
 }

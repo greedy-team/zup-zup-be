@@ -10,7 +10,7 @@ public record LostItemListCommand(
         String categoryIconUrl,
         Long schoolAreaId,
         String schoolAreaName,
-        String findAreaDetail,
+        String foundAreaDetail,
         LocalDateTime createdAt
 ) {
     public static LostItemListCommand from(LostItemListProjection projection) {
@@ -21,7 +21,7 @@ public record LostItemListCommand(
                 projection.getCategoryIconUrl(),
                 projection.getSchoolAreaId(),
                 projection.getSchoolAreaName(),
-                projection.getFindAreaDetail(),
+                projection.getFoundAreaDetail(),
                 projection.getCreatedAt()
         );
     }

@@ -15,7 +15,7 @@ public interface LostItemListProjection {
 
     String getSchoolAreaName();
 
-    String getFindAreaDetail();
+    String getFoundAreaDetail();
 
     LocalDateTime getCreatedAt();
 }
