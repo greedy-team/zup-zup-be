@@ -19,6 +19,10 @@ public record CreateLostItemCommand(
         List<ItemFeatureOptionCommand> featureOptions,
         List<CreateImageCommand> images
 ) {
+
+    private static final int MAX_IMAGE_COUNT = 3;
+    private static final int IMAGE_START_INDEX = 0;
+
     public static CreateLostItemCommand of(LostItemRegisterRequest request, List<MultipartFile> images) {
         return new CreateLostItemCommand(
                 request.description(),
@@ -39,11 +43,11 @@ public record CreateLostItemCommand(
 
     public static List<CreateImageCommand> toCreateImageCommandListWithValidation(List<MultipartFile> images) {
 
-        if (images == null || images.isEmpty() || images.size() > 3) {
+        if (images == null || images.isEmpty() || images.size() > MAX_IMAGE_COUNT) {
             throw new ApplicationException(LostItemImageException.INVALID_IMAGE_COUNT);
         }
         // 이미지 순서는 0부터
-        return IntStream.range(0, images.size())
+        return IntStream.range(IMAGE_START_INDEX, images.size())
                 .mapToObj(i -> new CreateImageCommand(images.get(i), i))
                 .collect(Collectors.toList());
     }
