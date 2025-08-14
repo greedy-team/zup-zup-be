@@ -7,6 +7,7 @@ import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.pledge.exception.PledgeException;
 import com.greedy.zupzup.quiz.application.dto.OptionDto;
 import com.greedy.zupzup.quiz.application.dto.QuizDto;
 import com.greedy.zupzup.quiz.exception.QuizException;
@@ -30,15 +31,19 @@ public class QuizGenerationService {
     private static final int QUIZ_OPTIONS_COUNT = 4;
     private static final int CORRECT_ANSWER_COUNT = 1;
     private static final int NUMBER_OF_WRONG_OPTIONS = QUIZ_OPTIONS_COUNT - CORRECT_ANSWER_COUNT;
-    private static final String ETC_CATEGORY_NAME = "기타";
     private static final String ETC_OPTION_TEXT = "기타";
 
     @Transactional(readOnly = true)
     public List<QuizDto> getLostItemQuizzes(Long lostItemId, Long memberId) {
-        validateQuizGeneration(lostItemId, memberId);
 
-        LostItem lostItem = lostItemRepository.findWithCategoryById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+        quizAttemptRepository.findByLostItemIdAndMemberId(lostItemId, memberId)
+                .ifPresent(attempt -> {
+                    if (!attempt.getIsCorrect()) {
+                        throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
+                    }
+                });
+
+        LostItem lostItem = findAndValidateLostItem(lostItemId);
 
         if (lostItem.isNotQuizCategory()) {
             return Collections.emptyList();
@@ -51,17 +56,18 @@ public class QuizGenerationService {
                 .collect(Collectors.toList());
     }
 
-    private void validateQuizGeneration(Long lostItemId, Long memberId) {
-        if (!lostItemRepository.existsById(lostItemId)) {
-            throw new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND);
+    private LostItem findAndValidateLostItem(Long lostItemId) {
+        LostItem lostItem = lostItemRepository.findWithCategoryById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+
+        if (!lostItem.isPledgeable()) {
+            throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
-        if (quizAttemptRepository.existsByLostItemIdAndMemberId(lostItemId, memberId)) {
-            throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
-        }
+        return lostItem;
     }
 
     private QuizDto createQuizDto(LostItemFeature lostItemFeature) {
-        List<FeatureOption> allOptions = lostItemFeature.getFeature().getOptions();
+        List<FeatureOption> allOptions = lostItemFeature.getFeatureOptions();
         FeatureOption correctAnswer = lostItemFeature.getSelectedOption();
 
         List<FeatureOption> selectedOptions = selectQuizOptions(allOptions, correctAnswer);

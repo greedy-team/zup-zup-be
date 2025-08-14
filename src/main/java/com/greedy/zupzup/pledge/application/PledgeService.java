@@ -8,9 +8,9 @@ import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.domain.Pledge;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.pledge.exception.PledgeException;
 import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
+import com.greedy.zupzup.quiz.exception.QuizException;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,18 +32,12 @@ public class PledgeService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));
-
         LostItem lostItem = lostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
 
         validatePledgeCreation(lostItem, memberId);
 
-        Pledge pledge = Pledge.builder()
-                .owner(member)
-                .lostItem(lostItem)
-                .build();
-        pledgeRepository.save(pledge);
-
+        Pledge pledge = savePledge(lostItem, member);
         lostItem.pledge();
 
         return pledge;
@@ -51,16 +45,23 @@ public class PledgeService {
 
     private void validatePledgeCreation(LostItem lostItem, Long memberId) {
         if (!lostItem.isPledgeable()) {
-            throw new ApplicationException(PledgeException.CANNOT_PLEDGE_STATUS);
+            throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
         if (!lostItem.isNotQuizCategory()) {
             QuizAttempt quizAttempt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), memberId)
-                    .orElseThrow(() -> new ApplicationException(PledgeException.QUIZ_NOT_PASSED));
-
+                    .orElseThrow(() -> new ApplicationException(QuizException.QUIZ_NOT_ATTEMPTED));
             if (!quizAttempt.getIsCorrect()) {
-                throw new ApplicationException(PledgeException.QUIZ_NOT_PASSED);
+                throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
             }
         }
+    }
+
+    private Pledge savePledge(LostItem lostItem, Member member) {
+        Pledge pledge = Pledge.builder()
+                .owner(member)
+                .lostItem(lostItem)
+                .build();
+        return pledgeRepository.save(pledge);
     }
 }
