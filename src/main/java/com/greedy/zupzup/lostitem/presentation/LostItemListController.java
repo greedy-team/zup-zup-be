@@ -24,27 +24,9 @@ public class LostItemListController {
 
     @GetMapping
     public ResponseEntity<LostItemListResponse> list(@Valid LostItemListQuery query) {
-        Page<LostItemListCommand> result = lostItemListService.getLostItems(
-                query.categoryId(),
-                query.schoolAreaId(),
-                query.safePage(),
-                query.safeLimit()
+        Page<LostItemListCommand> page = lostItemListService.getLostItems(
+                query.categoryId(), query.schoolAreaId(), query.safePage(), query.safeLimit()
         );
-
-        List<LostItemResponse> items = result.getContent().stream()
-                .map(LostItemResponse::from)
-                .toList();
-
-        PageInfoResponse pageInfo = PageInfoResponse.of(
-                result.getNumber() + 1,
-                result.getSize(),
-                result.getTotalElements(),
-                result.getTotalPages(),
-                result.hasPrevious(),
-                result.hasNext()
-        );
-
-        LostItemListResponse body = new LostItemListResponse(result.getNumberOfElements(), items, pageInfo);
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(LostItemListResponse.of(page));
     }
 }
