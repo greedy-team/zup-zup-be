@@ -12,7 +12,11 @@ import java.util.Optional;
 
 public interface SchoolAreaRepository extends JpaRepository<SchoolArea, Long> {
 
-    @Query(value = "SELECT sa FROM SchoolArea sa WHERE ST_Contains(sa.area, :point) = true")
+    @Query(value = """
+            select sa
+            from SchoolArea sa
+            where ST_Contains(sa.area, :point) = true
+            """)
     Optional<SchoolArea> findSchoolAreaByPoint(@Param("point") Point point);
 
     default SchoolArea getSchoolAreaByPoint(Point point) {
