@@ -7,7 +7,9 @@ import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
+import com.greedy.zupzup.pledge.exception.PledgeException;
 import com.greedy.zupzup.quiz.application.dto.AnswerCommand;
 import com.greedy.zupzup.quiz.application.dto.QuizResultDto;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
@@ -29,32 +31,42 @@ public class QuizSubmissionService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final MemberRepository memberRepository;
 
+    private static final long INVALID_OPTION_ID = -1L;
+
     @Transactional
     public QuizResultDto submitQuizAnswers(Long lostItemId, Long memberId, List<AnswerCommand> answers) {
-        validate(lostItemId, memberId);
 
-        List<LostItemFeature> correctAnswers = lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(
+        LostItem lostItem = lostItemRepository.findById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));
+
+        validateSubmissionPossibility(lostItem, member);
+
+        List<LostItemFeature> correctFeatures = lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(
                 lostItemId);
-        boolean isCorrect = checkAnswers(correctAnswers, answers);
+        Map<Long, Long> correctAnswerMap = createCorrectAnswerMap(correctFeatures);
+        boolean isCorrect = checkAnswers(correctAnswerMap, answers, correctFeatures.size());
 
-        saveQuizAttempt(lostItemId, memberId, isCorrect);
+        saveQuizAttempt(lostItem, member, isCorrect);
 
-        LostItem lostItem = lostItemRepository.getReferenceById(lostItemId);
         return isCorrect ? QuizResultDto.correct(lostItem) : QuizResultDto.incorrect();
     }
 
-    private void validate(Long lostItemId, Long memberId) {
-        if (!lostItemRepository.existsById(lostItemId)) {
-            throw new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND);
+    private void validateSubmissionPossibility(LostItem lostItem, Member member) {
+        if (!lostItem.isPledgeable()) {
+            throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
-        if (quizAttemptRepository.existsByLostItemIdAndMemberId(lostItemId, memberId)) {
-            throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
-        }
+
+        quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), member.getId())
+                .ifPresent(attempt -> {
+                    if (!attempt.getIsCorrect()) {
+                        throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
+                    }
+                });
     }
 
-    private void saveQuizAttempt(Long lostItemId, Long memberId, boolean isCorrect) {
-        Member member = memberRepository.getReferenceById(memberId);
-        LostItem lostItem = lostItemRepository.getReferenceById(lostItemId);
+    private void saveQuizAttempt(LostItem lostItem, Member member, boolean isCorrect) {
         QuizAttempt attempt = QuizAttempt.builder()
                 .member(member)
                 .lostItem(lostItem)
@@ -63,20 +75,22 @@ public class QuizSubmissionService {
         quizAttemptRepository.save(attempt);
     }
 
-    private boolean checkAnswers(List<LostItemFeature> correctAnswers, List<AnswerCommand> submittedAnswers) {
-        if (correctAnswers.size() != submittedAnswers.size()) {
+    private Map<Long, Long> createCorrectAnswerMap(List<LostItemFeature> correctFeatures) {
+        return correctFeatures.stream()
+                .collect(Collectors.toMap(
+                        LostItemFeature::getFeatureId,
+                        LostItemFeature::getSelectedOptionId
+                ));
+    }
+
+    private boolean checkAnswers(Map<Long, Long> correctAnswerMap, List<AnswerCommand> submittedAnswers,
+            int questionCount) {
+        if (questionCount != submittedAnswers.size()) {
             return false;
         }
-
-        Map<Long, Long> correctAnswerMap = correctAnswers.stream()
-                .collect(Collectors.toMap(
-                        answer -> answer.getFeature().getId(),
-                        answer -> answer.getSelectedOption().getId()
-                ));
-
         return submittedAnswers.stream()
                 .allMatch(submitted ->
-                        correctAnswerMap.getOrDefault(submitted.featureId(), -1L)
+                        correctAnswerMap.getOrDefault(submitted.featureId(), INVALID_OPTION_ID)
                                 .equals(submitted.selectedOptionId())
                 );
     }
