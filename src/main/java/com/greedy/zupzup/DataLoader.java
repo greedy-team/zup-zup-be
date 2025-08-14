@@ -7,12 +7,13 @@ import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
-import com.greedy.zupzup.member.Member;
-import com.greedy.zupzup.member.Provider;
-import com.greedy.zupzup.member.Role;
+import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.domain.Provider;
+import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
@@ -29,7 +30,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Profile("dev")
@@ -175,13 +175,15 @@ public class DataLoader implements CommandLineRunner {
             SchoolArea playground = schoolAreas.get(0);
 
             // --- 1. 퀴즈가 있는 분실물 생성 (핸드폰) ---
-            LostItem phoneLostItem = new LostItem(
-                    "AI 센터 1층 로비 소파 위",
-                    "검정색 아이폰 15 프로입니다. 케이스는 투명색입니다.",
-                    "AI 센터 1층 안내데스크",
-                    phoneCategory,
-                    aiCenter
-            );
+            LostItem phoneLostItem = LostItem.builder()
+                    .foundAreaDetail("AI 센터 1층 로비 소파 위")
+                    .description("검정색 아이폰 15 프로입니다. 케이스는 투명색입니다.")
+                    .depositArea("AI 센터 1층 안내데스크")
+                    .status(LostItemStatus.REGISTERED)
+                    .category(phoneCategory)
+                    .foundArea(aiCenter)
+                    .finder(member)
+                    .build();
             lostItemRepository.save(phoneLostItem);
 
             LostItemImage phoneImage = LostItemImage.builder()
@@ -201,13 +203,15 @@ public class DataLoader implements CommandLineRunner {
             lostItemFeatureRepository.saveAll(List.of(lostItemBrand, lostItemColor));
 
             // --- 2. 퀴즈가 없는 분실물 생성 (기타) ---
-            LostItem etcLostItem = new LostItem(
-                    "운동장 스탠드 세 번째 줄",
-                    "검정색 3단 우산. 손잡이에 곰돌이 스티커가 붙어있음.",
-                    "학생회관 분실물 보관함",
-                    etcCategory,
-                    playground
-            );
+            LostItem etcLostItem = LostItem.builder()
+                    .foundAreaDetail("운동장 스탠드 세 번째 줄")
+                    .description("검정색 3단 우산. 손잡이에 곰돌이 스티커가 붙어있음.")
+                    .depositArea("학생회관 분실물 보관함")
+                    .status(LostItemStatus.REGISTERED)
+                    .category(etcCategory)
+                    .foundArea(playground)
+                    .finder(member)
+                    .build();
             lostItemRepository.save(etcLostItem);
 
             LostItemImage umbrellaImage = LostItemImage.builder()
