@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "feature_option")
 @Getter
@@ -36,7 +38,7 @@ public class FeatureOption extends BaseTimeEntity {
     private Feature feature;
 
     public boolean isValidSelection(Long selectedFeatureId, Long selectedOptionId) {
-        return this.feature.getId().equals(selectedFeatureId) && this.id.equals(selectedOptionId);
+        return this.feature.isValidSelection(selectedFeatureId) && Objects.equals(this.id, selectedOptionId);
     }
 
 }
