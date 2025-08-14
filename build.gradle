@@ -35,6 +35,9 @@ dependencies {
 
 	implementation 'org.hibernate.orm:hibernate-spatial'
 	implementation 'org.locationtech.jts:jts-core'
+
+	implementation 'software.amazon.awssdk:s3:2.25.11'
+
 }
 
 tasks.named('test') {

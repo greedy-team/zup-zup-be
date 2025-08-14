@@ -1,4 +1,4 @@
-package com.greedy.zupzup.lostitem;
+package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -42,4 +42,10 @@ public class LostItemFeature extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "selected_option_id", nullable = false)
     private FeatureOption selectedOption;
+
+    public LostItemFeature(LostItem lostItem, Feature feature, FeatureOption selectedOption) {
+        this.lostItem = lostItem;
+        this.feature = feature;
+        this.selectedOption = selectedOption;
+    }
 }

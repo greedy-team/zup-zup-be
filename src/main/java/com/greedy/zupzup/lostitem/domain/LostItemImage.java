@@ -1,4 +1,4 @@
-package com.greedy.zupzup.lostitem;
+package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -37,4 +37,10 @@ public class LostItemImage extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lost_item_id", nullable = false)
     private LostItem lostItem;
+
+    public LostItemImage(String imageKey, Integer imageOrder, LostItem lostItem) {
+        this.imageKey = imageKey;
+        this.imageOrder = imageOrder;
+        this.lostItem = lostItem;
+    }
 }

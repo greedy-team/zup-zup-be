@@ -1,7 +1,7 @@
 package com.greedy.zupzup.quiz;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
-import com.greedy.zupzup.lostitem.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.member.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
