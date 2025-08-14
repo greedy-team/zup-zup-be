@@ -7,11 +7,13 @@ import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/lost-items")
@@ -23,16 +25,8 @@ public class LostItemSummaryController {
     public ResponseEntity<LostItemSummaryResponse> getSummary(
             @RequestParam(required = false) @Min(1) Long categoryId
     ) {
-        List<LostItemSummaryCommand> result = lostItemSummaryService.getSummary(categoryId);
-
-        List<LostItemSummaryResponse.AreaSummary> areas = result.stream()
-                .map(summary -> new LostItemSummaryResponse.AreaSummary(
-                        summary.schoolAreaId(),
-                        summary.schoolAreaName(),
-                        summary.lostCount()
-                ))
-                .toList();
-
-        return ResponseEntity.ok(new LostItemSummaryResponse(areas));
+        return ResponseEntity.ok(
+                LostItemSummaryResponse.of(lostItemSummaryService.getSummary(categoryId))
+        );
     }
 }
