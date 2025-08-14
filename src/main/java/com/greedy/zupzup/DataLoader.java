@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@Profile("dev")
+@Profile({"dev", "test"})
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
