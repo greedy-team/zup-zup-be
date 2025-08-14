@@ -1,0 +1,64 @@
+package com.greedy.zupzup.pledge.application;
+
+import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
+import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.member.exception.MemberException;
+import com.greedy.zupzup.member.repository.MemberRepository;
+import com.greedy.zupzup.pledge.domain.Pledge;
+import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.pledge.exception.PledgeException;
+import com.greedy.zupzup.pledge.repository.PledgeRepository;
+import com.greedy.zupzup.quiz.domain.QuizAttempt;
+import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class PledgeService {
+
+
+    private final LostItemRepository lostItemRepository;
+    private final MemberRepository memberRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
+    private final PledgeRepository pledgeRepository;
+
+
+    @Transactional
+    public Pledge createPledge(Long lostItemId, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));
+
+        LostItem lostItem = lostItemRepository.findById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+
+        validatePledgeCreation(lostItem, memberId);
+
+        Pledge pledge = Pledge.builder()
+                .owner(member)
+                .lostItem(lostItem)
+                .build();
+        pledgeRepository.save(pledge);
+
+        lostItem.pledge();
+
+        return pledge;
+    }
+
+    private void validatePledgeCreation(LostItem lostItem, Long memberId) {
+        QuizAttempt quizAttempt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), memberId)
+                .orElseThrow(() -> new ApplicationException(PledgeException.QUIZ_NOT_PASSED));
+
+        if (!quizAttempt.getIsCorrect()) {
+            throw new ApplicationException(PledgeException.QUIZ_NOT_PASSED);
+        }
+
+        if (!lostItem.isPledgeable()) {
+            throw new ApplicationException(PledgeException.CANNOT_PLEDGE_STATUS);
+        }
+    }
+}

@@ -27,8 +27,8 @@ public class QuizController {
     private final QuizSubmissionService quizSubmissionService;
 
     @GetMapping
-    public ResponseEntity<QuizzesResponse> generateLostItemQuizzes(@PathVariable Long lostItemId, Long memberId) {
-        List<QuizDto> quizDtos = quizGenerationService.generateLostItemQuizzes(lostItemId, memberId);
+    public ResponseEntity<QuizzesResponse> getLostItemQuizzes(@PathVariable Long lostItemId, Long memberId) {
+        List<QuizDto> quizDtos = quizGenerationService.getLostItemQuizzes(lostItemId, memberId);
         return ResponseEntity.ok(QuizzesResponse.from(quizDtos));
     }
 

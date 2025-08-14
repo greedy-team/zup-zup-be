@@ -34,7 +34,7 @@ public class QuizGenerationService {
     private static final String ETC_OPTION_TEXT = "기타";
 
     @Transactional(readOnly = true)
-    public List<QuizDto> generateLostItemQuizzes(Long lostItemId, Long memberId) {
+    public List<QuizDto> getLostItemQuizzes(Long lostItemId, Long memberId) {
         validateQuizGeneration(lostItemId, memberId);
 
         LostItem lostItem = lostItemRepository.findWithCategoryById(lostItemId)
