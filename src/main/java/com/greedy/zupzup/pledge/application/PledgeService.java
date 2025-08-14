@@ -50,15 +50,17 @@ public class PledgeService {
     }
 
     private void validatePledgeCreation(LostItem lostItem, Long memberId) {
-        QuizAttempt quizAttempt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), memberId)
-                .orElseThrow(() -> new ApplicationException(PledgeException.QUIZ_NOT_PASSED));
-
-        if (!quizAttempt.getIsCorrect()) {
-            throw new ApplicationException(PledgeException.QUIZ_NOT_PASSED);
-        }
-
         if (!lostItem.isPledgeable()) {
             throw new ApplicationException(PledgeException.CANNOT_PLEDGE_STATUS);
+        }
+
+        if (!lostItem.isNotQuizCategory()) {
+            QuizAttempt quizAttempt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), memberId)
+                    .orElseThrow(() -> new ApplicationException(PledgeException.QUIZ_NOT_PASSED));
+
+            if (!quizAttempt.getIsCorrect()) {
+                throw new ApplicationException(PledgeException.QUIZ_NOT_PASSED);
+            }
         }
     }
 }
