@@ -8,11 +8,11 @@ public record LostItemSummaryCommand(
         String schoolAreaName,
         Long lostCount
 ) {
-    public static LostItemSummaryCommand from(LostItemSummaryRepository.LostItemSummaryProjection p) {
+    public static LostItemSummaryCommand from(LostItemSummaryRepository.LostItemSummaryProjection projection) {
         return new LostItemSummaryCommand(
-                p.getSchoolAreaId(),
-                p.getSchoolAreaName(),
-                p.getLostCount()
+                projection.getSchoolAreaId(),
+                projection.getSchoolAreaName(),
+                projection.getLostCount()
         );
     }
 

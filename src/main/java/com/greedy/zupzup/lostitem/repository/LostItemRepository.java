@@ -19,7 +19,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                         c.iconUrl as categoryIconUrl,
                         sa.id as schoolAreaId,
                         sa.areaName as schoolAreaName,
-                        li.foundAreaDetail as findArea,
+                        li.foundAreaDetail as findAreaDetail,
                         li.createdAt as createdAt
                     from LostItem li
                         join li.category c

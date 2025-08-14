@@ -12,16 +12,16 @@ public record LostItemResponse(
         String findArea,
         String createdAt
 ) {
-    public static LostItemResponse from(LostItemListCommand dto) {
+    public static LostItemResponse from(LostItemListCommand command) {
         return new LostItemResponse(
-                dto.id(),
-                dto.categoryId(),
-                dto.categoryName(),
-                dto.categoryIconUrl(),
-                dto.schoolAreaId(),
-                dto.schoolAreaName(),
-                dto.findArea(),
-                dto.createdAt().toString()
+                command.id(),
+                command.categoryId(),
+                command.categoryName(),
+                command.categoryIconUrl(),
+                command.schoolAreaId(),
+                command.schoolAreaName(),
+                command.findAreaDetail(),
+                command.createdAt().toString()
         );
     }
 }

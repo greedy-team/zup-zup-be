@@ -25,10 +25,10 @@ public class LostItemSummaryController {
         List<LostItemSummaryCommand> result = service.getSummary(categoryId);
 
         List<LostItemSummaryResponse.AreaSummary> areas = result.stream()
-                .map(dto -> new LostItemSummaryResponse.AreaSummary(
-                        dto.schoolAreaId(),
-                        dto.schoolAreaName(),
-                        dto.lostCount()
+                .map(summary -> new LostItemSummaryResponse.AreaSummary(
+                        summary.schoolAreaId(),
+                        summary.schoolAreaName(),
+                        summary.lostCount()
                 ))
                 .toList();
 
