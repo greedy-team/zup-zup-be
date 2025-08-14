@@ -1,5 +1,6 @@
 package com.greedy.zupzup.lostitem.application;
 
+import com.greedy.zupzup.lostitem.LostItemStatus;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.repository.LostItemListProjection;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -19,8 +20,8 @@ public class LostItemListService {
     @Transactional(readOnly = true)
     public Page<LostItemListCommand> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-
-        Page<LostItemListProjection> slice = lostItemRepository.findList(categoryId, schoolAreaId, pageable);
-        return slice.map(LostItemListCommand::from);
+        return lostItemRepository
+                .findList(categoryId, schoolAreaId, LostItemStatus.REGISTERED, pageable)
+                .map(LostItemListCommand::from);
     }
 }

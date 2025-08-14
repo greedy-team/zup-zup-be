@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem.repository;
 
 import com.greedy.zupzup.lostitem.LostItem;
-import java.util.Optional;
+import com.greedy.zupzup.lostitem.LostItemStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,35 +13,36 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     @Query(
             value = """
                     select
-                        li.id as id,
-                        c.id as categoryId,
-                        c.name as categoryName,
-                        c.iconUrl as categoryIconUrl,
-                        sa.id as schoolAreaId,
-                        sa.areaName as schoolAreaName,
-                        li.foundAreaDetail as findAreaDetail,
-                        li.createdAt as createdAt
+                        li.id              as id,
+                        c.id               as categoryId,
+                        c.name             as categoryName,
+                        c.iconUrl          as categoryIconUrl,
+                        sa.id              as schoolAreaId,
+                        sa.areaName        as schoolAreaName,
+                        li.foundAreaDetail as foundAreaDetail,
+                        li.createdAt       as createdAt
                     from LostItem li
-                        join li.category c
+                        join li.category  c
                         join li.foundArea sa
-                    where li.status = com.greedy.zupzup.lostitem.LostItemStatus.REGISTERED
-                      and (:categoryId is null or c.id = :categoryId)
+                    where li.status = :status
+                      and (:categoryId   is null or c.id  = :categoryId)
                       and (:schoolAreaId is null or sa.id = :schoolAreaId)
-                    """
-            ,
+                    order by li.createdAt desc
+                    """,
             countQuery = """
                     select count(li)
                     from LostItem li
-                        join li.category c
+                        join li.category  c
                         join li.foundArea sa
-                    where li.status = com.greedy.zupzup.lostitem.LostItemStatus.REGISTERED
-                      and (:categoryId is null or c.id = :categoryId)
+                    where li.status = :status
+                      and (:categoryId   is null or c.id  = :categoryId)
                       and (:schoolAreaId is null or sa.id = :schoolAreaId)
                     """
     )
     Page<LostItemListProjection> findList(
             @Param("categoryId") Long categoryId,
             @Param("schoolAreaId") Long schoolAreaId,
+            @Param("status") LostItemStatus status,
             Pageable pageable
     );
 }
