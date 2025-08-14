@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.repository;
 
-import com.greedy.zupzup.lostitem.LostItemImage;
+import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -23,7 +23,7 @@ public class SchoolAreaService {
     @Transactional(readOnly = true)
     public SchoolArea findByLatLng(FindAreaCommand command) {
         Point userPoint = geometryFactory.createPoint(new Coordinate(command.lng(), command.lat()));
-        return schoolAreaRepository.getZoneByPoint(userPoint);
+        return schoolAreaRepository.getSchoolAreaByPoint(userPoint);
     }
 
     @Transactional(readOnly = true)

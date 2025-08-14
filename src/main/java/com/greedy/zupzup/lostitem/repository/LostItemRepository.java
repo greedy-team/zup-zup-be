@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.repository;
 
-import com.greedy.zupzup.lostitem.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.LostItemStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

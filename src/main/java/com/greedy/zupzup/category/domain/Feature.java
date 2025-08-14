@@ -14,6 +14,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,4 +49,8 @@ public class Feature extends BaseTimeEntity {
             orphanRemoval = true)
     @Builder.Default
     private List<FeatureOption> options = new ArrayList<>();
+
+    public boolean isValidSelection(Long selectedFeatureId) {
+        return Objects.equals(this.id, selectedFeatureId);
+    }
 }
