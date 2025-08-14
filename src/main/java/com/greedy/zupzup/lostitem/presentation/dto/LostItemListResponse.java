@@ -14,15 +14,10 @@ public record LostItemListResponse(
                 .map(LostItemResponse::from)
                 .toList();
 
-        PageInfoResponse pageInfo = PageInfoResponse.of(
-                page.getNumber() + 1,
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.hasPrevious(),
-                page.hasNext()
+        return new LostItemListResponse(
+                page.getNumberOfElements(),
+                items,
+                PageInfoResponse.from(page)
         );
-
-        return new LostItemListResponse(page.getNumberOfElements(), items, pageInfo);
     }
 }
