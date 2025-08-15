@@ -12,7 +12,7 @@ public record LostItemListResponse(
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
         List<LostItemResponse> items = page.getContent().stream()
-                .map(command -> LostItemResponse.from(command, repImageMap.get(command.id())))
+                .map(command -> LostItemResponse.of(command, repImageMap.get(command.id())))
                 .toList();
 
         return new LostItemListResponse(

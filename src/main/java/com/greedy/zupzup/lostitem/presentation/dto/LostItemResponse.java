@@ -15,7 +15,7 @@ public record LostItemResponse(
         String createdAt,
         String thumbnailUrl
 ) {
-    public static LostItemResponse from(LostItemListCommand command, String representativeImageUrl) {
+    public static LostItemResponse of(LostItemListCommand command, String representativeImageUrl) {
 
         String thumbnail = (command.categoryIconUrl() != null && !command.categoryIconUrl().isBlank())
                 ? command.categoryIconUrl()
