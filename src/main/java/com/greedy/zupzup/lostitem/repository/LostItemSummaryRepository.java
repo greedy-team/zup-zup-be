@@ -26,7 +26,6 @@ public interface LostItemSummaryRepository extends Repository<LostItemSummaryPro
                    and li.status = com.greedy.zupzup.lostitem.LostItemStatus.REGISTERED
                    and (:categoryId is null or li.category.id = :categoryId)
             group by sa.id, sa.areaName
-            order by sa.areaName asc
             """
     )
     List<LostItemSummaryProjection> findAreaSummaries(@Param("categoryId") Long categoryId);

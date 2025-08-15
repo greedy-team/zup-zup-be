@@ -4,6 +4,7 @@ import com.greedy.zupzup.lostitem.LostItemStatus;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,8 +34,8 @@ public class LostItemListService {
     public Map<Long, String> getRepresentativeImageMapByItemIds(List<Long> lostItemIds) {
         return lostItemImageRepository.findRepresentativeImages(lostItemIds).stream()
                 .collect(Collectors.toMap(
-                        LostItemImageRepository.RepImageProjection::getLostItemId,
-                        LostItemImageRepository.RepImageProjection::getImageUrl
+                        RepresentativeImageProjection::getLostItemId,
+                        RepresentativeImageProjection::getImageUrl
                 ));
     }
 }
