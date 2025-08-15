@@ -1,6 +1,5 @@
 package com.greedy.zupzup;
 
-
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -22,10 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@Profile("dev")
+@Profile("test")
 @Component
 @RequiredArgsConstructor
-public class DataLoader implements CommandLineRunner {
+public class TestDataLoader implements CommandLineRunner {
 
     private final SchoolAreaRepository schoolAreaRepository;
     private final CategoryRepository categoryRepository;
@@ -96,7 +95,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void initSchoolAreaData() {
-        log.info("구역 정보를 초기화합니다.");
+        log.info("데이터베이스 임시 구역 정보를 초기화합니다.");
         if (schoolAreaRepository.count() == 0) {
             Polygon playground = geometryFactory.createPolygon(new Coordinate[]{
                     new Coordinate(127.0752831, 37.5510817), new Coordinate(127.0742638, 37.5502523),
@@ -126,4 +125,5 @@ public class DataLoader implements CommandLineRunner {
             log.info("구역 정보가 이미 존재하여 초기화를 건너뜁니다.");
         }
     }
+
 }
