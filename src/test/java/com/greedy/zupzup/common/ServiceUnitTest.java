@@ -1,8 +1,7 @@
-package com.greedy.zupzup.global;
+package com.greedy.zupzup.common;
 
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
-import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -31,8 +30,5 @@ public abstract class ServiceUnitTest {
 
     @Mock
     protected CategoryRepository categoryRepository;
-
-    @Mock
-    protected S3ImageFileManager s3ImageFileManager;
 
 }
