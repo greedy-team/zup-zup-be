@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greedy.zupzup.category.exception.CategoryException;
 import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.common.ControllerTest;
+import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.exception.LostItemImageException;
 import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
@@ -142,38 +143,38 @@ class LostItemControllerTest extends ControllerTest {
         });
     }
 
-//    @Test
-//    void 이미지_파일을_등록하지_않으면_예외가_발생해야_한다() throws Exception {
-//        // given
-//        Long categoryId = 1L;
-//        Long schoolAreaId = 3L;
-//        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-//        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-//        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
-//
-//        given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
-//        String jsonRequest = objectMapper.writeValueAsString(request);
-//
-//        // when
-//        ExtractableResponse<Response> extract = RestAssured.given().log().all()
-//                .contentType(ContentType.MULTIPART)
-//                .multiPart("images", )
-//                .multiPart("lostItemRegisterRequest", jsonRequest, "application/json")
-//                .when()
-//                .post("/api/lost-items")
-//                .then().log().all()
-//                .extract();
-//        ErrorResponse response = extract.as(ErrorResponse.class);
-//
-//        // then
-//        assertSoftly(softly -> {
-//            softly.assertThat(extract.statusCode()).isEqualTo(400);
-//            softly.assertThat(response.status()).isEqualTo(LostItemImageException.INVALID_IMAGE_COUNT.getHttpStatus().value());
-//            softly.assertThat(response.title()).isEqualTo(LostItemImageException.INVALID_IMAGE_COUNT.getTitle());
-//            softly.assertThat(response.detail()).isEqualTo(LostItemImageException.INVALID_IMAGE_COUNT.getDetail());
-//            softly.assertThat(response.instance()).isEqualTo("/api/lost-items");
-//        });
-//    }
+    @Test
+    void 이미지_파일을_등록하지_않으면_예외가_발생해야_한다() throws Exception {
+
+        // given
+        Long categoryId = 1L;
+        Long schoolAreaId = 3L;
+        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
+        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+
+        given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
+        String jsonRequest = objectMapper.writeValueAsString(request);
+
+        // when - images 누락
+        ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                .contentType(ContentType.MULTIPART)
+                .multiPart("lostItemRegisterRequest", jsonRequest, "application/json")
+                .when()
+                .post("/api/lost-items")
+                .then().log().all()
+                .extract();
+        ErrorResponse response = extract.as(ErrorResponse.class);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(extract.statusCode()).isEqualTo(400);
+            softly.assertThat(response.status()).isEqualTo(CommonException.MISSING_REQUEST_PART.getHttpStatus().value());
+            softly.assertThat(response.title()).isEqualTo(CommonException.MISSING_REQUEST_PART.getTitle());
+            softly.assertThat(response.detail()).contains("images");
+            softly.assertThat(response.instance()).isEqualTo("/api/lost-items");
+        });
+    }
 
     @Test
     void 이미지_파일을_4개_이상_등록하면_예외가_발생해야_한다() throws Exception {
