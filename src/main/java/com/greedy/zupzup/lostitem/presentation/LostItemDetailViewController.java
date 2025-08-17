@@ -1,6 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation;
 
 import com.greedy.zupzup.lostitem.application.LostItemDetailViewService;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemDetailViewResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,7 @@ public class LostItemDetailViewController {
     @GetMapping("/{lostItemId}")
     public ResponseEntity<LostItemDetailViewResponse> getDetail(@PathVariable Long lostItemId,
                                                                 @RequestParam Long memberId) {
-        return ResponseEntity.ok(
-                LostItemDetailViewResponse.from(service.getDetail(lostItemId, memberId))
-        );
+        LostItemDetailViewCommand cmd = service.getDetail(lostItemId, memberId);
+        return ResponseEntity.ok(LostItemDetailViewResponse.from(cmd));
     }
 }

@@ -7,6 +7,7 @@ import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
@@ -28,14 +29,16 @@ public class LostItemDetailViewService {
 
     @Transactional(readOnly = true)
     public LostItemDetailViewCommand getDetail(Long lostItemId, Long memberId) {
-        memberRepository.getById(memberId);
 
-        LostItem li = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
+        Member member = memberRepository.getById(memberId);
 
-        boolean quizRequired = !li.isNotQuizCategory();
-        boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(li.getId(), memberId);
+        LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
+
+        boolean quizRequired = !item.isNotQuizCategory();
+
+        boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
         boolean quizAnswered = quizAttemptRepository
-                .findByLostItemIdAndMemberId(li.getId(), memberId)
+                .findByLostItemIdAndMemberId(item.getId(), member.getId())
                 .map(QuizAttempt::getIsCorrect)
                 .orElse(false);
 
@@ -43,28 +46,10 @@ public class LostItemDetailViewService {
             throw new ApplicationException(CommonException.ACCESS_FORBIDDEN);
         }
 
-        List<String> imageUrls = imageRepository.findAllByLostItemIdOrderByImageOrder(li.getId())
-                .stream()
-                .map(LostItemImage::getImageKey)
-                .toList();
+        String depositArea = item.getDepositArea();
 
-        return new LostItemDetailViewCommand(
-                li.getId(),
-                li.getStatus(),
-                li.getCategory().getId(),
-                li.getCategory().getName(),
-                li.getCategory().getIconUrl(),
-                li.getFoundArea().getId(),
-                li.getFoundArea().getAreaName(),
-                li.getFoundAreaDetail(),
-                li.getDescription(),
-                imageUrls,
-                li.getDepositArea(),
-                li.getPledgedAt(),
-                li.getCreatedAt(),
-                quizRequired,
-                quizAnswered,
-                pledgedByMe
-        );
+        List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
+
+        return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizAnswered, pledgedByMe);
     }
 }

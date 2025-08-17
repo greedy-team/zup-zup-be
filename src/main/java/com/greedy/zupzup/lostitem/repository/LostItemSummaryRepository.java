@@ -23,7 +23,7 @@ public interface LostItemSummaryRepository extends Repository<LostItemSummaryPro
             from SchoolArea sa
                 left join LostItem li
                     on li.foundArea.id = sa.id
-                   and li.status = com.greedy.zupzup.lostitem.LostItemStatus.REGISTERED
+                   and li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.REGISTERED
                    and (:categoryId is null or li.category.id = :categoryId)
             group by sa.id, sa.areaName
             """

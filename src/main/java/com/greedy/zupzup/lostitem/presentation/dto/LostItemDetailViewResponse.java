@@ -12,7 +12,7 @@ public record LostItemDetailViewResponse(
         SchoolArea schoolArea,
         String locationDetail,
         String description,
-        List<String> imageKeys,
+        List<String> imageUrls,
         String depositArea,
         String pledgedAt,
         String createdAt,
@@ -21,29 +21,29 @@ public record LostItemDetailViewResponse(
         boolean pledgedByMe
 ) {
 
-    public static LostItemDetailViewResponse from(LostItemDetailViewCommand c) {
+    public static LostItemDetailViewResponse from(LostItemDetailViewCommand command) {
 
-        String createdAt = c.createdAt()
+        String createdAt = command.createdAt()
                 .atZone(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
-        String pledgedAt = c.pledgedAt() == null ? null
-                : c.pledgedAt().toString();
+        String pledgedAt = command.pledgedAt() == null ? null
+                : command.pledgedAt().toString();
 
         return new LostItemDetailViewResponse(
-                c.id(),
-                c.status().name(),
-                new Category(c.categoryId(), c.categoryName(), c.categoryIconUrl()),
-                new SchoolArea(c.schoolAreaId(), c.schoolAreaName()),
-                c.locationDetail(),
-                c.description(),
-                c.imageUrls(),
-                c.depositArea(),
+                command.id(),
+                command.status().name(),
+                new Category(command.categoryId(), command.categoryName(), command.categoryIconUrl()),
+                new SchoolArea(command.schoolAreaId(), command.schoolAreaName()),
+                command.locationDetail(),
+                command.description(),
+                command.imageUrls(),
+                command.depositArea(),
                 pledgedAt,
                 createdAt,
-                c.quizRequired(),
-                c.quizAnswered(),
-                c.pledgedByMe()
+                command.quizRequired(),
+                command.quizAnswered(),
+                command.pledgedByMe()
         );
     }
 

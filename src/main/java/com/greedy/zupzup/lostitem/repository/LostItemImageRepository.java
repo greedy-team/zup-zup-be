@@ -17,10 +17,10 @@ public interface LostItemImageRepository extends JpaRepository<LostItemImage, Lo
     List<RepresentativeImageProjection> findRepresentativeImages(@Param("ids") Collection<Long> ids);
 
     @Query("""
-                select i
+                select i.imageKey
                   from LostItemImage i
                  where i.lostItem.id = :lostItemId
                  order by i.imageOrder asc
             """)
-    List<LostItemImage> findAllByLostItemIdOrderByImageOrder(@Param("lostItemId") Long lostItemId);
+    List<String> findImageUrlsByLostItemId(@Param("lostItemId") Long lostItemId);
 }
