@@ -7,7 +7,6 @@ import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.quiz.application.dto.AnswerCommand;
 import com.greedy.zupzup.quiz.application.dto.QuizResultDto;
