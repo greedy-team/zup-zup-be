@@ -2,6 +2,7 @@ package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
+import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,8 +14,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +60,9 @@ public class LostItem extends BaseTimeEntity {
     @JoinColumn(name = "found_area_id", nullable = false)
     private SchoolArea foundArea;
 
+    @OneToMany(mappedBy = "lostItem")
+    private List<LostItemImage> images = new ArrayList<>();
+
     public LostItem(String foundAreaDetail, String description, String depositArea, Category category, SchoolArea foundArea) {
         this.foundAreaDetail = foundAreaDetail;
         this.description = description;
@@ -64,5 +71,18 @@ public class LostItem extends BaseTimeEntity {
         this.pledgedAt = null;
         this.category = category;
         this.foundArea = foundArea;
+    }
+
+    public boolean isNotQuizCategory() {
+        return this.category.isNotQuizCategory();
+    }
+
+    public boolean isPledgeable() {
+        return this.status == LostItemStatus.REGISTERED;
+    }
+
+    public void pledge() {
+        this.status = LostItemStatus.PLEDGED;
+        this.pledgedAt = LocalDate.now();
     }
 }
