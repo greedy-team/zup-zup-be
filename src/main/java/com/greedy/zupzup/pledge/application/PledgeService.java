@@ -30,10 +30,8 @@ public class PledgeService {
     @Transactional
     public Pledge createPledge(Long lostItemId, Long memberId) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));
-        LostItem lostItem = lostItemRepository.findById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+        Member member = memberRepository.getById(memberId);
+        LostItem lostItem = lostItemRepository.getById(lostItemId);
 
         validatePledgeCreation(lostItem, memberId);
 
@@ -49,8 +47,7 @@ public class PledgeService {
         }
 
         if (!lostItem.isNotQuizCategory()) {
-            QuizAttempt quizAttempt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), memberId)
-                    .orElseThrow(() -> new ApplicationException(QuizException.QUIZ_NOT_ATTEMPTED));
+            QuizAttempt quizAttempt = quizAttemptRepository.getByLostItemIdAndMemberId(lostItem.getId(), memberId);
             if (!quizAttempt.getIsCorrect()) {
                 throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
             }

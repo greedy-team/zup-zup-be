@@ -57,8 +57,7 @@ public class QuizGenerationService {
     }
 
     private LostItem findAndValidateLostItem(Long lostItemId) {
-        LostItem lostItem = lostItemRepository.findWithCategoryById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+        LostItem lostItem = lostItemRepository.getWithCategoryById(lostItemId);
 
         if (!lostItem.isPledgeable()) {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);

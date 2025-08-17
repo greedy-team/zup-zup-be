@@ -9,7 +9,6 @@ import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
-import com.greedy.zupzup.pledge.exception.PledgeException;
 import com.greedy.zupzup.quiz.application.dto.AnswerCommand;
 import com.greedy.zupzup.quiz.application.dto.QuizResultDto;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
@@ -36,10 +35,8 @@ public class QuizSubmissionService {
     @Transactional
     public QuizResultDto submitQuizAnswers(Long lostItemId, Long memberId, List<AnswerCommand> answers) {
 
-        LostItem lostItem = lostItemRepository.findById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));
+        LostItem lostItem = lostItemRepository.getById(lostItemId);
+        Member member = memberRepository.getById(memberId);
 
         validateSubmissionPossibility(lostItem, member);
 

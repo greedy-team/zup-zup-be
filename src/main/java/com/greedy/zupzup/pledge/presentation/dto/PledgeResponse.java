@@ -5,7 +5,7 @@ import com.greedy.zupzup.pledge.domain.Pledge;
 public record PledgeResponse(
         Long pledgeId,
         String message,
-        String foundAreaDetail
+        String depositArea
 ) {
     public static PledgeResponse from(Pledge pledge) {
         return new PledgeResponse(
