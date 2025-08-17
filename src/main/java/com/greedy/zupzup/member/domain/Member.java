@@ -1,4 +1,4 @@
-package com.greedy.zupzup.member;
+package com.greedy.zupzup.member.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import lombok.*;

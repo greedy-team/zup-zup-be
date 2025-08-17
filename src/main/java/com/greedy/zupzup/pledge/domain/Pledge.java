@@ -1,8 +1,8 @@
-package com.greedy.zupzup.pledge;
+package com.greedy.zupzup.pledge.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import com.greedy.zupzup.lostitem.domain.LostItem;
-import com.greedy.zupzup.member.Member;
+import com.greedy.zupzup.member.domain.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

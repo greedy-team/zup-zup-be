@@ -25,6 +25,8 @@ import jakarta.persistence.Table;
 @Builder
 public class Category extends BaseTimeEntity {
 
+    private static final String ETC_CATEGORY_NAME = "기타";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,4 +42,8 @@ public class Category extends BaseTimeEntity {
             orphanRemoval = true)
     @Builder.Default
     private List<Feature> features = new ArrayList<>();
+
+    public boolean isNotQuizCategory() {
+        return ETC_CATEGORY_NAME.equals(this.name);
+    }
 }

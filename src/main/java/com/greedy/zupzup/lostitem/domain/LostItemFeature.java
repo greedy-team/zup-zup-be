@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.UniqueConstraint;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,5 +48,17 @@ public class LostItemFeature extends BaseTimeEntity {
         this.lostItem = lostItem;
         this.feature = feature;
         this.selectedOption = selectedOption;
+    }
+
+    public Long getFeatureId() {
+        return this.feature.getId();
+    }
+
+    public Long getSelectedOptionId() {
+        return this.selectedOption.getId();
+    }
+
+    public List<FeatureOption> getFeatureOptions() {
+        return this.feature.getOptions();
     }
 }
