@@ -182,7 +182,6 @@ public class DataLoader implements CommandLineRunner {
                     .status(LostItemStatus.REGISTERED)
                     .category(phoneCategory)
                     .foundArea(aiCenter)
-                    .finder(member)
                     .build();
             lostItemRepository.save(phoneLostItem);
 
@@ -210,7 +209,6 @@ public class DataLoader implements CommandLineRunner {
                     .status(LostItemStatus.REGISTERED)
                     .category(etcCategory)
                     .foundArea(playground)
-                    .finder(member)
                     .build();
             lostItemRepository.save(etcLostItem);
 

@@ -53,10 +53,6 @@ public class LostItem extends BaseTimeEntity {
     private LocalDate pledgedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "finder_id", nullable = false)
-    private Member finder;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
