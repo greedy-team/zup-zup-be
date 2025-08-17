@@ -41,7 +41,7 @@ public class QuizSubmissionService {
         validateSubmissionPossibility(lostItem, member);
 
         List<LostItemFeature> correctFeatures = lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(
-                lostItemId);
+                lostItem.getId());
         Map<Long, Long> correctAnswerMap = createCorrectAnswerMap(correctFeatures);
         boolean isCorrect = checkAnswers(correctAnswerMap, answers, correctFeatures.size());
 

@@ -7,6 +7,8 @@ import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.exception.PledgeException;
 import com.greedy.zupzup.quiz.application.dto.OptionDto;
 import com.greedy.zupzup.quiz.application.dto.QuizDto;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class QuizGenerationService {
 
+    private final MemberRepository memberRepository;
     private final LostItemRepository lostItemRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
     private final QuizAttemptRepository quizAttemptRepository;
@@ -36,14 +39,15 @@ public class QuizGenerationService {
     @Transactional(readOnly = true)
     public List<QuizDto> getLostItemQuizzes(Long lostItemId, Long memberId) {
 
-        quizAttemptRepository.findByLostItemIdAndMemberId(lostItemId, memberId)
+        Member member = memberRepository.getById(memberId);
+        LostItem lostItem = findAndValidateLostItem(lostItemId);
+
+        quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), member.getId())
                 .ifPresent(attempt -> {
                     if (!attempt.getIsCorrect()) {
                         throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
                     }
                 });
-
-        LostItem lostItem = findAndValidateLostItem(lostItemId);
 
         if (lostItem.isNotQuizCategory()) {
             return Collections.emptyList();

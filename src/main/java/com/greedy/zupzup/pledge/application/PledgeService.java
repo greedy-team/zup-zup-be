@@ -4,7 +4,6 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
-import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.domain.Pledge;
 import com.greedy.zupzup.member.domain.Member;
@@ -33,7 +32,7 @@ public class PledgeService {
         Member member = memberRepository.getById(memberId);
         LostItem lostItem = lostItemRepository.getById(lostItemId);
 
-        validatePledgeCreation(lostItem, memberId);
+        validatePledgeCreation(lostItem, member);
 
         Pledge pledge = savePledge(lostItem, member);
         lostItem.pledge();
@@ -41,13 +40,13 @@ public class PledgeService {
         return pledge;
     }
 
-    private void validatePledgeCreation(LostItem lostItem, Long memberId) {
+    private void validatePledgeCreation(LostItem lostItem, Member member) {
         if (!lostItem.isPledgeable()) {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
         if (!lostItem.isNotQuizCategory()) {
-            QuizAttempt quizAttempt = quizAttemptRepository.getByLostItemIdAndMemberId(lostItem.getId(), memberId);
+            QuizAttempt quizAttempt = quizAttemptRepository.getByLostItemIdAndMemberId(lostItem.getId(), member.getId());
             if (!quizAttempt.getIsCorrect()) {
                 throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
             }
