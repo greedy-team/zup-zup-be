@@ -1,7 +1,9 @@
 package com.greedy.zupzup.global.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -23,7 +26,8 @@ public class GlobalExceptionHandler {
      * 어플리케이션 로직에서 발생시킨 예외를 처리합니다.
      */
     @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex,
+                                                                     HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
         log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
@@ -62,7 +66,8 @@ public class GlobalExceptionHandler {
      * @RequestBody JSON 파싱 실패 등 Request Body를 읽을 수 없을 때 발생하는 예외를 처리합니다.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                      HttpServletRequest request) {
         ExceptionCode code = CommonException.INVALID_REQUEST_BODY;
         loggingClientError(code, code.getDetail(), request.getRequestURI());
         return createErrorResponse(code, request.getRequestURI());
@@ -72,7 +77,8 @@ public class GlobalExceptionHandler {
      * 서버가 지원하지 않는 Content-Type으로 요청 시 발생하는 예외를 처리합니다.
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
+                                                                         HttpServletRequest request) {
         String detail = String.format("지원하는 Media Type은 '%s' 입니다.", ex.getSupportedMediaTypes());
         ExceptionCode code = CommonException.UNSUPPORTED_MEDIA_TYPE;
         String instance = request.getRequestURI();
@@ -114,7 +120,8 @@ public class GlobalExceptionHandler {
      * 지원하지 않는 HTTP 메서드 호출 시 예외를 처리합니다.
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e,
+                                                                             HttpServletRequest request) {
         String detail = String.format("해당 엔드포인트는 '%s' 메소드를 지원하지 않습니다.", e.getMethod());
         ExceptionCode code = CommonException.METHOD_NOT_ALLOWED;
         String instance = request.getRequestURI();
@@ -161,5 +168,34 @@ public class GlobalExceptionHandler {
     private void loggingClientError(ExceptionCode code, String detail, String instance) {
         log.info("클라이언트 요청 오류 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), detail, instance);
+    }
+
+    /**
+     * 단일 파라미터 검증 실패 시 예외를 처리 합니다.
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponse> handleHandlerMethodValidation(HandlerMethodValidationException ex,
+                                                                       HttpServletRequest request) {
+        String detail = ex.getAllErrors().stream()
+                .map(error -> ((DefaultMessageSourceResolvable) error).getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
+        loggingClientError(code, detail, request.getRequestURI());
+        return createErrorResponse(code, detail, request.getRequestURI());
+    }
+
+    /**
+     * Bean Validation 에서 발생 하는 검증 위반 예외를 처리 합니다.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex,
+                                                                   HttpServletRequest request) {
+        String detail = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + " " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        ExceptionCode code = CommonException.INVALID_QUERY_PARAMETER;
+        loggingClientError(code, detail, request.getRequestURI());
+        return createErrorResponse(code, detail, request.getRequestURI());
     }
 }
