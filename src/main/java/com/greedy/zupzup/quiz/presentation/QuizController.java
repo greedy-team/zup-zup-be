@@ -21,17 +21,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/lost-items/{lostItemId}/quizzes")
 @RequiredArgsConstructor
-public class QuizController {
+public class QuizController implements QuizControllerDocs{
 
     private final QuizGenerationService quizGenerationService;
     private final QuizSubmissionService quizSubmissionService;
 
+    @Override
     @GetMapping
     public ResponseEntity<QuizzesResponse> getLostItemQuizzes(@PathVariable Long lostItemId, Long memberId) {
         List<QuizDto> quizDtos = quizGenerationService.getLostItemQuizzes(lostItemId, memberId);
         return ResponseEntity.ok(QuizzesResponse.from(quizDtos));
     }
 
+    @Override
     @PostMapping
     public ResponseEntity<QuizSubmissionResponse> submitQuizAnswers(@PathVariable Long lostItemId, Long memberId,
             @Valid @RequestBody QuizSubmissionRequest submissionRequest) {
