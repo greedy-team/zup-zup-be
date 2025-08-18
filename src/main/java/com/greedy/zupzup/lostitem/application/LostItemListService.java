@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.application;
 
-import com.greedy.zupzup.lostitem.LostItemStatus;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;

@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.application.dto;
 
-import com.greedy.zupzup.lostitem.repository.LostItemSummaryRepository;
+import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import java.util.List;
 
 public record LostItemSummaryCommand(
@@ -8,7 +8,7 @@ public record LostItemSummaryCommand(
         String schoolAreaName,
         Long lostCount
 ) {
-    public static LostItemSummaryCommand from(LostItemSummaryRepository.LostItemSummaryProjection projection) {
+    public static LostItemSummaryCommand from(LostItemRepository.LostItemSummaryProjection projection) {
         return new LostItemSummaryCommand(
                 projection.getSchoolAreaId(),
                 projection.getSchoolAreaName(),
