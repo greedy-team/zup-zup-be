@@ -1,6 +1,10 @@
 set FOREIGN_KEY_CHECKS = 0;
 
-truncate table keyword_alert;
+
+truncate table school_area;
+truncate table category;
+truncate table feature;
+truncate table feature_option;
 truncate table member;
 truncate table pledge;
 truncate table quiz_attempt;
