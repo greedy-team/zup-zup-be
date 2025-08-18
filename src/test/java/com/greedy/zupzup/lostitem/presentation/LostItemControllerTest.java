@@ -1,20 +1,25 @@
 package com.greedy.zupzup.lostitem.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.greedy.zupzup.category.domain.Category;
+import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.exception.CategoryException;
 import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.common.ControllerTest;
+import com.greedy.zupzup.common.fixture.SchoolAreaFixture;
 import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.exception.LostItemImageException;
 import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterResponse;
+import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.exception.SchoolAreaException;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,15 +35,26 @@ class LostItemControllerTest extends ControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private Category category;
+    private SchoolArea schoolArea;
+
+    @BeforeEach
+    void setUp() {
+        category = givenElectronicsCategory();
+        schoolArea = schoolAreaRepository.save(SchoolAreaFixture.AI_CENTER());
+    }
+
     @Test
     void 분실물_등록에_성공하면_등록된_분실물의_id를_응답해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -70,17 +86,19 @@ class LostItemControllerTest extends ControllerTest {
     void 분실물_상세정보를_입력하지_않아도_분실물_등록이_성공해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
         LostItemRegisterRequest request = new LostItemRegisterRequest(
                 null,
                 "학술 정보원 2층 데스크",
                 schoolAreaId,
                 "AI 센터 B205",
                 categoryId,
-                List.of(feature1, feature2)
+                List.of(featureRequest1, featureRequest2)
         );
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
@@ -110,11 +128,13 @@ class LostItemControllerTest extends ControllerTest {
     void 잘못된_학교_구역_id로_분실물을_등록하면_예외가_발생해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
+        Long categoryId = category.getId();
         Long schoolAreaId = 99L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -147,11 +167,13 @@ class LostItemControllerTest extends ControllerTest {
     void 이미지_파일을_등록하지_않으면_예외가_발생해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         String jsonRequest = objectMapper.writeValueAsString(request);
@@ -180,11 +202,13 @@ class LostItemControllerTest extends ControllerTest {
     void 이미지_파일을_4개_이상_등록하면_예외가_발생해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -220,9 +244,11 @@ class LostItemControllerTest extends ControllerTest {
         // given
         Long categoryId = 99L;
         Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 5L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -253,11 +279,13 @@ class LostItemControllerTest extends ControllerTest {
     void 카테고리에_대해_일치하지_않는_특징으로_분실물을_등록하면_예외가_발생해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(4L, 15L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(99L, feature2.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -288,11 +316,13 @@ class LostItemControllerTest extends ControllerTest {
     void 특징에_대해_일치하지_않는_옵션으로_분실물을_등록하면_예외가_발생해야_한다() throws Exception {
 
         // given
-        Long categoryId = 1L;
-        Long schoolAreaId = 3L;
-        ItemFeatureRequest feature1 = createFeatureRequest(1L, 2L);
-        ItemFeatureRequest feature2 = createFeatureRequest(2L, 99L);
-        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(feature1, feature2));
+        Long categoryId = category.getId();
+        Long schoolAreaId = schoolArea.getId();
+        Feature feature1 = category.getFeatures().get(0);
+        Feature feature2 = category.getFeatures().get(1);
+        ItemFeatureRequest featureRequest1 = createFeatureRequest(feature1.getId(), feature1.getOptions().get(0).getId());
+        ItemFeatureRequest featureRequest2 = createFeatureRequest(feature2.getId(), feature1.getOptions().get(0).getId());
+        LostItemRegisterRequest request = createRequest(schoolAreaId, categoryId, List.of(featureRequest1, featureRequest2));
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
