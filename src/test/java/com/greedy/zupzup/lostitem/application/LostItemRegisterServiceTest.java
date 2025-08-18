@@ -13,17 +13,21 @@ import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterRequest;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.greedy.zupzup.common.fixture.CategoryFixture.ELECTRONIC;
+import static com.greedy.zupzup.common.fixture.FeatureFixture.ELECTRONIC_COLOR;
+import static com.greedy.zupzup.common.fixture.FeatureOptionFixture.ELECTRONIC_COLOR_OPTIONS;
+import static com.greedy.zupzup.common.fixture.SchoolAreaFixture.AI_CENTER;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,23 +37,43 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 
-@ExtendWith(MockitoExtension.class)
 class LostItemRegisterServiceTest extends ServiceUnitTest {
+
+    private static final Long VALID_CATEGORY_ID = 1L;
+    private static final Long VALID_FEATURE_ID = 2L;
+    private static final Long VALID_OPTION_ID = 3L;
+    private static final Long VALID_FOUND_AREA_ID = 4L;
 
     @InjectMocks
     private LostItemRegisterService lostItemRegisterService;
+
+    private Category mockCategory;
+    private Feature mockFeature;
+    private List<FeatureOption> mockOptions;
+    private SchoolArea mockSchoolArea;
+
+    @BeforeEach
+    void setUp() {
+        mockCategory = ELECTRONIC();
+        mockFeature = ELECTRONIC_COLOR(mockCategory);
+        mockOptions = ELECTRONIC_COLOR_OPTIONS(mockFeature);
+        mockSchoolArea = AI_CENTER();
+
+        ReflectionTestUtils.setField(mockCategory, "id", VALID_CATEGORY_ID);
+        ReflectionTestUtils.setField(mockFeature, "id", VALID_FEATURE_ID);
+        ReflectionTestUtils.setField(mockOptions.get(0), "id", VALID_OPTION_ID);
+        ReflectionTestUtils.setField(mockSchoolArea, "id", VALID_FOUND_AREA_ID);
+        ReflectionTestUtils.setField(mockCategory, "features", List.of(mockFeature));
+    }
+
 
     @Test
     void 분실물_등록에_성공하면_생성된_분실물_객체를_반환해야_한다() {
 
         // given
-        LostItemRegisterRequest request = createDummyRequest(1L, 1L, 1L);
+        LostItemRegisterRequest request = createDummyRequest(VALID_CATEGORY_ID, VALID_FEATURE_ID, VALID_OPTION_ID);
         List<MultipartFile> images = createDummyImages(3);
         CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
-
-        Category mockCategory = createMockCategory();
-        List<FeatureOption> mockOptions = createMockOptions(mockCategory.getFeatures().get(0));
-        SchoolArea mockSchoolArea = SchoolArea.builder().id(1L).build();
 
         given(categoryRepository.findWithFeaturesById(request.categoryId())).willReturn(Optional.of(mockCategory));
         given(featureOptionRepository.findByFeatureIds(anyList())).willReturn(mockOptions);
@@ -78,7 +102,8 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     void 존재하지_않는_카테고리로_분실물_등록을_요청하면_예외가_발생해야_한다() {
 
         // given
-        LostItemRegisterRequest request = createDummyRequest(99L, 1L, 1L);
+        Long invalidCategoryId = 99L;
+        LostItemRegisterRequest request = createDummyRequest(invalidCategoryId, VALID_FEATURE_ID, VALID_OPTION_ID);
         List<MultipartFile> images = createDummyImages(1);
         CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
 
@@ -99,17 +124,11 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     void 카테고리와_일치하지_않는_특징으로_분실물_등록을_요청하면_예외가_발생해야_한다() {
 
         // given
-        LostItemRegisterRequest request = createDummyRequest(1L, 99L, 1L);
-        List<MultipartFile> images = createDummyImages(1);
-        CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
-
-        Category mockCategory = createMockCategory();
-        List<Long> categoryFeatureIds = mockCategory.getFeatures().stream().
-                map(Feature::getId)
-                .toList();
+        Long invalidFeatureId = 99L;
+        LostItemRegisterRequest request = createDummyRequest(VALID_CATEGORY_ID, invalidFeatureId, VALID_OPTION_ID);
+        CreateLostItemCommand command = CreateLostItemCommand.of(request, createDummyImages(1));
 
         given(categoryRepository.findWithFeaturesById(request.categoryId())).willReturn(Optional.of(mockCategory));
-        given(featureOptionRepository.findByFeatureIds(categoryFeatureIds)).willReturn(createMockOptions(mockCategory.getFeatures().get(0)));
 
         // when & then
         assertThatThrownBy(() -> lostItemRegisterService.registLostItem(command))
@@ -123,13 +142,10 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     void 특징에_속하지_않는_옵션으로_분실물_등록을_요청하면_예외가_발생해야_한다() {
 
         // given
-        LostItemRegisterRequest request = createDummyRequest(1L, 1L, 99L);
-        List<MultipartFile> images = createDummyImages(1);
-        CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
+        Long invalidOptionId = 99L;
+        LostItemRegisterRequest request = createDummyRequest(VALID_CATEGORY_ID, VALID_FEATURE_ID, invalidOptionId);
+        CreateLostItemCommand command = CreateLostItemCommand.of(request, createDummyImages(1));
 
-        Category mockCategory = createMockCategory();
-        Feature feature = mockCategory.getFeatures().get(0);
-        List<FeatureOption> mockOptions = createMockOptions(feature);
         List<Long> categoryFeatureIds = mockCategory.getFeatures().stream().
                 map(Feature::getId)
                 .toList();
@@ -149,7 +165,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
         return new LostItemRegisterRequest(
                 "핸드폰 액정이 깨져 있어요.",
                 "학술 정보원 2층 데스크",
-                3L,
+                VALID_FOUND_AREA_ID,
                 "AI 센터 B205",
                 categoryId,
                 List.of(new ItemFeatureRequest(featureId, optionId))
@@ -162,39 +178,4 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
                 .collect(Collectors.toList());
     }
 
-    private Category createMockCategory() {
-        Feature feature = Feature.builder()
-                .id(1L)
-                .name("색상")
-                .build();
-
-        return Category.builder()
-                .id(1L)
-                .name("핸드폰")
-                .features(List.of(feature))
-                .build();
-    }
-
-    private List<FeatureOption> createMockOptions(Feature feature) {
-
-        FeatureOption option1 = FeatureOption.builder()
-                .id(1L)
-                .optionValue("블랙")
-                .feature(feature)
-                .build();
-
-        FeatureOption option2 = FeatureOption.builder()
-                .id(1L)
-                .optionValue("실버")
-                .feature(feature)
-                .build();
-
-        FeatureOption option3 = FeatureOption.builder()
-                .id(1L)
-                .optionValue("골드")
-                .feature(feature)
-                .build();
-
-        return List.of(option1, option2, option3);
-    }
 }
