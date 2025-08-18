@@ -4,6 +4,7 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface LostItemRepository extends JpaRepository<LostItem, Long> {
+
+    interface LostItemSummaryProjection {
+        Long getSchoolAreaId();
+
+        String getSchoolAreaName();
+
+        Long getLostCount();
+    }
 
     @Query(
             value = """
@@ -55,6 +64,23 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             where li.id = :lostItemId
             """)
     Optional<LostItem> findWithCategoryById(Long lostItemId);
+
+    @Query("""
+            select
+                sa.id       as schoolAreaId,
+                sa.areaName as schoolAreaName,
+                coalesce(count(li.id), 0) as lostCount
+            from SchoolArea sa
+                left join LostItem li
+                    on li.foundArea.id = sa.id
+                   and li.status = :status
+                   and (:categoryId is null or li.category.id = :categoryId)
+            group by sa.id, sa.areaName
+            """)
+    List<LostItemSummaryProjection> findAreaSummaries(
+            @Param("categoryId") Long categoryId,
+            @Param("status") LostItemStatus status
+    );
 
     default LostItem getById(Long id) {
         return findById(id)
