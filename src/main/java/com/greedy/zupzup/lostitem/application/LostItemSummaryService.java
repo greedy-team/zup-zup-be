@@ -1,6 +1,7 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.lostitem.application.dto.LostItemSummaryCommand;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemSummaryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class LostItemSummaryService {
 
     @Transactional(readOnly = true)
     public List<LostItemSummaryCommand> getSummary(Long categoryId) {
-        return repository.findAreaSummaries(categoryId)
+        return repository.findAreaSummaries(categoryId, LostItemStatus.REGISTERED)
                 .stream()
                 .map(LostItemSummaryCommand::from)
                 .toList();
