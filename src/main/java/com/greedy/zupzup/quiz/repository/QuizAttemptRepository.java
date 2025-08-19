@@ -10,6 +10,8 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     boolean existsByLostItemIdAndMemberId(Long lostItemId, Long memberId);
 
+    boolean existsByLostItem_IdAndMember_IdAndIsCorrectTrue(Long lostItemId, Long memberId);
+
     Optional<QuizAttempt> findByLostItemIdAndMemberId(Long lostItemId, Long memberId);
 
     default QuizAttempt getByLostItemIdAndMemberId(Long lostItemId, Long memberId) {

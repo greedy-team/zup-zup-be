@@ -19,8 +19,7 @@ public enum CommonException implements ExceptionCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "유효하지 않은 입력값", "입력값이 유효성 검사를 통과하지 못했습니다."),
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 타입", "서버에서 지원하지 않는 Content-Type 입니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 메소드", "해당 엔드 포인트는 서버에서 지원하지 않는 HTTP 메소드 입니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 오류", "서버 내부에 알 수 없는 오류가 발생했습니다. 관리자에게 문의 하세요.")
-    ;
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 오류", "서버 내부에 알 수 없는 오류가 발생했습니다. 관리자에게 문의 하세요.");
 
     private final HttpStatus httpStatus;
     private final String title;
