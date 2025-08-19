@@ -5,6 +5,7 @@ import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
@@ -31,25 +32,23 @@ public class LostItemDetailViewService {
     public LostItemDetailViewCommand getDetail(Long lostItemId, Long memberId) {
 
         Member member = memberRepository.getById(memberId);
-
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
 
         boolean quizRequired = !item.isNotQuizCategory();
 
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
-        boolean quizAnswered = quizAttemptRepository
-                .findByLostItemIdAndMemberId(item.getId(), member.getId())
-                .map(QuizAttempt::getIsCorrect)
-                .orElse(false);
 
-        if (quizRequired && !pledgedByMe) {
-            throw new ApplicationException(CommonException.ACCESS_FORBIDDEN);
+        boolean quizPassed = quizAttemptRepository
+                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+
+        if (quizRequired && (!pledgedByMe || !quizPassed)) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
 
         String depositArea = item.getDepositArea();
 
         List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
 
-        return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizAnswered, pledgedByMe);
+        return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizPassed, pledgedByMe);
     }
 }
