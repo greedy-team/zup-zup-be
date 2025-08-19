@@ -3,19 +3,30 @@ package com.greedy.zupzup.schoolarea.presentation;
 import com.greedy.zupzup.common.ControllerTest;
 import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.ErrorResponse;
+import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.exception.SchoolAreaException;
 import com.greedy.zupzup.schoolarea.presentation.dto.AllSchoolAreasResponse;
 import com.greedy.zupzup.schoolarea.presentation.dto.SchoolAreaResponse;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class SchoolAreaControllerTest extends ControllerTest {
+
+    private List<SchoolArea> schoolAreas;
+
+    @BeforeEach
+    void setUp() {
+        schoolAreas = givenSchoolAreas();
+    }
 
     @Test
     void 모든_학교_구역을_응답해야한다() {
@@ -31,7 +42,7 @@ class SchoolAreaControllerTest extends ControllerTest {
                 .as(AllSchoolAreasResponse.class);
 
         // then
-        assertThat(response.count()).isEqualTo(3);
+        assertThat(response.count()).isEqualTo(schoolAreas.size());
     }
 
     @Test
@@ -40,6 +51,7 @@ class SchoolAreaControllerTest extends ControllerTest {
         // given
         Double lat = 37.55121049168251;
         Double lng = 127.0745588999;
+        SchoolArea expectedArea = schoolAreas.get(2);
 
         // when
         ExtractableResponse<Response> extract = RestAssured.given().log().all()
@@ -57,8 +69,8 @@ class SchoolAreaControllerTest extends ControllerTest {
 
         assertSoftly(softly -> {
             softly.assertThat(statusCode).isEqualTo(200);
-            softly.assertThat(response.id()).isEqualTo(2L);
-            softly.assertThat(response.areaName()).isEqualTo("세종대학교 운동장 옆 길");
+            softly.assertThat(response.id()).isEqualTo(expectedArea.getId());
+            softly.assertThat(response.areaName()).isEqualTo(expectedArea.getAreaName());
         });
     }
 

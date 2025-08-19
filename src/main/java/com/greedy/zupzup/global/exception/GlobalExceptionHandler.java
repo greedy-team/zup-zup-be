@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -26,8 +27,7 @@ public class GlobalExceptionHandler {
      * 어플리케이션 로직에서 발생시킨 예외를 처리합니다.
      */
     @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<ErrorResponse> applicationExceptionHandler(ApplicationException ex,
-                                                                     HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex, HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
         log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
                 code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
      * S3, 외부 API 등 외부 인프라와 연동에 실패 시 발생하는 예외를 처리합니다.
      */
     @ExceptionHandler(InfrastructureException.class)
-    public ResponseEntity<ErrorResponse> infrastructureExceptionHandler(InfrastructureException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleInfrastructureException(InfrastructureException ex, HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
         log.error("외부 시스템 연동 오류 | code={}, title=\"{}\", detail=\"{}\", instance={} ",
                 code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI(), ex);
@@ -81,6 +81,19 @@ public class GlobalExceptionHandler {
                                                                          HttpServletRequest request) {
         String detail = String.format("지원하는 Media Type은 '%s' 입니다.", ex.getSupportedMediaTypes());
         ExceptionCode code = CommonException.UNSUPPORTED_MEDIA_TYPE;
+        String instance = request.getRequestURI();
+        loggingClientError(code, detail, instance);
+        return createErrorResponse(code, detail, instance);
+    }
+
+    /**
+     * @RequestPart 필수 요청 파트 누락 시 발생하는 예외를 처리합니다.
+     */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpServletRequest request) {
+        String partName = ex.getRequestPartName();
+        String detail = String.format("필수 파트 '%s'가 요청에 없습니다.", partName);
+        ExceptionCode code = CommonException.MISSING_REQUEST_PART;
         String instance = request.getRequestURI();
         loggingClientError(code, detail, instance);
         return createErrorResponse(code, detail, instance);
