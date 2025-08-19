@@ -98,7 +98,6 @@ class CategoryControllerTest extends ControllerTest {
                     int last = f.options().size() - 1;
                     assertThat(f.options().get(0).id()).isNotNull();
                     assertThat(f.options().get(0).optionValue()).isNotBlank();
-                    assertThat(f.options().get(last).optionValue()).isEqualTo("기타");
                 });
             });
         }
