@@ -19,4 +19,11 @@ public class CategoryFixture {
                 .iconUrl("https://cdn-icons-png.flaticon.com/128/519/519184.png")
                 .build();
     }
+
+    public static Category ETC() {
+        return Category.builder()
+                .name("기타")
+                .iconUrl("https://cdn-icons-png.flaticon.com/128/109/109190.png")
+                .build();
+    }
 }
