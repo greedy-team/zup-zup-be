@@ -153,7 +153,7 @@ public abstract class ControllerTest {
         FeatureOption selectedColorOption = colorFeature.getOptions().get(0); // 블랙이 정답
         lostItemFeatureRepository.save(new LostItemFeature(lostItem, colorFeature, selectedColorOption));
 
-        return lostItemRepository.findById(lostItem.getId()).orElseThrow();
+        return lostItem;
     }
 
     protected LostItem givenNonQuizLostItem(Member member, Category category) {
@@ -169,7 +169,7 @@ public abstract class ControllerTest {
         lostItemRepository.save(lostItem);
         lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
 
-        return lostItemRepository.findById(lostItem.getId()).orElseThrow();
+        return lostItem;
     }
 }
 

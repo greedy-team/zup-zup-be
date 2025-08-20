@@ -38,7 +38,7 @@ class PledgeServiceTest extends ServiceUnitTest {
 
     private static final Long TEST_MEMBER_ID = 1L;
     private static final Long TEST_LOST_ITEM_ID = 1L;
-    private static final Long NON_CATEGORY_TEST_LOST_ITEM_ID = 2L;
+    private static final Long ETC_CATEGORY_LOST_ITEM_ID = 2L;
 
     private Member member;
     private LostItem pledgeableLostItem;
@@ -51,7 +51,7 @@ class PledgeServiceTest extends ServiceUnitTest {
         nonQuizCategoryLostItem = NON_QUIZ_CATEGORY_LOST_ITEM();
         ReflectionTestUtils.setField(member, "id", TEST_MEMBER_ID);
         ReflectionTestUtils.setField(pledgeableLostItem, "id", TEST_LOST_ITEM_ID);
-        ReflectionTestUtils.setField(nonQuizCategoryLostItem, "id", NON_CATEGORY_TEST_LOST_ITEM_ID);
+        ReflectionTestUtils.setField(nonQuizCategoryLostItem, "id", ETC_CATEGORY_LOST_ITEM_ID);
     }
 
     @Test
@@ -82,11 +82,11 @@ class PledgeServiceTest extends ServiceUnitTest {
 
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(lostItemRepository.getById(NON_CATEGORY_TEST_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
+        given(lostItemRepository.getById(ETC_CATEGORY_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
         given(pledgeRepository.save(any(Pledge.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        Pledge result = pledgeService.createPledge(NON_CATEGORY_TEST_LOST_ITEM_ID, TEST_MEMBER_ID);
+        Pledge result = pledgeService.createPledge(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID);
 
         // then
         assertSoftly(softly -> {

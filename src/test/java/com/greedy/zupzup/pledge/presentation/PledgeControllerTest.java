@@ -38,6 +38,7 @@ class PledgeControllerTest extends ControllerTest {
 
         @Test
         void 퀴즈를_통과한_경우_서약_작성에_성공하고_201_Created를_응답한다() {
+
             // given
             quizAttemptRepository.save(QuizAttempt.builder()
                     .member(member).lostItem(quizLostItem).isCorrect(true).build());
