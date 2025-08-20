@@ -124,6 +124,10 @@ public abstract class ControllerTest {
         return wallet;
     }
 
+    protected Category givenEtcCategory() {
+        return categoryRepository.save(CategoryFixture.ETC());
+    }
+
     protected LostItem givenLostItem(Member member, Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
@@ -151,4 +155,22 @@ public abstract class ControllerTest {
 
         return lostItem;
     }
+
+    protected LostItem givenNonQuizLostItem(Member member, Category category) {
+        SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
+
+        LostItem lostItem = new LostItem(
+                "학생회관 1층",
+                "갈색 곰인형 키링",
+                "학생회관 1층 분실물 보관소",
+                category,
+                schoolArea
+        );
+        lostItemRepository.save(lostItem);
+        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+
+        return lostItem;
+    }
 }
+
+
