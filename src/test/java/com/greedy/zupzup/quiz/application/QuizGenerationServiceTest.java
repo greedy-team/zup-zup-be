@@ -39,19 +39,23 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     private QuizGenerationService quizGenerationService;
 
     private static final Long TEST_LOST_ITEM_ID = 1L;
+    private static final Long NON_CATEGORY_TEST_LOST_ITEM_ID = 3L;
     private static final Long TEST_MEMBER_ID = 1L;
     private static final int QUIZ_OPTIONS_COUNT = 4;
     private static final String ETC_OPTION_TEXT = "기타";
 
     private Member member;
     private LostItem pledgeableLostItem;
+    private LostItem nonQuizCategoryLostItem;
 
     @BeforeEach
     void setUp() {
         member = MEMBER();
         pledgeableLostItem = PLEDGEABLE_ELECTRONIC_LOST_ITEM();
+        nonQuizCategoryLostItem = NON_QUIZ_CATEGORY_LOST_ITEM();
         ReflectionTestUtils.setField(member, "id", TEST_MEMBER_ID);
         ReflectionTestUtils.setField(pledgeableLostItem, "id", TEST_LOST_ITEM_ID);
+        ReflectionTestUtils.setField(nonQuizCategoryLostItem, "id", NON_CATEGORY_TEST_LOST_ITEM_ID);
     }
 
     @Test
@@ -124,13 +128,12 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     void 퀴즈_생성_대상이_아닌_카테고리인_경우_빈_리스트를_반환해야_한다() {
 
         // given
-        LostItem nonQuizCategoryLostItem = NON_QUIZ_CATEGORY_LOST_ITEM();
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
+        given(lostItemRepository.getWithCategoryById(NON_CATEGORY_TEST_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
         given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
 
         // when
-        List<QuizDto> result = quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID);
+        List<QuizDto> result = quizGenerationService.getLostItemQuizzes(NON_CATEGORY_TEST_LOST_ITEM_ID, TEST_MEMBER_ID);
 
         // then
         assertThat(result).isEmpty();

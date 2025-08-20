@@ -2,7 +2,6 @@ package com.greedy.zupzup.common.fixture;
 
 import static com.greedy.zupzup.common.fixture.CategoryFixture.ELECTRONIC;
 import static com.greedy.zupzup.common.fixture.CategoryFixture.ETC;
-import static com.greedy.zupzup.common.fixture.CategoryFixture.WALLET;
 import static com.greedy.zupzup.common.fixture.LostItemImageFixture.DEFAULT_IMAGE;
 import static com.greedy.zupzup.common.fixture.SchoolAreaFixture.AI_CENTER;
 
@@ -21,7 +20,6 @@ public class LostItemFixture {
                 .foundArea(AI_CENTER())
                 .status(LostItemStatus.REGISTERED) 
                 .build();
-        ReflectionTestUtils.setField(lostItem, "id", 1L);
 
         List<LostItemImage> images = List.of(DEFAULT_IMAGE(lostItem));
         ReflectionTestUtils.setField(lostItem, "images", images);
@@ -36,7 +34,6 @@ public class LostItemFixture {
                 .foundArea(AI_CENTER())
                 .status(LostItemStatus.PLEDGED) 
                 .build();
-        ReflectionTestUtils.setField(lostItem, "id", 2L);
 
         List<LostItemImage> images = List.of(DEFAULT_IMAGE(lostItem));
         ReflectionTestUtils.setField(lostItem, "images", images);
@@ -51,7 +48,6 @@ public class LostItemFixture {
                 .foundArea(AI_CENTER())
                 .status(LostItemStatus.REGISTERED)
                 .build();
-        ReflectionTestUtils.setField(lostItem, "id", 3L);
 
         List<LostItemImage> images = List.of(DEFAULT_IMAGE(lostItem));
         ReflectionTestUtils.setField(lostItem, "images", images);

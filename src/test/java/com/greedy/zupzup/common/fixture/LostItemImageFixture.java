@@ -8,7 +8,7 @@ public class LostItemImageFixture {
     public static LostItemImage DEFAULT_IMAGE(LostItem lostItem) {
         return LostItemImage.builder()
                 .imageKey("https://example.com/default-image.jpg")
-                .imageOrder(1)
+                .imageOrder(0)
                 .lostItem(lostItem)
                 .build();
     }

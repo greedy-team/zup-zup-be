@@ -149,6 +149,6 @@ public abstract class ControllerTest {
         FeatureOption selectedColorOption = colorFeature.getOptions().get(0); // 블랙이 정답
         lostItemFeatureRepository.save(new LostItemFeature(lostItem, colorFeature, selectedColorOption));
 
-        return lostItemRepository.findById(lostItem.getId()).orElseThrow();
+        return lostItem;
     }
 }
