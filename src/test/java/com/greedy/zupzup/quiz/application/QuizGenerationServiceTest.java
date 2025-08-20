@@ -39,7 +39,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     private QuizGenerationService quizGenerationService;
 
     private static final Long TEST_LOST_ITEM_ID = 1L;
-    private static final Long NON_CATEGORY_TEST_LOST_ITEM_ID = 3L;
+    private static final Long NON_CATEGORY_TEST_LOST_ITEM_ID = 2L;
     private static final Long TEST_MEMBER_ID = 1L;
     private static final int QUIZ_OPTIONS_COUNT = 4;
     private static final String ETC_OPTION_TEXT = "기타";

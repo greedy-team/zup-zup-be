@@ -7,6 +7,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.repository.MemberRepository;
+import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
@@ -44,4 +45,6 @@ public abstract class ServiceUnitTest {
     @Mock
     protected QuizAttemptRepository quizAttemptRepository;
 
+    @Mock
+    protected PledgeRepository pledgeRepository;
 }
