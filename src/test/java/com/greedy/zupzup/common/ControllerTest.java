@@ -124,6 +124,10 @@ public abstract class ControllerTest {
         return wallet;
     }
 
+    protected Category givenEtcCategory() {
+        return categoryRepository.save(CategoryFixture.ETC());
+    }
+
     protected LostItem givenLostItem(Member member, Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
@@ -149,6 +153,24 @@ public abstract class ControllerTest {
         FeatureOption selectedColorOption = colorFeature.getOptions().get(0); // 블랙이 정답
         lostItemFeatureRepository.save(new LostItemFeature(lostItem, colorFeature, selectedColorOption));
 
-        return lostItem;
+        return lostItemRepository.findById(lostItem.getId()).orElseThrow();
+    }
+
+    protected LostItem givenNonQuizLostItem(Member member, Category category) {
+        SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
+
+        LostItem lostItem = new LostItem(
+                "학생회관 1층",
+                "갈색 곰인형 키링",
+                "학생회관 1층 분실물 보관소",
+                category,
+                schoolArea
+        );
+        lostItemRepository.save(lostItem);
+        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+
+        return lostItemRepository.findById(lostItem.getId()).orElseThrow();
     }
 }
+
+
