@@ -14,4 +14,6 @@ public interface LostItemFeatureRepository extends JpaRepository<LostItemFeature
             where lif.lostItem.id = :lostItemId
             """)
     List<LostItemFeature> findWithFeatureAndOptionsByLostItemId(Long lostItemId);
+
+    List<LostItemFeature> findByLostItemId(Long lostItemId);
 }
