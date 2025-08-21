@@ -50,7 +50,7 @@ public class SejongAuthenticator {
 
             return parseHTMLAndGetMemberInfo(readingPageHtml);
         } catch (IOException e) {
-            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FILED);
+            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
 
@@ -115,7 +115,7 @@ public class SejongAuthenticator {
                     .build();
 
         } catch (Exception e) {
-            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FILED);
+            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
 
@@ -127,7 +127,7 @@ public class SejongAuthenticator {
         Request ssoReq = new Request.Builder().url(SEJONG_SSO_URL).get().build();
         try (Response ssoResp = client.newCall(ssoReq).execute()) {
             if (!ssoResp.isSuccessful()) {
-                throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FILED);
+                throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
             }
         }
     }
@@ -145,7 +145,7 @@ public class SejongAuthenticator {
 
         try (Response finalResp = client.newCall(readingSiteRequest).execute()) {
             if (finalResp.body() == null || finalResp.code() != 200) {
-                throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FILED);
+                throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
             }
             return finalResp.body().string();
         }
@@ -191,10 +191,10 @@ public class SejongAuthenticator {
                 }
             } catch (SocketTimeoutException e) {
                 tryCount++;
-                log.warn("[PortalLogin] Timeout 발생 -> 재시도... ({}회)", tryCount);
+                log.warn("포탈 로그인 타임아웃 발생 (재시도: {}회)", tryCount);
             }
         }
-        throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FILED);
+        throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
     }
 
 

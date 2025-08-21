@@ -1,4 +1,4 @@
-package com.greedy.zupzup.global.infrastructure;
+package com.greedy.zupzup.global.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

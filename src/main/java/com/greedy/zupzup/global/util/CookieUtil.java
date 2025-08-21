@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtil {
 
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
+
     public static void setToken(String accessToken, int cookieExpirationSeconds, HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", accessToken);
+        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
@@ -21,7 +23,8 @@ public class CookieUtil {
             throw new ApplicationException(AuthException.UNAUTHENTICATED_REQUEST);
         }
         for (Cookie cookie : cookies) {
-            if ("accessToken".equals(cookie.getName())) {
+            if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                System.out.println("쿠키 값 " + cookie.getValue());
                 return cookie.getValue();
             }
         }

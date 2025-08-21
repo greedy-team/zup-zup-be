@@ -24,7 +24,7 @@ public class AuthService {
         SejongAuthInfo studentAuthInfo = sejongAuthenticator.getStudentAuthInfo(command.portalId(), command.portalPassword());
          return memberRepository.findByStudentId(studentAuthInfo.studentId())
                 .orElseGet(() -> {
-                    Member newMember = new Member(studentAuthInfo.studentId(), studentAuthInfo.studentName());
+                    Member newMember = new Member(studentAuthInfo.studentName(), studentAuthInfo.studentId());
                     return memberRepository.save(newMember);
                 });
     }
