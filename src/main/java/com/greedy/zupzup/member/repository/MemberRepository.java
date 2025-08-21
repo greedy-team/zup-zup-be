@@ -11,6 +11,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByStudentId(Integer studentId);
 
+    Boolean existsByStudentId(Integer studentId);
+
     default Member getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));

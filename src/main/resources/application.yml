@@ -1,6 +1,10 @@
 server:
   port: 8080
 
+  servlet:
+    session:
+      timeout: ${STUDENT_VERIFICATION_SESSION_TIME:1m}
+
 cloud:
   aws:
     credentials:
@@ -19,6 +23,8 @@ springdoc:
   swagger-ui.display-request-duration: true
   swagger-ui:
     path: /docs/swagger
+
+
 
 zupzup:
   auth:

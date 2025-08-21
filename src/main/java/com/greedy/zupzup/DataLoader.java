@@ -83,7 +83,7 @@ public class DataLoader implements CommandLineRunner {
             log.info("구역 정보가 이미 존재하여 초기화를 건너뜁니다.");
         }
     }
-    
+
 
     private void initCategoryData() {
         log.info("카테고리 정보를 초기화합니다.");

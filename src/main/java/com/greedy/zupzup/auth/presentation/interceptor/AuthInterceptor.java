@@ -1,7 +1,7 @@
 package com.greedy.zupzup.auth.presentation.interceptor;
 
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
-import com.greedy.zupzup.auth.presentation.dto.LoginMember;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
