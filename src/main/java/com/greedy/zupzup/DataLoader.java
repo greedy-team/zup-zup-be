@@ -12,7 +12,6 @@ import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.member.domain.Provider;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
@@ -149,12 +148,9 @@ public class DataLoader implements CommandLineRunner {
         log.info("회원 정보를 초기화합니다.");
         if (memberRepository.count() == 0) {
             Member member = Member.builder()
-                    .email("testuser@example.com")
-                    .nickname("테스트유저")
-                    .provider(Provider.GOOGLE)
-                    .providerId("123456789")
+                    .name("테스트유저")
+                    .studentId("123456789")
                     .role(Role.USER)
-                    .emailConsent(true)
                     .build();
             memberRepository.save(member);
             log.info("임시 회원 정보 초기화 완료!");

@@ -5,8 +5,6 @@ import lombok.*;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "member",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -17,22 +15,16 @@ public class Member extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String email;
+    private String name;
 
-    @Column(nullable = false)
-    private String nickname;
+    @Column(unique = true, nullable = false)
+    private String studentId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Provider provider;
-
-    @Column(nullable = false)
-    private String providerId;
+    // 일단은 nullable로 -> 추후 사이트 로그인 방식으로 바뀌면 가입 유도
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
-    @Column(nullable = false)
-    private boolean emailConsent;
 }
