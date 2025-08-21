@@ -1,5 +1,6 @@
 package com.greedy.zupzup.member.domain;
 
+import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.global.BaseTimeEntity;
 import lombok.*;
 import jakarta.persistence.*;
@@ -27,9 +28,4 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-
-    public Member(String name, Integer studentId) {
-        this.name = name;
-        this.studentId = studentId;
-    }
 }

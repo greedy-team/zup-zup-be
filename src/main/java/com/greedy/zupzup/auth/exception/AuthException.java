@@ -15,7 +15,8 @@ public enum AuthException implements ExceptionCode {
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 형식", "인증 정보가 올바르지 않습니다. 다시 로그인해주세요."),
     UNAUTHENTICATED_REQUEST(HttpStatus.UNAUTHORIZED, "인증되지 않은 요청", "로그인이 필요합니다."),
     ALREADY_REGISTERED_MEMBER(HttpStatus.BAD_REQUEST, "가입된 사용자", "이미 가입된 사용자 입니다."),
-    SEJONG_VERIFICATION_EXPIRED(HttpStatus.UNAUTHORIZED, "세종대학교 인증 누락", "세종대학교 인증이 필요합니ㅏㄷ")
+    SEJONG_VERIFICATION_EXPIRED(HttpStatus.UNAUTHORIZED, "세종대학교 인증 필요", "세종대학교 인증이 만료되었거나, 아직 인증하지 않았습니다."),
+    STUDENT_ID_MISMATCH(HttpStatus.BAD_REQUEST, "인증 정보 불일치", "가입 요청된 학번과, 인증된 학번이 일치하지 않습니다.")
     ;
 
     private final HttpStatus httpStatus;

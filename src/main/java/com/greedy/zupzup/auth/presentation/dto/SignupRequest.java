@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Pattern;
 public record SignupRequest(
 
         @NotNull(message = "학번은 필수입니다.")
-        int studentId,
+        Integer studentId,
 
         @NotBlank(message = "비밀번호는 필수입니다.")
         @Pattern(

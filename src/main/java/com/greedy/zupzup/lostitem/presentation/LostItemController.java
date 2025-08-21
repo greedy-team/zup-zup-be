@@ -1,5 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation;
 
+import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.LostItemRegisterService;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterRequest;
@@ -7,10 +9,7 @@ import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
@@ -30,5 +29,10 @@ public class LostItemController {
         return ResponseEntity
                 .created(URI.create("/api/lost-items/" + lostItem.getId()))
                 .body(new LostItemRegisterResponse(lostItem.getId(), "분실물 등록에 성공했습니다."));
+    }
+
+    @GetMapping("/test/hello")
+    public ResponseEntity<LoginMember> hello(@MemberAuth LoginMember loginMember) {
+        return ResponseEntity.ok(loginMember);
     }
 }
