@@ -18,7 +18,7 @@ public class LostItemDetailViewController {
 
     private final LostItemDetailViewService service;
 
-    @GetMapping("/{lostItemId}")
+    @GetMapping("/{lostItemId}/detail")
     public ResponseEntity<LostItemDetailViewResponse> getDetail(@PathVariable Long lostItemId,
                                                                 @RequestParam Long memberId) {
         LostItemDetailViewCommand cmd = service.getDetail(lostItemId, memberId);
