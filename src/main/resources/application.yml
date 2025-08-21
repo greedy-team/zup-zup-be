@@ -19,3 +19,10 @@ springdoc:
   swagger-ui.display-request-duration: true
   swagger-ui:
     path: /docs/swagger
+
+zupzup:
+  auth:
+    jwt:
+      access:
+        secret: ${ACCESS_JWT_SECRET_KEY:accessQWTGSDGASDFQWFQWAFSF}
+        expiration: ${ACCESS_TOKEN_EXPIRATION:60000}

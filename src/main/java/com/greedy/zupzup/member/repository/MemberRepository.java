@@ -5,7 +5,11 @@ import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.exception.MemberException;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    Optional<Member> findByStudentId(String studentId);
 
     default Member getById(Long id) {
         return findById(id)
