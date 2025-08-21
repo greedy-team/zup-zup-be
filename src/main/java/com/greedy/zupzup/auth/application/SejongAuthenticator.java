@@ -33,7 +33,7 @@ public class SejongAuthenticator {
     private static final String SEJONG_SSO_URL = "http://classic.sejong.ac.kr/_custom/sejong/sso/sso-return.jsp?returnUrl=https://classic.sejong.ac.kr/classic/index.do";
     private static final String SEJONG_READING_SITE_URL = "https://classic.sejong.ac.kr/classic/reading/status.do";
     private static final String STUDENT_INFO_TABLE_TR = ".b-con-box:has(h4.b-h4-tit01:contains(사용자 정보)) table.b-board-table tbody tr";
-    private static final String SEJONG_PORTAL_LOGIN_FAILED_MESSAGE_IN_HTML = "아이디나 비밀번호가 일치하지 않습니다";
+    private static final String SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML = "var result = 'OK'";
 
 
     /**
@@ -80,9 +80,13 @@ public class SejongAuthenticator {
         String body = response.body() != null ? response.body().string() : "";
         response.close();
 
-        if (body.contains(SEJONG_PORTAL_LOGIN_FAILED_MESSAGE_IN_HTML)) {
+        System.out.println(body);
+
+        // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
+        if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
             throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
         }
+
     }
 
 
@@ -161,7 +165,7 @@ public class SejongAuthenticator {
             rowValues.add(value);
         });
 
-        String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);
+        String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);   // 일단 사용 x
         String studentId = getValueFromList(rowValues, STUDENT_INFO_ID_INDEX);
         String studentName = getValueFromList(rowValues, STUDENT_INFO_NAME_INDEX);
 
