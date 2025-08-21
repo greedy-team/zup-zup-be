@@ -166,10 +166,21 @@ public class SejongAuthenticator {
         });
 
         String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);   // 일단 사용 x
-        String studentId = getValueFromList(rowValues, STUDENT_INFO_ID_INDEX);
+        String studentIdString = getValueFromList(rowValues, STUDENT_INFO_ID_INDEX);
         String studentName = getValueFromList(rowValues, STUDENT_INFO_NAME_INDEX);
 
-        return new SejongAuthInfo(studentId, studentName);
+        if (studentIdString == null || studentIdString.isBlank() || studentName == null || studentName.isBlank()) {
+            log.warn("포탈 로그인 | 고전 독서 페이지에서 학생 정보 추출 실패");
+            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
+        }
+
+        try {
+            int studentId = Integer.parseInt(studentIdString);
+            return new SejongAuthInfo(studentId, studentName);
+        } catch (NumberFormatException e) {
+            log.warn("포탈 로그인 | 학번 -> 정수 파싱 오류 studentId={}, studentName={}", studentIdString, studentName);
+            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
+        }
     }
 
     private String getValueFromList(List<String> list, int index) {
@@ -191,7 +202,7 @@ public class SejongAuthenticator {
                 }
             } catch (SocketTimeoutException e) {
                 tryCount++;
-                log.warn("포탈 로그인 타임아웃 발생 (재시도: {}회)", tryCount);
+                log.warn("포탈 로그인 | 타임아웃 발생 (재시도: {}회)", tryCount);
             }
         }
         throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);

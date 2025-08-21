@@ -18,7 +18,7 @@ public class Member extends BaseTimeEntity {
     private String name;
 
     @Column(unique = true, nullable = false)
-    private String studentId;
+    private Integer studentId;
 
     // 일단은 nullable로 -> 추후 사이트 로그인 방식으로 바뀌면 가입 유도
     private String password;
@@ -28,7 +28,7 @@ public class Member extends BaseTimeEntity {
     private Role role = Role.USER;
 
 
-    public Member(String name, String studentId) {
+    public Member(String name, Integer studentId) {
         this.name = name;
         this.studentId = studentId;
     }

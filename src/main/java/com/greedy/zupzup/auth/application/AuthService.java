@@ -15,7 +15,6 @@ public class AuthService {
     private final SejongAuthenticator sejongAuthenticator;
     private final MemberRepository memberRepository;
 
-
     /**
      * 포털 인증만으로 로그인 (데모데이 용) - 정식 출시 전에는 삭제하고, 인증+가입 절차만 열어두기
      */

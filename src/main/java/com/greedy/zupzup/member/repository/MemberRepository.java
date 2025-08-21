@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByStudentId(String studentId);
+    Optional<Member> findByStudentId(Integer studentId);
 
     default Member getById(Long id) {
         return findById(id)

@@ -149,7 +149,7 @@ public class DataLoader implements CommandLineRunner {
         if (memberRepository.count() == 0) {
             Member member = Member.builder()
                     .name("테스트유저")
-                    .studentId("123456789")
+                    .studentId(123456789)
                     .role(Role.USER)
                     .build();
             memberRepository.save(member);
