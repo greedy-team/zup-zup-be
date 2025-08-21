@@ -1,4 +1,7 @@
 package com.greedy.zupzup.auth.application.dto;
 
-public record SejongAuthInfo() {
+public record SejongAuthInfo(
+        String studentId,
+        String studentName
+) {
 }
