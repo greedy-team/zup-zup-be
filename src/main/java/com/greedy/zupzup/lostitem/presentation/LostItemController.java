@@ -31,8 +31,4 @@ public class LostItemController {
                 .body(new LostItemRegisterResponse(lostItem.getId(), "분실물 등록에 성공했습니다."));
     }
 
-    @GetMapping("/test/hello")
-    public ResponseEntity<LoginMember> hello(@MemberAuth LoginMember loginMember) {
-        return ResponseEntity.ok(loginMember);
-    }
 }

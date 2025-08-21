@@ -12,6 +12,6 @@ public record PortalLoginRequest(
         String portalPassword
 ) {
     public PortalLoginCommand toCommand() {
-        return new PortalLoginCommand(this.portalId(), this.portalPassword());
+        return new PortalLoginCommand(this.portalId, this.portalPassword);
     }
 }

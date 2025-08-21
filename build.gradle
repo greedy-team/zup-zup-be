@@ -51,6 +51,10 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
 	implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
 
+	// 비밀번호 암호와
+	implementation 'org.mindrot:jbcrypt:0.4'
+
+
 }
 
 tasks.named('test') {

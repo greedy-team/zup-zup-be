@@ -1,5 +1,6 @@
 package com.greedy.zupzup.auth.application;
 
+import com.greedy.zupzup.auth.application.dto.LoginCommand;
 import com.greedy.zupzup.auth.application.dto.PortalLoginCommand;
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.application.dto.SignupCommand;
@@ -9,6 +10,7 @@ import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,22 +40,34 @@ public class AuthService {
         if (!sejongAuthInfo.studentId().equals(command.studentId())) {
             throw new ApplicationException(AuthException.STUDENT_ID_MISMATCH);
         }
+        // 비밀번호 암호화 (해싱 Alg)
+        String hashedPassword = BCrypt.hashpw(command.password(), BCrypt.gensalt());
 
         try {
             Member newMember = Member.builder()
                     .name(sejongAuthInfo.studentName())
                     .studentId(sejongAuthInfo.studentId())
-                    .password(command.password())
+                    .password(hashedPassword)
                     .role(Role.USER)
                     .build();
 
-            System.out.println("가입 ㄱㄱ" + newMember.toString());
             memberRepository.save(newMember);
 
             return newMember;
         } catch (DataIntegrityViolationException e) {
             throw new ApplicationException(AuthException.ALREADY_REGISTERED_MEMBER);
         }
+    }
+
+
+    public Member login(LoginCommand command) {
+        Member loginMember = memberRepository.getMemberByStudentId(command.studentId());
+
+        if (!BCrypt.checkpw(command.password(), loginMember.getPassword())) {
+            throw new ApplicationException(AuthException.LOGIN_FAILED);
+        }
+
+        return loginMember;
     }
 
 

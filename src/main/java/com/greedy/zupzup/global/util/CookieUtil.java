@@ -24,7 +24,6 @@ public class CookieUtil {
         }
         for (Cookie cookie : cookies) {
             if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
-                System.out.println("쿠키 값 " + cookie.getValue());
                 return cookie.getValue();
             }
         }

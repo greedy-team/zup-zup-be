@@ -5,10 +5,7 @@ import com.greedy.zupzup.auth.application.SejongAuthenticator;
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
-import com.greedy.zupzup.auth.presentation.dto.PortalLoginRequest;
-import com.greedy.zupzup.auth.presentation.dto.SignupRequest;
-import com.greedy.zupzup.auth.presentation.dto.SignupResponse;
-import com.greedy.zupzup.auth.presentation.dto.VerifiedStudentResponse;
+import com.greedy.zupzup.auth.presentation.dto.*;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.util.CookieUtil;
 import com.greedy.zupzup.member.domain.Member;
@@ -54,22 +51,30 @@ public class AuthController {
         HttpSession session = httpRequest.getSession(false);
         SejongAuthInfo sejongAuthInfo = checkSessionAndGetSejongAuthInfo(session);
 
-        Member member = authService.signup(signupRequest.toCommand(sejongAuthInfo));
+        Member signupMember = authService.signup(signupRequest.toCommand(sejongAuthInfo));
 
         // 세종대학교 인증 세션 종료
         session.invalidate();
+        setAccessToken(response, signupMember);
 
-        String accessToken = jwtTokenProvider.createAccessToken(member);
-        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpiration, response);
-        return ResponseEntity.created(URI.create("/members/" + member.getId()))
-                .body(SignupResponse.of(member));
+        return ResponseEntity.created(URI.create("/members/" + signupMember.getId()))
+                .body(SignupResponse.from(signupMember));
     }
+
 
     public SejongAuthInfo checkSessionAndGetSejongAuthInfo(HttpSession session) {
         if (session == null || session.getAttribute(SEJONG_VERIFICATION_INFO_SESSION_KEY) == null) {
             throw new ApplicationException(AuthException.SEJONG_VERIFICATION_EXPIRED);
         }
         return (SejongAuthInfo) session.getAttribute(SEJONG_VERIFICATION_INFO_SESSION_KEY);
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
+        Member loginMember = authService.login(loginRequest.toCommand());
+        setAccessToken(response, loginMember);
+        return ResponseEntity.ok(LoginResponse.from(loginMember));
     }
 
 
@@ -86,9 +91,13 @@ public class AuthController {
     @PostMapping("/login/portal")
     public ResponseEntity<Void> portalLogin(@RequestBody @Valid PortalLoginRequest request, HttpServletResponse response) {
         Member loginMember = authService.authenticateSejongAndLogin(request.toCommand());
-        String accessToken = jwtTokenProvider.createAccessToken(loginMember);
-        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpiration, response);
+        setAccessToken(response, loginMember);
         return ResponseEntity.ok().build();
     }
-    
+
+    private void setAccessToken(HttpServletResponse response, Member member) {
+        String accessToken = jwtTokenProvider.createAccessToken(member);
+        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpiration, response);
+    }
+
 }

@@ -2,14 +2,14 @@ package com.greedy.zupzup.auth.presentation.dto;
 
 import com.greedy.zupzup.member.domain.Member;
 
-public record SignupResponse(
+public record LoginResponse(
         Long memberId,
         String message
 ) {
-    public static SignupResponse from(Member member) {
-        return new SignupResponse(
+    public static LoginResponse from(Member member) {
+        return new LoginResponse(
                 member.getId(),
-                "회원가입에 성공했습니다!"
+                "로그인에 성공했습니다."
         );
     }
 }
