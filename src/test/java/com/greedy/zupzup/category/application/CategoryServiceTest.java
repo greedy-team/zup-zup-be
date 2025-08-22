@@ -21,6 +21,7 @@ import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
 import com.greedy.zupzup.category.presentation.dto.CategoryFeaturesResponse;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
+import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class CategoryServiceTest {
+class CategoryServiceTest extends ServiceUnitTest {
 
     @InjectMocks
     private CategoryService categoryService;
@@ -214,10 +215,6 @@ class CategoryServiceTest {
                 .optionValue(text)
                 .build();
         return o;
-    }
-
-    private static void setId(Object target, Long id) {
-        ReflectionTestUtils.setField(target, "id", id);
     }
 
     private static FeatureWithOptionsDto featureByName(
