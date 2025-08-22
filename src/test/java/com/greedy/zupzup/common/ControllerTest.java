@@ -7,10 +7,16 @@ import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.category.repository.FeatureRepository;
 import com.greedy.zupzup.common.fixture.CategoryFixture;
+import com.greedy.zupzup.common.fixture.LostItemImageFixture;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.repository.MemberRepository;
+import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import io.restassured.RestAssured;
@@ -56,6 +62,12 @@ public abstract class ControllerTest {
 
     @Autowired
     protected SchoolAreaRepository schoolAreaRepository;
+
+    @Autowired
+    protected MemberRepository memberRepository;
+
+    @Autowired
+    protected QuizAttemptRepository quizAttemptRepository;
 
     @LocalServerPort
     protected int port;
@@ -112,4 +124,53 @@ public abstract class ControllerTest {
         return wallet;
     }
 
+    protected Category givenEtcCategory() {
+        return categoryRepository.save(CategoryFixture.ETC());
+    }
+
+    protected LostItem givenLostItem(Member member, Category category) {
+        SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
+
+        LostItem lostItem = new LostItem(
+                "AI 센터 B205",
+                "검정색 아이폰 15 프로",
+                "학술정보원 2층 데스크",
+                category,
+                schoolArea
+        );
+        lostItemRepository.save(lostItem);
+        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+
+        // 1. 브랜드 특징 및 정답 설정
+        Feature brandFeature = category.getFeatures().stream()
+                .filter(f -> f.getName().equals("브랜드")).findFirst().orElseThrow();
+        FeatureOption selectedBrandOption = brandFeature.getOptions().get(0); // 삼성이 정답
+        lostItemFeatureRepository.save(new LostItemFeature(lostItem, brandFeature, selectedBrandOption));
+
+        // 2. 색상 특징 및 정답 설정
+        Feature colorFeature = category.getFeatures().stream()
+                .filter(f -> f.getName().equals("색상")).findFirst().orElseThrow();
+        FeatureOption selectedColorOption = colorFeature.getOptions().get(0); // 블랙이 정답
+        lostItemFeatureRepository.save(new LostItemFeature(lostItem, colorFeature, selectedColorOption));
+
+        return lostItem;
+    }
+
+    protected LostItem givenNonQuizLostItem(Member member, Category category) {
+        SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
+
+        LostItem lostItem = new LostItem(
+                "학생회관 1층",
+                "갈색 곰인형 키링",
+                "학생회관 1층 분실물 보관소",
+                category,
+                schoolArea
+        );
+        lostItemRepository.save(lostItem);
+        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+
+        return lostItem;
+    }
 }
+
+

@@ -21,9 +21,10 @@ public class CategoryFixture {
     }
 
     public static Category ETC() {
-        return Category.builder()
+        return Category
+                .builder()
                 .name("기타")
-                .iconUrl("https://cdn-icons-png.flaticon.com/128/109/109190.png")
+                .iconUrl("https://cdn-icons-png.flaticon.com/128/109/109190.png") // 예시 아이콘
                 .build();
     }
 }

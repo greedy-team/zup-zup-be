@@ -66,6 +66,14 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     Optional<LostItem> findWithCategoryById(Long lostItemId);
 
     @Query("""
+            select li from LostItem li
+            join fetch li.category
+            join fetch li.foundArea
+            where li.id = :lostItemId
+            """)
+    Optional<LostItem> findWithCategoryAndAreaById(@Param("lostItemId") Long lostItemId);
+
+    @Query("""
             select
                 sa.id       as schoolAreaId,
                 sa.areaName as schoolAreaName,
@@ -89,6 +97,11 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
 
     default LostItem getWithCategoryById(Long id) {
         return findWithCategoryById(id)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+    }
+
+    default LostItem getWithCategoryAndAreaById(Long id) {
+        return findWithCategoryAndAreaById(id)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
 }
