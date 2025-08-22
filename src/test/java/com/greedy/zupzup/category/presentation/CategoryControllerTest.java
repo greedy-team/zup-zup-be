@@ -4,15 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.greedy.zupzup.category.domain.Category;
-import com.greedy.zupzup.category.domain.Feature;
-import com.greedy.zupzup.category.domain.FeatureOption;
-import com.greedy.zupzup.category.exception.CategoryException;
 import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
 import com.greedy.zupzup.category.presentation.dto.CategoryFeaturesResponse;
 import com.greedy.zupzup.common.ControllerTest;
-import com.greedy.zupzup.global.exception.ErrorResponse;
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.Set;
@@ -116,7 +111,7 @@ class CategoryControllerTest extends ControllerTest {
         }
 
         @Test
-        void 숫자가_아닌_카테고리ID면_400() {
+        void 숫자가_아닌_카테고리ID면_400_BAD_REQUEST를_응답한다() {
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .when()
                     .get("/api/categories/{categoryId}/features", "abc")
