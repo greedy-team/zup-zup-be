@@ -5,12 +5,14 @@ import static com.greedy.zupzup.common.fixture.CategoryFixture.ETC;
 import static com.greedy.zupzup.common.fixture.CategoryFixture.WALLET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
+import com.greedy.zupzup.category.application.dto.FeatureWithOptionsDto;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -125,27 +127,29 @@ class CategoryServiceTest {
             CategoryFeaturesResponse resp = categoryService.getCategoryFeatures(10L);
 
             // then
-            assertThat(resp.categoryId()).isEqualTo(10L);
-            assertThat(resp.categoryName()).isEqualTo("전자기기");
-            assertThat(resp.features()).hasSize(2);
+            assertSoftly(s -> {
+                s.assertThat(resp.categoryId()).isEqualTo(10L);
+                s.assertThat(resp.categoryName()).isEqualTo("전자기기");
+                s.assertThat(resp.features()).hasSize(2);
 
-            var brandDto = resp.features().stream()
-                    .filter(f -> f.name().equals("브랜드"))
-                    .findFirst().orElseThrow();
-            assertThat(brandDto.id()).isEqualTo(101L);
-            assertThat(brandDto.quizQuestion()).isEqualTo("브랜드는 무엇인가요?");
-            assertThat(brandDto.options())
-                    .extracting(FeatureOptionDto::optionValue)
-                    .containsExactlyInAnyOrder("삼성", "애플");
+                s.assertThat(resp.features())
+                        .extracting(FeatureWithOptionsDto::name, FeatureWithOptionsDto::id,
+                                FeatureWithOptionsDto::quizQuestion)
+                        .containsExactlyInAnyOrder(
+                                tuple("브랜드", 101L, "브랜드는 무엇인가요?"),
+                                tuple("색상", 102L, "색상은 무엇인가요?")
+                        );
 
-            var colorDto = resp.features().stream()
-                    .filter(f -> f.name().equals("색상"))
-                    .findFirst().orElseThrow();
-            assertThat(colorDto.id()).isEqualTo(102L);
-            assertThat(colorDto.quizQuestion()).isEqualTo("색상은 무엇인가요?");
-            assertThat(colorDto.options())
-                    .extracting(FeatureOptionDto::optionValue)
-                    .containsExactlyInAnyOrder("블랙", "실버");
+                FeatureWithOptionsDto brandDto = featureByName(resp, "브랜드");
+                s.assertThat(brandDto.options())
+                        .extracting(FeatureOptionDto::optionValue)
+                        .containsExactlyInAnyOrder("삼성", "애플");
+
+                FeatureWithOptionsDto colorDto = featureByName(resp, "색상");
+                s.assertThat(colorDto.options())
+                        .extracting(FeatureOptionDto::optionValue)
+                        .containsExactlyInAnyOrder("블랙", "실버");
+            });
 
             then(categoryRepository).should().findWithFeaturesById(10L);
             then(featureOptionRepository).should().findByFeatureIds(List.of(101L, 102L));
@@ -214,5 +218,13 @@ class CategoryServiceTest {
 
     private static void setId(Object target, Long id) {
         ReflectionTestUtils.setField(target, "id", id);
+    }
+
+    private static FeatureWithOptionsDto featureByName(
+            CategoryFeaturesResponse resp, String name) {
+        return resp.features().stream()
+                .filter(f -> f.name().equals(name))
+                .findFirst()
+                .orElseThrow();
     }
 }
