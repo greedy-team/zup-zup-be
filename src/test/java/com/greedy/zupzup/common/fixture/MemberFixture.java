@@ -8,7 +8,7 @@ public class MemberFixture {
     public static Member MEMBER() {
         return Member.builder()
                 .name("테스트유저")
-                .studentId("naver-test-id-12345")
+                .studentId(123456)
                 .role(Role.USER)
                 .build();
     }
