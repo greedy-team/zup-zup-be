@@ -1,7 +1,6 @@
 package com.greedy.zupzup.auth.presentation;
 
 import com.greedy.zupzup.auth.application.AuthService;
-import com.greedy.zupzup.auth.application.SejongAuthenticator;
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
