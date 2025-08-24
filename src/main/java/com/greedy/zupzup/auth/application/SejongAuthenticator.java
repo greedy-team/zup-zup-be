@@ -80,8 +80,6 @@ public class SejongAuthenticator {
         String body = response.body() != null ? response.body().string() : "";
         response.close();
 
-        System.out.println(body);
-
         // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
         if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
             throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
