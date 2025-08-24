@@ -1,6 +1,5 @@
 package com.greedy.zupzup.member.domain;
 
-import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.global.BaseTimeEntity;
 import lombok.*;
 import jakarta.persistence.*;

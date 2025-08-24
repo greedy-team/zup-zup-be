@@ -1,4 +1,4 @@
-package com.greedy.zupzup.auth.application;
+package com.greedy.zupzup.auth.infrastructure;
 
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.exception.AuthException;

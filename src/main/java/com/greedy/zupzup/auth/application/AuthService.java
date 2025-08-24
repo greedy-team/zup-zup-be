@@ -5,12 +5,13 @@ import com.greedy.zupzup.auth.application.dto.PortalLoginCommand;
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.application.dto.SignupCommand;
 import com.greedy.zupzup.auth.exception.AuthException;
+import com.greedy.zupzup.auth.infrastructure.PasswordEncoder;
+import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class AuthService {
 
     private final SejongAuthenticator sejongAuthenticator;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     public SejongAuthInfo verifyStudent(PortalLoginCommand command) {
@@ -41,7 +43,7 @@ public class AuthService {
             throw new ApplicationException(AuthException.STUDENT_ID_MISMATCH);
         }
         // 비밀번호 암호화 (해싱 Alg)
-        String hashedPassword = BCrypt.hashpw(command.password(), BCrypt.gensalt());
+        String hashedPassword = passwordEncoder.encode(command.password());
 
         try {
             Member newMember = Member.builder()
@@ -64,7 +66,7 @@ public class AuthService {
         Member loginMember = memberRepository.findByStudentId(command.studentId())
                 .orElseThrow(() -> new ApplicationException(AuthException.LOGIN_FAILED));
 
-        if (!BCrypt.checkpw(command.password(), loginMember.getPassword())) {
+        if (!passwordEncoder.matches(command.password(), loginMember.getPassword())) {
             throw new ApplicationException(AuthException.LOGIN_FAILED);
         }
 
