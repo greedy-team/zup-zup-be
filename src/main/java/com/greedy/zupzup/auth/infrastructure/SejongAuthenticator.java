@@ -11,10 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
-import javax.net.ssl.*;
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +32,8 @@ public class SejongAuthenticator {
     private static final String STUDENT_INFO_TABLE_TR = ".b-con-box:has(h4.b-h4-tit01:contains(사용자 정보)) table.b-board-table tbody tr";
     private static final String SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML = "var result = 'OK'";
 
+    private final OkHttpClient client; // 생성자 주입
+
 
     /**
      * 세종대학교 포털 로그인을 통해 학생 인증을 진행합니다.
@@ -42,7 +41,6 @@ public class SejongAuthenticator {
     public SejongAuthInfo getStudentAuthInfo(String portalId, String portalPassword) {
 
         try {
-            OkHttpClient client = buildClient();
             doPortalLogin(client, portalId, portalPassword);
 
             ssoRedirectToReadingSite(client);
@@ -74,46 +72,14 @@ public class SejongAuthenticator {
                 .header("Referer", "https://portal.sejong.ac.kr")
                 .header("Cookie", "chknos=false")
                 .build();
-        
-        Response response = executeWithRetry(client, request);
 
-        String body = response.body() != null ? response.body().string() : "";
-        response.close();
+        try (Response response = executeWithRetry(client, request)) {
+            String body = response.body() != null ? response.body().string() : "";
 
-        // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
-        if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
-            throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
-        }
-
-    }
-
-
-    /**
-     * 세종대학교 포털 로그인을 요청을 위한 OkHttpClient 객체를 생성합니다.
-     */
-    private OkHttpClient buildClient() {
-        try {
-            // SSLContext 생성, 모든 인증서 신뢰 설정
-            SSLContext sslCtx = SSLContext.getInstance("SSL");
-            sslCtx.init(null, new TrustManager[]{trustAllManager()}, new java.security.SecureRandom());
-            SSLSocketFactory sslFactory = sslCtx.getSocketFactory();
-
-            // hostnameVerifier: 모든 호스트네임에 대해 OK 처리
-            HostnameVerifier hostnameVerifier = (hostname, session) -> true;
-
-            // 쿠키 관리
-            CookieManager cookieManager = new CookieManager();
-            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-
-            // OkHttpClient 생성
-            return new OkHttpClient.Builder()
-                    .sslSocketFactory(sslFactory, trustAllManager())
-                    .hostnameVerifier(hostnameVerifier)
-                    .cookieJar(new JavaNetCookieJar(cookieManager))
-                    .build();
-
-        } catch (Exception e) {
-            throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
+            // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
+            if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
+                throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
+            }
         }
     }
 
@@ -198,29 +164,12 @@ public class SejongAuthenticator {
                 if (response.isSuccessful()) {
                     return response;
                 }
+                response.close();   // 실패 시 자원 반납
             } catch (SocketTimeoutException e) {
-                tryCount++;
                 log.warn("포탈 로그인 | 타임아웃 발생 (재시도: {}회)", tryCount);
             }
+            tryCount++;
         }
         throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
-    }
-
-
-    private X509TrustManager trustAllManager() {
-        return new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[0];
-            }
-        };
     }
 }
