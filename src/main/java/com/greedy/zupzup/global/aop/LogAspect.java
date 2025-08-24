@@ -1,6 +1,7 @@
 package com.greedy.zupzup.global.aop;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,7 +26,9 @@ public class LogAspect {
     @Around("controllerPointcut()")
     public Object logApiTrace(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        ServletRequestAttributes attributes = (ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes());
+        HttpServletRequest request = attributes.getRequest();
+        HttpServletResponse response = attributes.getResponse();
 
         long startTime = System.currentTimeMillis();
         String requestId = MDC.get("request_id");
@@ -35,8 +38,8 @@ public class LogAspect {
         String controllerName = joinPoint.getSignature().getDeclaringType().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
 
-        log.info("[{}] API-REQUEST | {} {} | IP: {} | {}.{}",
-                requestId, httpMethod, requestURI, clientIp, controllerName, methodName);
+        log.info("API-REQUEST | {} {} | IP: {} | {}.{}",
+                httpMethod, requestURI, clientIp, controllerName, methodName);
 
         try {
             Object result = joinPoint.proceed();
@@ -44,9 +47,10 @@ public class LogAspect {
         } finally {
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
+            int statusCode = (response != null) ? response.getStatus() : 0;
 
-            log.info("[{}] API-RESPONSE | {} {} | Execution Time: {}ms",
-                    requestId, httpMethod, requestURI, executionTime);
+            log.info("API-RESPONSE | {} {} | Status: {} | Execution Time: {}ms",
+                     httpMethod, requestURI, statusCode,executionTime);
         }
     }
 }
