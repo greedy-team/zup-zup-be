@@ -14,6 +14,7 @@ import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class ServiceUnitTest {
@@ -47,4 +48,8 @@ public abstract class ServiceUnitTest {
 
     @Mock
     protected PledgeRepository pledgeRepository;
+  
+    protected static void setId(Object target, Long id) {
+        ReflectionTestUtils.setField(target, "id", id);
+    }
 }
