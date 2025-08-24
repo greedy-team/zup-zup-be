@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -71,12 +72,19 @@ public abstract class ControllerTest {
     @Autowired
     protected QuizAttemptRepository quizAttemptRepository;
 
+    @Autowired
+    protected JwtTokenProvider jwtTokenProvider;
+
     @LocalServerPort
     protected int port;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    protected String givenAccessToken(Member member) {
+        return jwtTokenProvider.createAccessToken(member);
     }
 
     protected Member givenMember(String password) {
