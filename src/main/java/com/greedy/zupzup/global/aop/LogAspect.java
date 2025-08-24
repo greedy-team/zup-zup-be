@@ -16,7 +16,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 @Aspect
 @Component
-@Profile({"local", "dev"})
+@Profile({"dev"})
 public class LogAspect {
 
     @Pointcut("execution(* com.greedy.zupzup..*Controller.*(..))")

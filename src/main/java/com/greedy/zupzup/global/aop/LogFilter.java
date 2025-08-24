@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Order(1)
-@Profile({"local", "dev"})
+@Profile({"dev"})
 public class LogFilter implements Filter {
 
     @Override
