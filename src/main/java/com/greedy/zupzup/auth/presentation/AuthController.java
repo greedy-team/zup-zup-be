@@ -25,7 +25,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
     private static final String SEJONG_VERIFICATION_INFO_SESSION_KEY = "sejongAuthInfo";
 
