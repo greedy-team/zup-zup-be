@@ -34,7 +34,7 @@ public class AuthController {
 
 
     @PostMapping("/verify-sejong")
-    public ResponseEntity<VerifiedStudentResponse> verifyStudent(@RequestBody @Valid PortalLoginRequest portalLoginRequest, HttpServletRequest httpRequest) {
+    public ResponseEntity<VerifiedStudentResponse> verifySejong(@RequestBody @Valid PortalLoginRequest portalLoginRequest, HttpServletRequest httpRequest) {
         SejongAuthInfo sejongAuthInfo = authService.verifyStudent(portalLoginRequest.toCommand());
 
         HttpSession session = httpRequest.getSession();
