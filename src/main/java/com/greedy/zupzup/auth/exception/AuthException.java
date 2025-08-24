@@ -17,7 +17,7 @@ public enum AuthException implements ExceptionCode {
     ALREADY_REGISTERED_MEMBER(HttpStatus.CONFLICT, "가입된 사용자", "이미 가입된 사용자 입니다."),
     SEJONG_VERIFICATION_EXPIRED(HttpStatus.UNAUTHORIZED, "세종대학교 인증 필요", "세종대학교 인증이 만료되었거나, 아직 인증하지 않았습니다."),
     STUDENT_ID_MISMATCH(HttpStatus.BAD_REQUEST, "인증 정보 불일치", "가입 요청된 학번과, 인증된 학번이 일치하지 않습니다."),
-    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인 실패", "아이디와 패스워드가 일치하지 않습니다.")
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인 실패", "아이디 또는 패스워드가 일치하지 않습니다.")
     ;
 
     private final HttpStatus httpStatus;

@@ -61,7 +61,8 @@ public class AuthService {
 
 
     public Member login(LoginCommand command) {
-        Member loginMember = memberRepository.getMemberByStudentId(command.studentId());
+        Member loginMember = memberRepository.findByStudentId(command.studentId())
+                .orElseThrow(() -> new ApplicationException(AuthException.LOGIN_FAILED));
 
         if (!BCrypt.checkpw(command.password(), loginMember.getPassword())) {
             throw new ApplicationException(AuthException.LOGIN_FAILED);
