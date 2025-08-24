@@ -4,18 +4,22 @@ import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 
 public class CookieUtil {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
     public static void setToken(String accessToken, int cookieExpirationSeconds, HttpServletResponse response) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(cookieExpirationSeconds);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(cookieExpirationSeconds)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     public static String extractToken(Cookie[] cookies) {
