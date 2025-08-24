@@ -18,18 +18,18 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final String accessSecretKey;
-    public final int accessExpiration;
+    public final int accessExpirationSecond;
 
     public JwtTokenProvider(@Value("${zupzup.auth.jwt.access.secret}") String accessSecretKey,
-                            @Value("${zupzup.auth.jwt.access.expiration}") int accessExpiration) {
+                            @Value("${zupzup.auth.jwt.access.expiration-second}") int accessExpirationSecond) {
         this.accessSecretKey = accessSecretKey;
-        this.accessExpiration = accessExpiration;
+        this.accessExpirationSecond = accessExpirationSecond;
     }
 
 
     public String createAccessToken(Member member) {
         Date now = new Date();
-        Date expirationTime = new Date(now.getTime() + accessExpiration);
+        Date expirationTime = new Date(now.getTime() + (accessExpirationSecond * 1000L));
 
         return Jwts.builder()
                 .setSubject(member.getId().toString())

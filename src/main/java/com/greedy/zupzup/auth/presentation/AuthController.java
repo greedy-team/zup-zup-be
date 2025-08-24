@@ -96,7 +96,7 @@ public class AuthController implements AuthControllerDocs {
 
     private void setAccessToken(HttpServletResponse response, Member member) {
         String accessToken = jwtTokenProvider.createAccessToken(member);
-        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpiration, response);
+        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpirationSecond, response);
     }
 
 }
