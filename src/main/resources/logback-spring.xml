@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <!-- 로컬 환경 -->
-  <springProfile name="local">
+  <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+  <!-- 개발 환경 -->
+  <springProfile name="dev">
     <include resource="logback/console/info-console.xml"/>
     <include resource="logback/console/warn-console.xml"/>
     <include resource="logback/console/error-console.xml"/>
@@ -12,15 +13,15 @@
     </root>
   </springProfile>
 
-  <!-- 개발 환경, 프로덕션 환경 -->
-  <springProfile name="dev, prod">
+  <!-- 프로덕션 환경 -->
+  <springProfile name="prod">
     <include resource="logback/file/info-appender.xml"/>
     <include resource="logback/file/warn-appender.xml"/>
     <include resource="logback/file/error-appender.xml"/>
     <root level="info">
-      <appender-ref ref="INFO"/>
-      <appender-ref ref="WARN"/>
-      <appender-ref ref="ERROR"/>
+      <appender-ref ref="FILE_INFO"/>
+      <appender-ref ref="FILE_WARN"/>
+      <appender-ref ref="FILE_ERROR"/>
     </root>
   </springProfile>
 </configuration>

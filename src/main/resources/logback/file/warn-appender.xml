@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
-  <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>./logs/warn.log</file>
-
+  <appender name="FILE_WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <filter class="ch.qos.logback.classic.filter.LevelFilter">
       <level>WARN</level>
       <onMatch>ACCEPT</onMatch>
       <onMismatch>DENY</onMismatch>
     </filter>
-    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-      <timestampPattern>yyyy-MM-dd HH:mm:ss.SSS</timestampPattern>
+    <file>./logs/warn.log</file>
+    <encoder>
+      <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%X{request_id}] [%logger{30}] - %msg%n</pattern>
     </encoder>
-
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>./logs/archive/warn.%d{yyyy-MM-dd}.txt</fileNamePattern>
+      <fileNamePattern>./logs/archive/warn.%d{yyyy-MM-dd}.log</fileNamePattern>
       <maxHistory>30</maxHistory>
-      <totalSizeCap>2GB</totalSizeCap>
     </rollingPolicy>
   </appender>
 </included>
