@@ -33,7 +33,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    @PostMapping("/verify-student")
+    @PostMapping("/verify-sejong")
     public ResponseEntity<VerifiedStudentResponse> verifyStudent(@RequestBody @Valid PortalLoginRequest portalLoginRequest, HttpServletRequest httpRequest) {
         SejongAuthInfo sejongAuthInfo = authService.verifyStudent(portalLoginRequest.toCommand());
 
@@ -88,10 +88,10 @@ public class AuthController {
      * 포털 인증만으로 로그인 (데모데이 용) - 정식 출시 전에는 삭제하고, 인증+가입 절차만 열어두기
      */
     @PostMapping("/login/portal")
-    public ResponseEntity<Void> portalLogin(@RequestBody @Valid PortalLoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> portalLogin(@RequestBody @Valid PortalLoginRequest request, HttpServletResponse response) {
         Member loginMember = authService.authenticateSejongAndLogin(request.toCommand());
         setAccessToken(response, loginMember);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(LoginResponse.from(loginMember));
     }
 
     private void setAccessToken(HttpServletResponse response, Member member) {
