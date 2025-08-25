@@ -40,6 +40,21 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.25.11'
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+	// 포털 로그인 위한 의존성
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+	implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.9.3'
+	implementation 'org.jsoup:jsoup:1.15.3'
+
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	implementation 'io.jsonwebtoken:jjwt-gson:0.11.2'
+
+	// 비밀번호 암호와
+	implementation 'org.mindrot:jbcrypt:0.4'
+
+
 }
 
 tasks.named('test') {

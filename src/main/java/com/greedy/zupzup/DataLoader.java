@@ -12,7 +12,6 @@ import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.member.domain.Provider;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
@@ -85,31 +84,6 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    private List<SchoolArea> createSchoolAreas() {
-        Polygon playground = geometryFactory.createPolygon(new Coordinate[]{
-                new Coordinate(127.0752831, 37.5510817), new Coordinate(127.0742638, 37.5502523),
-                new Coordinate(127.0749505, 37.5498356), new Coordinate(127.0759912, 37.5507372),
-                new Coordinate(127.0752831, 37.5510817)
-        });
-        SchoolArea playgroundZone = new SchoolArea("세종대학교 운동장", playground);
-
-        Polygon sideRoad = geometryFactory.createPolygon(new Coordinate[]{
-                new Coordinate(127.0738508, 37.5506351), new Coordinate(127.0742638, 37.5502523),
-                new Coordinate(127.075326, 37.5511285), new Coordinate(127.0747198, 37.5516133),
-                new Coordinate(127.0740868, 37.5510902), new Coordinate(127.0739902, 37.5510051),
-                new Coordinate(127.0741565, 37.5508605), new Coordinate(127.0738508, 37.5506351)
-        });
-        SchoolArea sideRoadZone = new SchoolArea("세종대학교 운동장 옆 길", sideRoad);
-
-        Polygon aiCenter = geometryFactory.createPolygon(new Coordinate[]{
-                new Coordinate(127.0754923, 37.551137), new Coordinate(127.0757605, 37.5508988),
-                new Coordinate(127.076018, 37.5510647), new Coordinate(127.0757015, 37.5512986),
-                new Coordinate(127.0754923, 37.551137)
-        });
-        SchoolArea aiCenterZone = new SchoolArea("세종대학교 AI 센터", aiCenter);
-
-        return schoolAreaRepository.saveAll(Arrays.asList(playgroundZone, sideRoadZone, aiCenterZone));
-    }
 
     private void initCategoryData() {
         log.info("카테고리 정보를 초기화합니다.");
@@ -149,12 +123,9 @@ public class DataLoader implements CommandLineRunner {
         log.info("회원 정보를 초기화합니다.");
         if (memberRepository.count() == 0) {
             Member member = Member.builder()
-                    .email("testuser@example.com")
-                    .nickname("테스트유저")
-                    .provider(Provider.GOOGLE)
-                    .providerId("123456789")
+                    .name("테스트유저")
+                    .studentId(123456789)
                     .role(Role.USER)
-                    .emailConsent(true)
                     .build();
             memberRepository.save(member);
             log.info("임시 회원 정보 초기화 완료!");

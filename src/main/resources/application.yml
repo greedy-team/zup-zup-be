@@ -1,6 +1,10 @@
 server:
   port: 8080
 
+  servlet:
+    session:
+      timeout: ${STUDENT_VERIFICATION_SESSION_TIME:1m}
+
 cloud:
   aws:
     credentials:
@@ -19,3 +23,10 @@ springdoc:
   swagger-ui.display-request-duration: true
   swagger-ui:
     path: /docs/swagger
+
+zupzup:
+  auth:
+    jwt:
+      access:
+        secret: ${ACCESS_JWT_SECRET_KEY:accessFSFvPh5v9x3w+T8fA9gB7eC6dF3gH5jJ2kL4mN1oP0rS1c}
+        expiration-second: ${ACCESS_TOKEN_EXPIRATION:6000}  # 초 단위

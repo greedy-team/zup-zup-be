@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -8,6 +9,7 @@ import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.category.repository.FeatureRepository;
 import com.greedy.zupzup.common.fixture.CategoryFixture;
 import com.greedy.zupzup.common.fixture.LostItemImageFixture;
+import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
@@ -32,6 +34,7 @@ import java.util.List;
 
 import static com.greedy.zupzup.common.fixture.FeatureFixture.*;
 import static com.greedy.zupzup.common.fixture.FeatureOptionFixture.*;
+import static com.greedy.zupzup.common.fixture.MemberFixture.*;
 import static com.greedy.zupzup.common.fixture.SchoolAreaFixture.*;
 
 @Sql("/truncate.sql")
@@ -69,12 +72,24 @@ public abstract class ControllerTest {
     @Autowired
     protected QuizAttemptRepository quizAttemptRepository;
 
+    @Autowired
+    protected JwtTokenProvider jwtTokenProvider;
+
     @LocalServerPort
     protected int port;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    protected String givenAccessToken(Member member) {
+        return jwtTokenProvider.createAccessToken(member);
+    }
+
+    protected Member givenMember(String password) {
+        Member member = MEMBER_WITH_ENCODED_PASSWORD(password);
+        return memberRepository.save(member);
     }
 
     protected List<SchoolArea> givenSchoolAreas() {
