@@ -1,7 +1,11 @@
 package com.greedy.zupzup.lostitem.application;
 
+import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
+import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
@@ -17,11 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LostItemListService {
+public class LostItemViewService {
 
     private final LostItemRepository lostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
 
+    /**
+     * 목록 조회
+     */
     @Transactional(readOnly = true)
     public Page<LostItemListCommand> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
@@ -30,7 +37,21 @@ public class LostItemListService {
                 .map(LostItemListCommand::from);
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * 단건 조회
+     */
+    public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
+        LostItem item = lostItemRepository.findById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+
+        String representative = getRepresentativeImageMapByItemIds(List.of(lostItemId)).get(lostItemId);
+
+        return LostItemSimpleViewCommand.of(item, representative);
+    }
+
+    /**
+     * 대표 이미지 맵 조회
+     */
     public Map<Long, String> getRepresentativeImageMapByItemIds(List<Long> lostItemIds) {
         return lostItemImageRepository.findRepresentativeImages(lostItemIds).stream()
                 .collect(Collectors.toMap(
