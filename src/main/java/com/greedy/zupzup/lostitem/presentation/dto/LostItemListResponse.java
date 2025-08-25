@@ -7,12 +7,12 @@ import org.springframework.data.domain.Page;
 
 public record LostItemListResponse(
         int count,
-        List<LostItemResponse> items,
+        List<LostItemViewResponse> items,
         PageInfoResponse pageInfo
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
-        List<LostItemResponse> items = page.getContent().stream()
-                .map(command -> LostItemResponse.of(command, repImageMap.get(command.id())))
+        List<LostItemViewResponse> items = page.getContent().stream()
+                .map(c -> LostItemViewResponse.from(c, repImageMap.get(c.id())))
                 .toList();
 
         return new LostItemListResponse(

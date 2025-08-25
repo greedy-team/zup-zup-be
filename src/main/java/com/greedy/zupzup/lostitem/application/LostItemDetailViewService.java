@@ -38,9 +38,11 @@ public class LostItemDetailViewService {
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
-        if (quizRequired && (!pledgedByMe || !quizPassed)) {
+        boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
+        if (!authorized) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
+
 
         String depositArea = item.getDepositArea();
 
