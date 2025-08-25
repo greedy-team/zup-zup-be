@@ -2,6 +2,7 @@ package com.greedy.zupzup.global.config;
 
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMemberArgumentResolver;
 import com.greedy.zupzup.auth.presentation.interceptor.AuthInterceptor;
+import com.greedy.zupzup.global.presentation.interceptor.LogInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -16,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private final LogInterceptor logInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -29,6 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/school-areas/**",
                         "/api/categories/**"
                 );
+        registry.addInterceptor(logInterceptor)
+                .addPathPatterns("/api/**");
     }
 
     @Override

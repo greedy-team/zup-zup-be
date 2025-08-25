@@ -1,4 +1,4 @@
-package com.greedy.zupzup.global.aop;
+package com.greedy.zupzup.global.presentation;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
