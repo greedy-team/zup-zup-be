@@ -4,6 +4,7 @@ import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.LostItemDetailViewService;
 import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemDepositAreaResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemDetailViewResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemImageResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,18 @@ public class LostItemDetailViewController implements LostItemDetailViewControlle
         LostItemDetailViewCommand command =
                 service.getImagesAfterQuiz(lostItemId, loginMember.memberId());
         return ResponseEntity.ok(LostItemImageResponse.from(command));
+    }
+
+    /**
+     * 서약 후 보관 장소 공개
+     */
+    @Override
+    @GetMapping("/{lostItemId}/deposit-area")
+    public ResponseEntity<LostItemDepositAreaResponse> getDepositArea(
+            @PathVariable Long lostItemId,
+            @MemberAuth LoginMember loginMember
+    ) {
+        String depositArea = service.getDepositArea(lostItemId, loginMember.memberId());
+        return ResponseEntity.ok(LostItemDepositAreaResponse.from(depositArea));
     }
 }
