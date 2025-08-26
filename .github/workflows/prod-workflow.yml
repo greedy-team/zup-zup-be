@@ -1,4 +1,4 @@
-name: zupzup backend prod server
+name: zupzup CI/CD with GitHub Actions
 
 on:
   push:
