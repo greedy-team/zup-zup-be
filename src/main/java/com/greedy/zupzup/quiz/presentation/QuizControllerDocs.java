@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,8 @@ public interface QuizControllerDocs {
               ]
             }
             ```
-            """
+            """,
+            security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "퀴즈 목록 조회 성공"),
@@ -97,7 +99,8 @@ public interface QuizControllerDocs {
             ```json
             { "correct": false }
             ```
-            """
+            """,
+            security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "채점 성공"),
