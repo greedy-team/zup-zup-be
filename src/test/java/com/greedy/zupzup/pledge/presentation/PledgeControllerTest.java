@@ -1,6 +1,5 @@
 package com.greedy.zupzup.pledge.presentation;
 
-import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.greedy.zupzup.category.domain.Category;
@@ -22,12 +21,16 @@ import org.junit.jupiter.api.Test;
 
 class PledgeControllerTest extends ControllerTest {
 
+    private static final String TEST_PASSWORD = "password1234";
+
     private Member member;
+    private String accessToken;
     private LostItem quizLostItem;
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(MEMBER());
+        member = givenMember(TEST_PASSWORD);
+        accessToken = givenAccessToken(member);
         Category category = givenElectronicsCategory();
         quizLostItem = givenLostItem(member, category);
     }
@@ -45,7 +48,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .post("/api/lost-items/{lostItemId}/pledge", quizLostItem.getId())
                     .then().log().all()
@@ -68,7 +71,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .post("/api/lost-items/{lostItemId}/pledge", nonQuizLostItem.getId())
                     .then().log().all()
@@ -91,7 +94,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .post("/api/lost-items/{lostItemId}/pledge", quizLostItem.getId())
                     .then().log().all()
@@ -110,7 +113,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .post("/api/lost-items/{lostItemId}/pledge", quizLostItem.getId())
                     .then().log().all()
@@ -133,7 +136,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .post("/api/lost-items/{lostItemId}/pledge", quizLostItem.getId())
                     .then().log().all()
