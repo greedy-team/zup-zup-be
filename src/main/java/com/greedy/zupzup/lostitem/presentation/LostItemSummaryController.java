@@ -17,10 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/lost-items")
-public class LostItemSummaryController {
+public class LostItemSummaryController implements LostItemSummaryControllerDocs {
 
     private final LostItemSummaryService lostItemSummaryService;
 
+    @Override
     @GetMapping("/summary")
     public ResponseEntity<LostItemSummaryResponse> getSummary(
             @RequestParam(required = false) @Min(1) Long categoryId
