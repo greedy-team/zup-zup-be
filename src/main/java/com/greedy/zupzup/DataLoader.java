@@ -1,5 +1,6 @@
 package com.greedy.zupzup;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -17,7 +18,9 @@ import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import jakarta.transaction.Transactional;
+import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
@@ -26,9 +29,9 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Slf4j
 @Profile("dev")
@@ -43,6 +46,9 @@ public class DataLoader implements CommandLineRunner {
     private final LostItemFeatureRepository lostItemFeatureRepository;
     private final LostItemImageRepository lostItemImageRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private final ObjectMapper objectMapper;
+
+    private record SchoolAreaInitDto(String areaName, List<List<Double>> coordinates) {}
 
     @Override
     @Transactional
@@ -55,29 +61,28 @@ public class DataLoader implements CommandLineRunner {
         log.info("========== 개발용 임시 데이터 초기화 완료 ==========");
     }
 
-    private void initSchoolAreaData() {
+    private void initSchoolAreaData() throws Exception{
         log.info("구역 정보를 초기화합니다.");
         if (schoolAreaRepository.count() == 0) {
-            Polygon playground = geometryFactory.createPolygon(
-                    new Coordinate[]{new Coordinate(127.0752831, 37.5510817), new Coordinate(127.0742638, 37.5502523),
-                            new Coordinate(127.0749505, 37.5498356), new Coordinate(127.0759912, 37.5507372),
-                            new Coordinate(127.0752831, 37.5510817)});
-            SchoolArea playgroundZone = SchoolArea.builder().areaName("세종대학교 운동장").area(playground).build();
+            ClassPathResource resource = new ClassPathResource("data/school-areas.json");
+            InputStream inputStream = resource.getInputStream();
 
-            Polygon sideRoad = geometryFactory.createPolygon(
-                    new Coordinate[]{new Coordinate(127.0738508, 37.5506351), new Coordinate(127.0742638, 37.5502523),
-                            new Coordinate(127.075326, 37.5511285), new Coordinate(127.0747198, 37.5516133),
-                            new Coordinate(127.0740868, 37.5510902), new Coordinate(127.0739902, 37.5510051),
-                            new Coordinate(127.0741565, 37.5508605), new Coordinate(127.0738508, 37.5506351)});
-            SchoolArea sideRoadZone = SchoolArea.builder().areaName("세종대학교 운동장 옆 길").area(sideRoad).build();
+            List<SchoolAreaInitDto> inputs = objectMapper.readValue(inputStream, new TypeReference<>() {});
 
-            Polygon aiCenter = geometryFactory.createPolygon(
-                    new Coordinate[]{new Coordinate(127.0754923, 37.551137), new Coordinate(127.0757605, 37.5508988),
-                            new Coordinate(127.076018, 37.5510647), new Coordinate(127.0757015, 37.5512986),
-                            new Coordinate(127.0754923, 37.551137)});
-            SchoolArea aiCenterZone = SchoolArea.builder().areaName("세종대학교 AI 센터").area(aiCenter).build();
+            List<SchoolArea> schoolAreas = inputs.stream()
+                    .map(input -> {
+                        Coordinate[] coords = input.coordinates().stream()
+                                .map(c -> new Coordinate(c.get(0), c.get(1)))
+                                .toArray(Coordinate[]::new);
+                        Polygon polygon = geometryFactory.createPolygon(coords);
+                        return SchoolArea.builder()
+                                .areaName(input.areaName())
+                                .area(polygon)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
 
-            schoolAreaRepository.saveAll(Arrays.asList(playgroundZone, sideRoadZone, aiCenterZone));
+            schoolAreaRepository.saveAll(schoolAreas);
             log.info("임시 구역 정보 초기화 완료!");
         } else {
             log.info("구역 정보가 이미 존재하여 초기화를 건너뜁니다.");
