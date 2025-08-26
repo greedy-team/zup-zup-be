@@ -40,13 +40,16 @@ public class LostItemViewService {
     /**
      * 단건 조회
      */
+    @Transactional(readOnly = true)
     public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
-        LostItem item = lostItemRepository.findById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+        LostItem item = lostItemRepository.getWithCategoryById(lostItemId);
 
-        String representative = getRepresentativeImageMapByItemIds(List.of(lostItemId)).get(lostItemId);
+        String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : null;
+        String finalImage = (icon != null && !icon.isBlank())
+                ? icon
+                : getRepresentativeImageMapByItemIds(List.of(lostItemId)).get(lostItemId);
 
-        return LostItemSimpleViewCommand.of(item, representative);
+        return LostItemSimpleViewCommand.of(item, finalImage);
     }
 
     /**

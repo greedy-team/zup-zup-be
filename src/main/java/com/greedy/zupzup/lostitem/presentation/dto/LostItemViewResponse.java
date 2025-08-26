@@ -33,11 +33,15 @@ public record LostItemViewResponse(
     }
 
     public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
+        String finalImage = (c.categoryIconUrl() != null && !c.categoryIconUrl().isBlank())
+                ? c.categoryIconUrl()
+                : representativeImageUrl;
+
         return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
-                representativeImageUrl
+                finalImage
         );
     }
 }
