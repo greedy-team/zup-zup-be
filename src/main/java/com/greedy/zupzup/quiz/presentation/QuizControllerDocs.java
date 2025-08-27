@@ -1,5 +1,6 @@
 package com.greedy.zupzup.quiz.presentation;
 
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.quiz.presentation.dto.QuizSubmissionRequest;
 import com.greedy.zupzup.quiz.presentation.dto.QuizSubmissionResponse;
 import com.greedy.zupzup.quiz.presentation.dto.QuizzesResponse;
@@ -7,12 +8,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Quiz", description = "분실물 주인 확인 퀴즈 관련 API")
 public interface QuizControllerDocs {
@@ -21,10 +22,11 @@ public interface QuizControllerDocs {
             summary = "분실물 퀴즈 조회",
             description = """
             특정 분실물의 주인을 판별하기 위한 퀴즈 목록을 조회합니다.
+            **※ 로그인(액세스 토큰)이 반드시 필요한 API 입니다.**
 
             ### 요청 예시
-            GET /quizzes/{lostItemId}?memberId=1
-
+            GET /api/lost-items/101/quizzes
+                    
             ### 응답 예시
             ```json
             {
@@ -52,7 +54,8 @@ public interface QuizControllerDocs {
               ]
             }
             ```
-            """
+            """,
+            security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "퀴즈 목록 조회 성공"),
@@ -62,14 +65,14 @@ public interface QuizControllerDocs {
     ResponseEntity<QuizzesResponse> getLostItemQuizzes(
             @Parameter(description = "퀴즈를 조회할 분실물", required = true, example = "101")
             @PathVariable Long lostItemId,
-            @Parameter(description = "퀴즈를 푸는 사용자", required = true, example = "7")
-            @RequestParam Long memberId
+            @Parameter(hidden = true) LoginMember loginMember
     );
 
     @Operation(
             summary = "퀴즈 정답 제출 및 채점",
             description = """
             사용자가 제출한 퀴즈 답안을 채점하고 정답 여부를 반환합니다.
+            **※ 로그인(액세스 토큰)이 반드시 필요한 API 입니다.**
 
             ### 요청 본문 예시
             ```json
@@ -96,7 +99,8 @@ public interface QuizControllerDocs {
             ```json
             { "correct": false }
             ```
-            """
+            """,
+            security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "채점 성공"),
@@ -106,8 +110,7 @@ public interface QuizControllerDocs {
     ResponseEntity<QuizSubmissionResponse> submitQuizAnswers(
             @Parameter(description = "채점할 분실물", required = true, example = "101")
             @PathVariable Long lostItemId,
-            @Parameter(description = "퀴즈를 푸는 사용자", required = true, example = "7")
-            @RequestParam Long memberId,
+            @Parameter(hidden = true) LoginMember loginMember,
             @Valid @RequestBody QuizSubmissionRequest submissionRequest
     );
 }

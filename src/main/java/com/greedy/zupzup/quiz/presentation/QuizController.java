@@ -1,5 +1,7 @@
 package com.greedy.zupzup.quiz.presentation;
 
+import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.quiz.application.QuizGenerationService;
 import com.greedy.zupzup.quiz.application.QuizSubmissionService;
 import com.greedy.zupzup.quiz.application.dto.QuizDto;
@@ -28,16 +30,16 @@ public class QuizController implements QuizControllerDocs{
 
     @Override
     @GetMapping
-    public ResponseEntity<QuizzesResponse> getLostItemQuizzes(@PathVariable Long lostItemId, Long memberId) {
-        List<QuizDto> quizDtos = quizGenerationService.getLostItemQuizzes(lostItemId, memberId);
+    public ResponseEntity<QuizzesResponse> getLostItemQuizzes(@PathVariable Long lostItemId, @MemberAuth LoginMember loginMember) {
+        List<QuizDto> quizDtos = quizGenerationService.getLostItemQuizzes(lostItemId, loginMember.memberId());
         return ResponseEntity.ok(QuizzesResponse.from(quizDtos));
     }
 
     @Override
     @PostMapping
-    public ResponseEntity<QuizSubmissionResponse> submitQuizAnswers(@PathVariable Long lostItemId, Long memberId,
+    public ResponseEntity<QuizSubmissionResponse> submitQuizAnswers(@PathVariable Long lostItemId, @MemberAuth LoginMember loginMember,
             @Valid @RequestBody QuizSubmissionRequest submissionRequest) {
-        QuizResultDto resultDto = quizSubmissionService.submitQuizAnswers(lostItemId, memberId, submissionRequest.toCommands());
+        QuizResultDto resultDto = quizSubmissionService.submitQuizAnswers(lostItemId, loginMember.memberId(), submissionRequest.toCommands());
         return ResponseEntity.ok(QuizSubmissionResponse.from(resultDto));
     }
 }

@@ -1,5 +1,7 @@
 package com.greedy.zupzup.pledge.presentation;
 
+import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.pledge.application.PledgeService;
 import com.greedy.zupzup.pledge.domain.Pledge;
 import com.greedy.zupzup.pledge.presentation.dto.PledgeResponse;
@@ -23,9 +25,9 @@ public class PledgeController implements PledgeControllerDocs{
     @PostMapping
     public ResponseEntity<PledgeResponse> createPledge(
             @PathVariable Long lostItemId,
-            @RequestParam Long memberId
+            @MemberAuth LoginMember loginMember
     ) {
-        Pledge pledge = pledgeService.createPledge(lostItemId, memberId);
+        Pledge pledge = pledgeService.createPledge(lostItemId, loginMember.memberId());
         return ResponseEntity
                 .created(URI.create("/api/pledges/" + pledge.getId()))
                 .body(PledgeResponse.from(pledge));

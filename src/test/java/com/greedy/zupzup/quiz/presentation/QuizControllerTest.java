@@ -1,6 +1,5 @@
 package com.greedy.zupzup.quiz.presentation;
 
-import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,15 +29,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class QuizControllerTest extends ControllerTest {
 
+    private static final String TEST_PASSWORD = "password1234";
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private Member member;
+    private String accessToken;
     private LostItem lostItem;
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(MEMBER());
+        member = givenMember(TEST_PASSWORD);
+        accessToken = givenAccessToken(member);
         Category category = givenElectronicsCategory();
         lostItem = givenLostItem(member, category);
     }
@@ -53,7 +56,7 @@ class QuizControllerTest extends ControllerTest {
             long ExistentLostItemId = lostItem.getId();
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .param("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .get("/api/lost-items/{lostItemId}/quizzes", ExistentLostItemId)
                     .then().log().all()
@@ -77,7 +80,7 @@ class QuizControllerTest extends ControllerTest {
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
-                    .param("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .when()
                     .get("/api/lost-items/{lostItemId}/quizzes", nonExistentLostItemId)
                     .then().log().all()
@@ -107,7 +110,7 @@ class QuizControllerTest extends ControllerTest {
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .body(objectMapper.writeValueAsString(request))
                     .when()
                     .post("/api/lost-items/{lostItemId}/quizzes", lostItem.getId())
@@ -137,7 +140,7 @@ class QuizControllerTest extends ControllerTest {
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .body(objectMapper.writeValueAsString(request))
                     .when()
                     .post("/api/lost-items/{lostItemId}/quizzes", lostItem.getId())
@@ -169,7 +172,7 @@ class QuizControllerTest extends ControllerTest {
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .queryParam("memberId", member.getId())
+                    .cookie("access_token", accessToken)
                     .body(objectMapper.writeValueAsString(request))
                     .when()
                     .post("/api/lost-items/{lostItemId}/quizzes", lostItem.getId())
