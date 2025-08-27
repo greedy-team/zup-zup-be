@@ -3,7 +3,7 @@
 # 명령 에러 발생 시 종료
 set -e
 
-PROJECT_ROOT="/home/ubuntu/zupzup/deploy"
+PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 
 APP_ERROR_LOG="/home/ubuntu/zupzup/log/jvm_error.log"
