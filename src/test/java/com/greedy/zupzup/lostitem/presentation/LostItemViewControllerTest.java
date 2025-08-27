@@ -1,0 +1,97 @@
+package com.greedy.zupzup.lostitem.presentation;
+
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import com.greedy.zupzup.category.domain.Category;
+import com.greedy.zupzup.common.ControllerTest;
+import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
+import com.greedy.zupzup.member.domain.Member;
+import io.restassured.RestAssured;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class LostItemViewControllerTest extends ControllerTest {
+
+    private Member owner;
+    private Category category;
+    private LostItem anyItem;
+
+    @BeforeEach
+    void setUpData() {
+        owner = givenMember("pw123456!");
+        category = givenElectronicsCategory();
+        anyItem = givenLostItem(owner, category);
+
+        IntStream.range(0, 4).forEach(i -> givenLostItem(owner, category));
+    }
+
+    @Nested
+    @DisplayName("분실물 목록 조회 API")
+    class ListApi {
+
+        @Test
+        void 목록_조회에_성공하면_200_OK와_리스트를_응답한다() {
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .queryParam("page", 1)
+                    .queryParam("limit", 10)
+                    .when()
+                    .get("/api/lost-items")
+                    .then().log().all()
+                    .extract();
+
+            LostItemListResponse response = extract.as(LostItemListResponse.class);
+
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(response.count()).isPositive();
+                softly.assertThat(response.items()).isNotEmpty();
+                softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
+            });
+        }
+    }
+
+    @Nested
+    @DisplayName("분실물 단건(간단) 조회 API")
+    class BasicApi {
+
+        @Test
+        void 단건_조회에_성공하면_200_OK와_데이터를_응답한다() {
+            Long id = anyItem.getId();
+
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/{id}", id)
+                    .then().log().all()
+                    .extract();
+
+            LostItemViewResponse response = extract.as(LostItemViewResponse.class);
+
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(response.id()).isEqualTo(id);
+                softly.assertThat(response.categoryName()).isNotBlank();
+                softly.assertThat(response.representativeImageUrl()).isNotBlank();
+            });
+        }
+
+        @Test
+        void 존재하지_않는_분실물은_404_Not_Found를_응답한다() {
+            long nonExistent = 999_999L;
+
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/{id}", nonExistent)
+                    .then().log().all()
+                    .extract();
+
+            assertSoftly(softly -> softly.assertThat(extract.statusCode()).isEqualTo(404));
+        }
+    }
+}
