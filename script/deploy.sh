@@ -6,7 +6,6 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 
-APP_LOG="var/log/zupzup/application.log"
 APP_ERROR_LOG="var/log/zupzup/jvm_error.log"
 DEPLOY_LOG="var/log/zupzup/deploy.log"
 
@@ -70,9 +69,7 @@ nohup java \
     -DACCESS_TOKEN_SECRET_KEY="$ACCESS_TOKEN_SECRET_KEY" \
     -DACCESS_TOKEN_EXPIRATION="$ACCESS_TOKEN_EXPIRATION" \
     -DSTUDENT_VERIFICATION_SESSION_TIME="$STUDENT_VERIFICATION_SESSION_TIME" \
-    -jar $JAR_FILE > $APP_LOG 2> $APP_ERROR_LOG &
-
-# Logback으로 설정한 레벨별 로그 분리가 머지가 되면  $APP_LOG 는 지우고 /dev/null 로 버릴 수 있도록 (남길수도?)
+    -jar $JAR_FILE > /dev/nul 2> $APP_ERROR_LOG &
 
 
 # 5. 애플리케이션 실행 여부 체크
