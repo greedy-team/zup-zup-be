@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+
+  <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+
+  <!-- 개발 환경 -->
+  <springProfile name="dev">
+    <include resource="logback/console/info-console.xml"/>
+    <include resource="logback/console/warn-console.xml"/>
+    <include resource="logback/console/error-console.xml"/>
+    <root level="info">
+      <appender-ref ref="INFO_CONSOLE"/>
+      <appender-ref ref="WARN_CONSOLE"/>
+      <appender-ref ref="ERROR_CONSOLE"/>
+    </root>
+  </springProfile>
+
+  <!-- 프로덕션 환경 -->
+  <springProfile name="prod">
+    <include resource="logback/file/info-appender.xml"/>
+    <include resource="logback/file/warn-appender.xml"/>
+    <include resource="logback/file/error-appender.xml"/>
+    <root level="info">
+      <appender-ref ref="FILE_INFO"/>
+      <appender-ref ref="FILE_WARN"/>
+      <appender-ref ref="FILE_ERROR"/>
+    </root>
+  </springProfile>
+</configuration>

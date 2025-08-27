@@ -30,3 +30,7 @@ zupzup:
       access:
         secret: ${ACCESS_JWT_SECRET_KEY:accessFSFvPh5v9x3w+T8fA9gB7eC6dF3gH5jJ2kL4mN1oP0rS1c}
         expiration-second: ${ACCESS_TOKEN_EXPIRATION:6000}  # 초 단위
+
+logging:
+  file:
+    path: /var/log/zupzup
