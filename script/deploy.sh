@@ -6,9 +6,9 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 
-APP_LOG_DIR="/var/log/zupzup"
-APP_ERROR_LOG="$APP_LOG_DIR/jvm_error.log"
-DEPLOY_LOG="$APP_LOG_DIR/deploy.log"
+
+APP_ERROR_LOG="log/jvm_error.log"
+DEPLOY_LOG="log/deploy.log"
 
 # 배포 중 에러 발생으로 중단 시 로그 기록 함수
 on_error() {
@@ -70,7 +70,7 @@ nohup java \
     -DACCESS_TOKEN_SECRET_KEY="$ACCESS_TOKEN_SECRET_KEY" \
     -DACCESS_TOKEN_EXPIRATION="$ACCESS_TOKEN_EXPIRATION" \
     -DSTUDENT_VERIFICATION_SESSION_TIME="$STUDENT_VERIFICATION_SESSION_TIME" \
-    -jar $JAR_FILE > /dev/nul 2> $APP_ERROR_LOG &
+    -jar $JAR_FILE > /dev/null 2> $APP_ERROR_LOG &
 
 
 # 5. 애플리케이션 실행 여부 체크
