@@ -6,8 +6,9 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 
-APP_ERROR_LOG="var/log/zupzup/jvm_error.log"
-DEPLOY_LOG="var/log/zupzup/deploy.log"
+APP_LOG_DIR="/var/log/zupzup"
+APP_ERROR_LOG="$APP_LOG_DIR/jvm_error.log"
+DEPLOY_LOG="$APP_LOG_DIR/deploy.log"
 
 # 배포 중 에러 발생으로 중단 시 로그 기록 함수
 on_error() {
