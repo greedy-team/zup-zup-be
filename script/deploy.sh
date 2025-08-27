@@ -3,12 +3,12 @@
 # 명령 에러 발생 시 종료
 set -e
 
-PROJECT_ROOT="/home/ubuntu/zupzup"
+PROJECT_ROOT="/home/ubuntu/zupzup/deploy"
 APP_NAME="sejong-zupzup"
 
+APP_ERROR_LOG="/home/ubuntu/zupzup/log/jvm_error.log"
+DEPLOY_LOG="/home/ubuntu/zupzup/log/deploy.log"
 
-APP_ERROR_LOG="log/jvm_error.log"
-DEPLOY_LOG="log/deploy.log"
 
 # 배포 중 에러 발생으로 중단 시 로그 기록 함수
 on_error() {
