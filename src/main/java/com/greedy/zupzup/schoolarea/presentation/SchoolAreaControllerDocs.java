@@ -99,7 +99,7 @@ public interface SchoolAreaControllerDocs {
                                             {
                                                  "title": "유효하지 않은 구역",
                                                  "status": 404,
-                                                 "detail": "해당 좌표는 세종대학교를 벗어났습니다.",
+                                                 "detail": "요청하신 좌표는 세종대학교를 벗어났습니다.",
                                                  "instance": "/api/school-areas/contains"
                                             }
                                             """
