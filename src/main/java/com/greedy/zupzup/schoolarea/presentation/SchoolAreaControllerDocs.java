@@ -77,9 +77,10 @@ public interface SchoolAreaControllerDocs {
             @ApiResponse(responseCode = "400", description = "요청 파라미터가 유효하지 않은 경우 (누락 or 위도 경도 범위에서 벗어난 경우 등)",
                     content = @Content(
                             schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(
-                                    name = "요청 파라미터로 주어진 위도 경도 값이 잘못된 범위일 경우 예시",
-                                    value = """
+                            examples = {
+                                    @ExampleObject(
+                                            name = "요청 파라미터로 주어진 위도/경도 값이 잘못된 범위일 경우",
+                                            value = """
                                             {
                                                 "title": "유효하지 않은 입력값",
                                                 "status": 400,
@@ -87,7 +88,20 @@ public interface SchoolAreaControllerDocs {
                                                 "instance": "/api/school-areas/contains"
                                             }
                                             """
-                            )
+                                    ),
+
+                                    @ExampleObject(
+                                            name = "요청 파라미터로 위도/경도 값(필수 입력 필드)을 입력하지 않은 경우",
+                                            value = """
+                                            {
+                                                "title": "유효하지 않은 입력값",
+                                                "status": 400,
+                                                "detail": "lng: 경도를 입력해주세요.",
+                                                "instance": "/api/school-areas/contains"
+                                            }
+                                            """
+                                    )
+                            }
                     )
             ),
             @ApiResponse(responseCode = "404", description = "주어진 좌표에 해당하는 구역이 존재하지 않는 경우",
