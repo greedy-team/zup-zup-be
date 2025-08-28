@@ -401,7 +401,7 @@ class AuthControllerTest extends ControllerTest {
     class Logout {
 
         @Test
-        void 로그아웃을_하면_쿠키에_저장된_억세스토큰을_삭제하고_200_OK를_응답해야_한다() {
+        void 로그아웃을_하면_쿠키에_저장된_억세스토큰을_삭제하고_204_NO_CONTENT를_응답해야_한다() {
             // given
             Member member = givenMember("password");
             String accessToken = givenAccessToken(member);
@@ -417,7 +417,7 @@ class AuthControllerTest extends ControllerTest {
 
             // then
             assertSoftly(softly -> {
-                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(extract.statusCode()).isEqualTo(204);
                 softly.assertThat(extract.cookie(ACCESS_TOKEN_COOKIE_NAME)).isEmpty();
             });
         }
