@@ -21,7 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
     private final LogInterceptor logInterceptor;
 
     private static final String[] ALLOWED_ORIGINS = {
-            "https://api.sejong-zupzup.kr" // 메인 API 서버
+            "https://api.sejong-zupzup.kr", // 메인 API 서버
+            "http://localhost:5173"
     };
 
     @Override
