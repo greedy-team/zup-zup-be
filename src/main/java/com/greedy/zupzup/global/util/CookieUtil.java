@@ -13,10 +13,10 @@ public class CookieUtil {
     public static void setToken(String accessToken, int cookieExpirationSeconds, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, accessToken)
                 .httpOnly(true)
-                .secure(true)
+                //.secure(true)
                 .path("/")
                 .maxAge(cookieExpirationSeconds)
-                .sameSite("Lax")
+                //.sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());

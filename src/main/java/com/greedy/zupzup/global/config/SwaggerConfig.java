@@ -38,10 +38,6 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.COOKIE)
                 .description("서비스 로그인 성공 후 발급되는 Access Token 쿠키");
 
-        SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList(sejongSessionAuth)
-                .addList(zupzupAccessTokenAuth);
-
         List<Server> servers = List.of(
                 new Server().url("http://localhost:8080").description("로컬 서버"),
                 new Server().url("https://api.sejong-zupzup.kr").description("메인 서버")
@@ -51,7 +47,6 @@ public class SwaggerConfig {
                 .servers(servers)
                 .components(new Components()
                         .addSecuritySchemes(sejongSessionAuth, sejongSessionScheme)
-                        .addSecuritySchemes(zupzupAccessTokenAuth, accessTokenScheme))
-                .addSecurityItem(securityRequirement);
+                        .addSecuritySchemes(zupzupAccessTokenAuth, accessTokenScheme));
     }
 }
