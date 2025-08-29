@@ -186,6 +186,19 @@ public abstract class ControllerTest {
 
         return lostItem;
     }
+
+    protected LostItem givenLostItemInArea(Member member, Category category, SchoolArea area) {
+        LostItem lostItem = new LostItem(
+                area.getAreaName() + " 1층",
+                "테스트 분실물",
+                "보관소",
+                category,
+                area
+        );
+        lostItemRepository.save(lostItem);
+        return lostItem;
+    }
+
 }
 
 

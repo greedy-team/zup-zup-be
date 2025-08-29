@@ -1,5 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation;
 
+import com.greedy.zupzup.lostitem.application.LostItemDetailViewService;
 import com.greedy.zupzup.lostitem.application.LostItemViewService;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/lost-items")
-public class LostItemViewController {
+public class LostItemViewController implements LostItemViewControllerDocs{
 
     private final LostItemViewService lostItemViewService;
 

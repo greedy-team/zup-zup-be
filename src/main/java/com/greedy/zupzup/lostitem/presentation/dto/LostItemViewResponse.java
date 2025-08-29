@@ -5,6 +5,7 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public record LostItemViewResponse(
         Long id,
@@ -33,11 +34,15 @@ public record LostItemViewResponse(
     }
 
     public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
+        String finalImage = (!Objects.equals(c.categoryIconUrl(), "") && !c.categoryIconUrl().isBlank())
+                ? c.categoryIconUrl()
+                : representativeImageUrl;
+
         return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
-                representativeImageUrl
+                finalImage
         );
     }
 }

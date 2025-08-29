@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/categories")
-public class CategoryController {
+public class CategoryController implements CategoryControllerDocs {
 
     private final CategoryService categoryService;
 
+    @Override
     @GetMapping
     public ResponseEntity<CategoriesResponse> categories() {
         return ResponseEntity.ok(categoryService.getAll());
     }
 
+    @Override
     @GetMapping("/{categoryId}/features")
     public ResponseEntity<CategoryFeaturesResponse> getCategoryFeatures(
             @PathVariable Long categoryId

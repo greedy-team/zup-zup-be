@@ -25,6 +25,7 @@ public class LostItemDetailViewService {
     private final PledgeRepository pledgeRepository;
     private final QuizAttemptRepository quizAttemptRepository;
 
+    /**상세 정보 조회*/
     @Transactional(readOnly = true)
     public LostItemDetailViewCommand getDetail(Long lostItemId, Long memberId) {
 
@@ -49,5 +50,42 @@ public class LostItemDetailViewService {
         List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
 
         return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizPassed, pledgedByMe);
+    }
+
+    /**서약 전 사진과 상세 정보 공개*/
+    @Transactional(readOnly = true)
+    public LostItemDetailViewCommand getImagesAfterQuiz(Long lostItemId, Long memberId) {
+        Member member = memberRepository.getById(memberId);
+        LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
+
+        boolean quizRequired = !item.isNotQuizCategory();
+        boolean quizPassed = quizAttemptRepository
+                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+
+        boolean authorized = quizRequired ? quizPassed : true;
+        if (!authorized) throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+
+        List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
+
+        return LostItemDetailViewCommand.of(
+                item, imageUrls, item.getDepositArea(), quizRequired, quizPassed, false
+        );
+    }
+    /**서약 후 보관 장소 공개*/
+    @Transactional(readOnly = true)
+    public String getDepositArea(Long lostItemId, Long memberId) {
+        Member member = memberRepository.getById(memberId);
+        LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
+
+        boolean quizRequired = !item.isNotQuizCategory();
+        boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
+        boolean quizPassed = quizAttemptRepository
+                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+
+        boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
+        if (!authorized) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
+        return item.getDepositArea();
     }
 }
