@@ -90,6 +90,50 @@ class LostItemViewControllerTest extends ControllerTest {
                 softly.assertThat(target.representativeImageUrl()).isEqualTo(expected);
             });
         }
+
+        @Test
+        void 목록_조회_카테고리_필터링이_적용된다() {
+            Category wallet = givenWalletCategory();
+            LostItem w1 = givenNonQuizLostItem(owner, wallet);
+            LostItem w2 = givenNonQuizLostItem(owner, wallet);
+            LostItem w3 = givenNonQuizLostItem(owner, wallet);
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .queryParam("page", 1)
+                    .queryParam("limit", 50)
+                    .queryParam("categoryId", wallet.getId())
+                    .when()
+                    .get("/api/lost-items")
+                    .then().log().all()
+                    .extract();
+
+            LostItemListResponse response = extract.as(LostItemListResponse.class);
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(response.items()).isNotEmpty();
+                boolean allMatch = response.items().stream()
+                        .allMatch(i -> i.categoryId().equals(wallet.getId()));
+                softly.assertThat(allMatch).isTrue();
+                softly.assertThat(response.count()).isEqualTo(3);
+                softly.assertThat(response.items().size()).isEqualTo(3);
+            });
+        }
+
+        @Test
+        void 목록_조회_limit가_50초과면_400을_응답한다() {
+            RestAssured.given()
+                    .queryParam("page", 1)
+                    .queryParam("limit", 51)
+                    .when()
+                    .get("/api/lost-items")
+                    .then()
+                    .statusCode(400);
+        }
+
+
     }
 
     @Nested
