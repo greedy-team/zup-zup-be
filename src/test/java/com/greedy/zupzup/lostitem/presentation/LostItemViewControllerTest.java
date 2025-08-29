@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class LostItemViewControllerTest extends ControllerTest {
 
@@ -55,6 +56,40 @@ class LostItemViewControllerTest extends ControllerTest {
                 softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
             });
         }
+
+        @Test
+        void 카테고리_아이콘_NULL이면_목록_대표이미지는_0번_사진_URL_200_OK를_응답한다() {
+            // given
+            Category etc = givenEtcCategory();
+            ReflectionTestUtils.setField(etc, "iconUrl", "");
+            categoryRepository.saveAndFlush(etc);
+
+            LostItem item = givenNonQuizLostItem(owner, etc);
+            Long id = item.getId();
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .queryParam("page", 1)
+                    .queryParam("limit", 10)
+                    .when()
+                    .get("/api/lost-items")
+                    .then().log().all()
+                    .extract();
+
+            LostItemListResponse response = extract.as(LostItemListResponse.class);
+
+            // then
+            String expected = "https://example.com/default-image.jpg";
+            var target = response.items().stream()
+                    .filter(v -> v.id().equals(id))
+                    .findFirst()
+                    .orElseThrow();
+
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(target.representativeImageUrl()).isEqualTo(expected);
+            });
+        }
     }
 
     @Nested
@@ -92,6 +127,34 @@ class LostItemViewControllerTest extends ControllerTest {
                     .extract();
 
             assertSoftly(softly -> softly.assertThat(extract.statusCode()).isEqualTo(404));
+        }
+
+        @Test
+        void 카테고리_아이콘_NULL이면_단건_대표이미지는_0번_사진_URL_200_OK을_응답한다() {
+            // given
+            Category etc = givenEtcCategory();
+            ReflectionTestUtils.setField(etc, "iconUrl", "");
+            categoryRepository.saveAndFlush(etc);
+
+            LostItem item = givenNonQuizLostItem(owner, etc);
+            Long id = item.getId();
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/{id}", id)
+                    .then().log().all()
+                    .extract();
+
+            LostItemViewResponse response = extract.as(LostItemViewResponse.class);
+
+            // then
+            String expected = "https://example.com/default-image.jpg";
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(response.id()).isEqualTo(id);
+                softly.assertThat(response.representativeImageUrl()).isEqualTo(expected);
+            });
         }
     }
 }
