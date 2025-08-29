@@ -1,11 +1,15 @@
 package com.greedy.zupzup.quiz.presentation;
 
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
+import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.quiz.presentation.dto.QuizSubmissionRequest;
 import com.greedy.zupzup.quiz.presentation.dto.QuizSubmissionResponse;
 import com.greedy.zupzup.quiz.presentation.dto.QuizzesResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -58,9 +62,79 @@ public interface QuizControllerDocs {
             security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "퀴즈 목록 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "요청한 분실물을 찾을 수 없음"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+            @ApiResponse(responseCode = "200", description = "퀴즈 목록 조회 성공",
+                    content = @Content(schema = @Schema(implementation = QuizzesResponse.class),
+                            examples = @ExampleObject(name = "퀴즈 조회 성공 예시", value = """
+                                {
+                                  "quizzes": [
+                                    {
+                                      "featureId": 1,
+                                      "question": "어떤 브랜드의 제품인가요?",
+                                      "options": [
+                                        { "id": 1, "text": "삼성" },
+                                        { "id": 3, "text": "LG" },
+                                        { "id": 2, "text": "애플" },
+                                        { "id": 4, "text": "기타" }
+                                      ]
+                                    }
+                                  ]
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "요청에 포함된 액세스 토큰이 없거나 유효하지 않아 인증에 실패한 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "인증 실패 예시 (로그인 필요)", value = """
+                                {
+                                  "title": "인증되지 않은 요청",
+                                  "status": 401,
+                                  "detail": "로그인이 필요합니다.",
+                                  "instance": "/api/lost-items/101/quizzes"
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "이미 해당 퀴즈에 응시하여 '오답' 처리된 사용자가 재조회를 시도하는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "퀴즈 재시도 불가 예시", value = """
+                                {
+                                    "title": "퀴즈 시도 횟수 초과",
+                                    "status": 403,
+                                    "detail": "퀴즈 시도 횟수를 초과하여 더 이상 시도할 수 없습니다.",
+                                    "instance": "/api/lost-items/101/quizzes"
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "요청한 ID에 해당하는 분실물이 존재하지 않는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "분실물 없음 예시", value = """
+                                {
+                                  "title": "분실물 없음",
+                                  "status": 404,
+                                  "detail": "해당 ID의 분실물을 찾을 수 없습니다.",
+                                  "instance": "/api/lost-items/101/quizzes"
+                                }
+                                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "409", description = "이미 주인이 확인되었거나 처리할 수 없는 상태의 분실물 퀴즈를 조회하려는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "서약 불가 상태 예시", value = """
+                                {
+                                  "title": "서약 불가 상태",
+                                  "status": 409,
+                                  "detail": "이미 서약되었거나 처리할 수 없는 상태의 분실물입니다.",
+                                  "instance": "/api/lost-items/101/quizzes"
+                                }
+                                """
+                            )
+                    )
+            )
     })
     ResponseEntity<QuizzesResponse> getLostItemQuizzes(
             @Parameter(description = "퀴즈를 조회할 분실물", required = true, example = "101")
@@ -83,29 +157,80 @@ public interface QuizControllerDocs {
               ]
             }
             ```
-
-            ### 응답 예시
-            - 정답:
-            ```json
-            {
-              "correct": true,
-              "detail": {
-                "imageUrl": "https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/dev/iphone.webp",
-                "description": "검정색 아이폰 15 프로입니다. 케이스는 투명색입니다."
-              }
-            }
-            ```
-            - 오답:
-            ```json
-            { "correct": false }
-            ```
             """,
             security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "채점 성공"),
-            @ApiResponse(responseCode = "400", description = "요청 형식 오류 (예: answers 배열 비어있음)"),
-            @ApiResponse(responseCode = "404", description = "요청한 분실물을 찾을 수 없음")
+            @ApiResponse(responseCode = "200", description = "채점 성공",
+                    content = @Content(schema = @Schema(implementation = QuizSubmissionResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "정답 예시", value = """
+                                            {
+                                              "correct": true,
+                                              "detail": {
+                                                "imageUrl": "https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/dev/iphone.webp",
+                                                "description": "검정색 아이폰 15 프로입니다. 케이스는 투명색입니다."
+                                              }
+                                            }
+                                            """),
+                                    @ExampleObject(name = "오답 예시", value = """
+                                            { "correct": false }
+                                            """)
+                            }
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "요청에 포함된 액세스 토큰이 없거나 유효하지 않아 인증에 실패한 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "인증 실패 예시 (로그인 필요)", value = """
+                                    {
+                                      "title": "인증되지 않은 요청",
+                                      "status": 401,
+                                      "detail": "로그인이 필요합니다.",
+                                      "instance": "/api/lost-items/101/quizzes"
+                                    }
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "이미 해당 퀴즈에 응시하여 '오답' 처리된 사용자가 재조회를 시도하는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "퀴즈 재시도 불가 예시", value = """
+                                    {
+                                        "title": "퀴즈 시도 횟수 초과",
+                                        "status": 403,
+                                        "detail": "퀴즈 시도 횟수를 초과하여 더 이상 시도할 수 없습니다.",
+                                        "instance": "/api/lost-items/101/quizzes"
+                                    }
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "요청한 ID에 해당하는 분실물이 존재하지 않는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "분실물 없음 예시", value = """
+                                    {
+                                      "title": "분실물 없음",
+                                      "status": 404,
+                                      "detail": "해당 ID의 분실물을 찾을 수 없습니다.",
+                                      "instance": "/api/lost-items/101/quizzes"
+                                    }
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "409", description = "이미 주인이 확인되었거나 처리할 수 없는 상태의 분실물 퀴즈를 조회하려는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "서약 불가 상태 예시", value = """
+                                    {
+                                      "title": "서약 불가 상태",
+                                      "status": 409,
+                                      "detail": "이미 서약되었거나 처리할 수 없는 상태의 분실물입니다.",
+                                      "instance": "/api/lost-items/101/quizzes"
+                                    }
+                                    """
+                            )
+                    )
+            )
     })
     ResponseEntity<QuizSubmissionResponse> submitQuizAnswers(
             @Parameter(description = "채점할 분실물", required = true, example = "101")

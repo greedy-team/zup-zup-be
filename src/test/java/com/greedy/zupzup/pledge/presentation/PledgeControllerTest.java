@@ -123,7 +123,7 @@ class PledgeControllerTest extends ControllerTest {
             ErrorResponse response = extract.as(ErrorResponse.class);
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(400);
-                softly.assertThat(response.title()).isEqualTo(QuizException.QUIZ_NOT_ATTEMPTED.getTitle());
+                softly.assertThat(response.title()).isEqualTo(QuizException.QUIZ_NOT_PASSED.getTitle());
             });
         }
 
