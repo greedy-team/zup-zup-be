@@ -16,6 +16,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     default QuizAttempt getByLostItemIdAndMemberId(Long lostItemId, Long memberId) {
         return findByLostItemIdAndMemberId(lostItemId, memberId)
-                .orElseThrow(() -> new ApplicationException(QuizException.QUIZ_NOT_ATTEMPTED));
+                .orElseThrow(() -> new ApplicationException(QuizException.QUIZ_NOT_PASSED));
     }
 }

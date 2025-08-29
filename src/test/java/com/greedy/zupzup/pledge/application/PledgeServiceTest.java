@@ -132,11 +132,11 @@ class PledgeServiceTest extends ServiceUnitTest {
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
         given(quizAttemptRepository.getByLostItemIdAndMemberId(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
-                .willThrow(new ApplicationException(QuizException.QUIZ_NOT_ATTEMPTED));
+                .willThrow(new ApplicationException(QuizException.QUIZ_NOT_PASSED));
 
         // when & then
         assertThatThrownBy(() -> pledgeService.createPledge(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
                 .isInstanceOf(ApplicationException.class)
-                .hasMessage(QuizException.QUIZ_NOT_ATTEMPTED.getDetail());
+                .hasMessage(QuizException.QUIZ_NOT_PASSED.getDetail());
     }
 }
