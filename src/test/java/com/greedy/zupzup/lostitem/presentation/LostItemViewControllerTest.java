@@ -4,7 +4,10 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.common.ControllerTest;
+import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
 import com.greedy.zupzup.member.domain.Member;
@@ -198,6 +201,58 @@ class LostItemViewControllerTest extends ControllerTest {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.id()).isEqualTo(id);
                 softly.assertThat(response.representativeImageUrl()).isEqualTo(expected);
+            });
+        }
+
+        @Test
+        void 단건_조회_PLEDGED면_403_FORBIDDEN를_응답한다() {
+            // given
+            LostItem item = givenLostItem(owner, category);
+            Long id = item.getId();
+            ReflectionTestUtils.setField(item, "status", LostItemStatus.PLEDGED);
+            lostItemRepository.saveAndFlush(item);
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/{id}", id)
+                    .then().log().all()
+                    .extract();
+
+            // then
+            ErrorResponse error = extract.as(ErrorResponse.class);
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(403);
+                softly.assertThat(error.status()).isEqualTo(403);
+                softly.assertThat(error.title()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getTitle());
+                softly.assertThat(error.detail()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getDetail());
+                softly.assertThat(error.instance()).isEqualTo("/api/lost-items/" + id);
+            });
+        }
+
+        @Test
+        void 단건_조회_FOUND면_403_FORBIDDEN를_응답한다() {
+            // given
+            LostItem item = givenLostItem(owner, category);
+            Long id = item.getId();
+            ReflectionTestUtils.setField(item, "status", LostItemStatus.FOUND);
+            lostItemRepository.saveAndFlush(item);
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/{id}", id)
+                    .then().log().all()
+                    .extract();
+
+            // then
+            ErrorResponse error = extract.as(ErrorResponse.class);
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(403);
+                softly.assertThat(error.status()).isEqualTo(403);
+                softly.assertThat(error.title()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getTitle());
+                softly.assertThat(error.detail()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getDetail());
+                softly.assertThat(error.instance()).isEqualTo("/api/lost-items/" + id);
             });
         }
     }

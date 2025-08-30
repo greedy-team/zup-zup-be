@@ -3,6 +3,7 @@ package com.greedy.zupzup.lostitem.application;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -38,6 +39,8 @@ public class LostItemDetailViewService {
 
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+
+        statusGuard(item, pledgedByMe);
 
         boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
         if (!authorized) {
@@ -82,10 +85,22 @@ public class LostItemDetailViewService {
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
+        statusGuard(item, pledgedByMe);
+
         boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
         if (!authorized) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
         return item.getDepositArea();
+    }
+
+    private void statusGuard(LostItem item, boolean pledgedByMe) {
+        LostItemStatus status = item.getStatus();
+        if (status == LostItemStatus.FOUND) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
+        if (status == LostItemStatus.PLEDGED && !pledgedByMe) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
     }
 }

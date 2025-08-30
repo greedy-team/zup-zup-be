@@ -45,6 +45,8 @@ public class LostItemViewService {
     public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
         LostItem item = lostItemRepository.getWithCategoryById(lostItemId);
 
+        statusGuardForSimpleView(item);
+
         String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : "";
         String finalImage = (!Objects.equals(icon, "") && !icon.isBlank())
                 ? icon
@@ -62,5 +64,11 @@ public class LostItemViewService {
                         RepresentativeImageProjection::getLostItemId,
                         RepresentativeImageProjection::getImageUrl
                 ));
+    }
+
+    private void statusGuardForSimpleView(LostItem item) {
+        if (item.getStatus() != LostItemStatus.REGISTERED) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
     }
 }
