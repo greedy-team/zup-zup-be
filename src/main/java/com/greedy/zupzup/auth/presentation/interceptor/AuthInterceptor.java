@@ -17,6 +17,12 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
+        // CORS Preflight 요청 처리 - 임시
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+            return true;
+        }
+
         String accessToken = CookieUtil.extractToken(request.getCookies());
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
         LoginMember loginMember = new LoginMember(loginMemberId);
