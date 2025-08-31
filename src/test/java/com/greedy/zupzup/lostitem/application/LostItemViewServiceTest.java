@@ -107,6 +107,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
 
         LostItem item = Mockito.mock(LostItem.class);
         Mockito.when(item.getId()).thenReturn(itemId);
+        Mockito.when(item.getStatus()).thenReturn(LostItemStatus.REGISTERED);
         Mockito.when(item.getCategory()).thenReturn(category);
         Mockito.when(item.getFoundArea()).thenReturn(area);
         Mockito.when(item.getFoundAreaDetail()).thenReturn("AI센터 B205");
@@ -144,6 +145,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
 
         LostItem item = Mockito.mock(LostItem.class);
         Mockito.when(item.getId()).thenReturn(itemId);
+        Mockito.when(item.getStatus()).thenReturn(LostItemStatus.REGISTERED);
         Mockito.when(item.getCategory()).thenReturn(category);
         Mockito.when(item.getFoundArea()).thenReturn(area);
         Mockito.when(item.getFoundAreaDetail()).thenReturn("운동장 매점 앞");

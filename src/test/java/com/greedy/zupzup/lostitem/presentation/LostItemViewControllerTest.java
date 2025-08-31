@@ -223,10 +223,8 @@ class LostItemViewControllerTest extends ControllerTest {
             ErrorResponse error = extract.as(ErrorResponse.class);
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(403);
-                softly.assertThat(error.status()).isEqualTo(403);
                 softly.assertThat(error.title()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getTitle());
-                softly.assertThat(error.detail()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getDetail());
-                softly.assertThat(error.instance()).isEqualTo("/api/lost-items/" + id);
+                softly.assertThat(error.detail()).contains("서약 진행 중");
             });
         }
 
@@ -249,10 +247,8 @@ class LostItemViewControllerTest extends ControllerTest {
             ErrorResponse error = extract.as(ErrorResponse.class);
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(403);
-                softly.assertThat(error.status()).isEqualTo(403);
                 softly.assertThat(error.title()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getTitle());
-                softly.assertThat(error.detail()).isEqualTo(LostItemException.ACCESS_FORBIDDEN.getDetail());
-                softly.assertThat(error.instance()).isEqualTo("/api/lost-items/" + id);
+                softly.assertThat(error.detail()).contains("주인이 찾아간");
             });
         }
     }

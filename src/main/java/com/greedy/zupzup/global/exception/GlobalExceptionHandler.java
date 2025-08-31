@@ -27,12 +27,19 @@ public class GlobalExceptionHandler {
      * 어플리케이션 로직에서 발생시킨 예외를 처리합니다.
      */
     @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex,
+                                                                    HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
+        String instance = request.getRequestURI();
+
+        String detail = (ex.getDetailOverride() != null) ? ex.getDetailOverride() : code.getDetail();
+
         log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
-                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
-        return createErrorResponse(ex.getCode(), request.getRequestURI());
+                code.getHttpStatus().value(), code.getTitle(), detail, instance);
+
+        return createErrorResponse(code, detail, instance);
     }
+
 
     /**
      * S3, 외부 API 등 외부 인프라와 연동에 실패 시 발생하는 예외를 처리합니다.

@@ -67,8 +67,16 @@ public class LostItemViewService {
     }
 
     private void statusGuardForSimpleView(LostItem item) {
-        if (item.getStatus() != LostItemStatus.REGISTERED) {
-            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
-        }
+        LostItemStatus status = item.getStatus();
+        if (status == LostItemStatus.REGISTERED) return;
+
+        String detail = switch (status) {
+            case PLEDGED -> "이미 서약 진행 중인 분실물로, 조회가 제한됩니다.";
+            case FOUND   -> "이미 주인이 찾아간 분실물로, 조회가 제한됩니다.";
+            default      -> "해당 분실물은 조회가 제한됩니다.";
+        };
+
+        throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN, detail);
     }
+
 }
