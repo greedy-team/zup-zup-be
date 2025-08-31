@@ -26,7 +26,9 @@ public class LostItemDetailViewService {
     private final PledgeRepository pledgeRepository;
     private final QuizAttemptRepository quizAttemptRepository;
 
-    /**상세 정보 조회*/
+    /**
+     * 상세 정보 조회
+     */
     @Transactional(readOnly = true)
     public LostItemDetailViewCommand getDetail(Long lostItemId, Long memberId) {
 
@@ -40,13 +42,14 @@ public class LostItemDetailViewService {
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
-        statusGuard(item, pledgedByMe);
+        if (!item.canAccess(pledgedByMe)) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
 
         boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
         if (!authorized) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
-
 
         String depositArea = item.getDepositArea();
 
@@ -55,7 +58,9 @@ public class LostItemDetailViewService {
         return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizPassed, pledgedByMe);
     }
 
-    /**서약 전 사진과 상세 정보 공개*/
+    /**
+     * 서약 전 사진과 상세 정보 공개
+     */
     @Transactional(readOnly = true)
     public LostItemDetailViewCommand getImagesAfterQuiz(Long lostItemId, Long memberId) {
         Member member = memberRepository.getById(memberId);
@@ -65,16 +70,25 @@ public class LostItemDetailViewService {
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
+        boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
+        if (!item.canAccess(pledgedByMe)) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
+
         boolean authorized = quizRequired ? quizPassed : true;
-        if (!authorized) throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        if (!authorized) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
 
         List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
-
         return LostItemDetailViewCommand.of(
                 item, imageUrls, item.getDepositArea(), quizRequired, quizPassed, false
         );
     }
-    /**서약 후 보관 장소 공개*/
+
+    /**
+     * 서약 후 보관 장소 공개
+     */
     @Transactional(readOnly = true)
     public String getDepositArea(Long lostItemId, Long memberId) {
         Member member = memberRepository.getById(memberId);
@@ -85,22 +99,14 @@ public class LostItemDetailViewService {
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
-        statusGuard(item, pledgedByMe);
+        if (!item.canAccess(pledgedByMe)) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
+        }
 
         boolean authorized = quizRequired ? (pledgedByMe && quizPassed) : pledgedByMe;
         if (!authorized) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
         return item.getDepositArea();
-    }
-
-    private void statusGuard(LostItem item, boolean pledgedByMe) {
-        LostItemStatus status = item.getStatus();
-        if (status == LostItemStatus.FOUND) {
-            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
-        }
-        if (status == LostItemStatus.PLEDGED && !pledgedByMe) {
-            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
-        }
     }
 }
