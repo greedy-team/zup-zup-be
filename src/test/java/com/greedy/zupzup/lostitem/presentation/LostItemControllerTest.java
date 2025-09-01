@@ -37,13 +37,13 @@ class LostItemControllerTest extends ControllerTest {
     private ObjectMapper objectMapper;
 
     private Category category;
-    private Category ectCategory;
+    private Category etcCategory;
     private SchoolArea schoolArea;
 
     @BeforeEach
     void setUp() {
         category = givenElectronicsCategory();
-        ectCategory = givenEtcCategory();
+        etcCategory = givenEtcCategory();
         schoolArea = schoolAreaRepository.save(SchoolAreaFixture.AI_CENTER());
     }
 
@@ -90,9 +90,9 @@ class LostItemControllerTest extends ControllerTest {
     void 기타_분실물_등록에_성공하면_등록된_분실물의_id와_201_CREATED를_응답해야_한다() throws Exception {
 
         // given
-        Long categoryId = ectCategory.getId();
+        Long categoryId = etcCategory.getId();
         Long schoolAreaId = schoolArea.getId();
-        LostItemRegisterRequest request = createECtRequest(schoolAreaId, categoryId);
+        LostItemRegisterRequest request = createETCRequest(schoolAreaId, categoryId);
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -168,7 +168,7 @@ class LostItemControllerTest extends ControllerTest {
         // given
         Long categoryId = category.getId();
         Long schoolAreaId = schoolArea.getId();
-        LostItemRegisterRequest request = createECtRequest(schoolAreaId, categoryId);
+        LostItemRegisterRequest request = createETCRequest(schoolAreaId, categoryId);
 
         given(imageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
         byte[] imageData = "더미 이미지 데이터".getBytes();
@@ -434,7 +434,7 @@ class LostItemControllerTest extends ControllerTest {
         );
     }
 
-    private LostItemRegisterRequest createECtRequest(Long schoolAreaId, Long categoryId) {
+    private LostItemRegisterRequest createETCRequest(Long schoolAreaId, Long categoryId) {
         return new LostItemRegisterRequest(
                 "핸드폰 액정이 깨져 있어요.",
                 "학술 정보원 2층 데스크",

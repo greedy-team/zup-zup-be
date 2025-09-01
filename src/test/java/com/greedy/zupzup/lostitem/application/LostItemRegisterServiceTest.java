@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
 class LostItemRegisterServiceTest extends ServiceUnitTest {
 
     private static final Long VALID_CATEGORY_ID = 1L;
-    private static final Long VALID_ECT_CATEGORY_ID = 2L;
+    private static final Long VALID_ETC_CATEGORY_ID = 2L;
     private static final Long VALID_FEATURE_ID = 2L;
     private static final Long VALID_OPTION_ID = 3L;
     private static final Long VALID_FOUND_AREA_ID = 4L;
@@ -50,7 +50,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     private LostItemRegisterService lostItemRegisterService;
 
     private Category mockCategory;
-    private Category mockECTCategory;
+    private Category mockETCCategory;
     private Feature mockFeature;
     private List<FeatureOption> mockOptions;
     private SchoolArea mockSchoolArea;
@@ -58,13 +58,13 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     @BeforeEach
     void setUp() {
         mockCategory = ELECTRONIC();
-        mockECTCategory = CategoryFixture.ETC();
+        mockETCCategory = CategoryFixture.ETC();
         mockFeature = ELECTRONIC_COLOR(mockCategory);
         mockOptions = ELECTRONIC_COLOR_OPTIONS(mockFeature);
         mockSchoolArea = AI_CENTER();
 
         ReflectionTestUtils.setField(mockCategory, "id", VALID_CATEGORY_ID);
-        ReflectionTestUtils.setField(mockECTCategory, "id", VALID_ECT_CATEGORY_ID);
+        ReflectionTestUtils.setField(mockETCCategory, "id", VALID_ETC_CATEGORY_ID);
         ReflectionTestUtils.setField(mockFeature, "id", VALID_FEATURE_ID);
         ReflectionTestUtils.setField(mockOptions.get(0), "id", VALID_OPTION_ID);
         ReflectionTestUtils.setField(mockSchoolArea, "id", VALID_FOUND_AREA_ID);
@@ -108,11 +108,11 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     void 기타_분실물은_특징값_없이_등록에_성공해야_한다() {
 
         // given
-        LostItemRegisterRequest request = createECTDummyRequest(VALID_ECT_CATEGORY_ID);
+        LostItemRegisterRequest request = createETCDummyRequest(VALID_ETC_CATEGORY_ID);
         List<MultipartFile> images = createDummyImages(3);
         CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
 
-        given(categoryRepository.findWithFeaturesById(request.categoryId())).willReturn(Optional.of(mockECTCategory));
+        given(categoryRepository.findWithFeaturesById(request.categoryId())).willReturn(Optional.of(mockETCCategory));
         given(schoolAreaRepository.getAreaById(request.foundAreaId())).willReturn(mockSchoolArea);
         given(s3ImageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
 
@@ -122,7 +122,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(result).isNotNull();
-            softly.assertThat(result.getCategory()).isEqualTo(mockECTCategory);
+            softly.assertThat(result.getCategory()).isEqualTo(mockETCCategory);
             softly.assertThat(result.getFoundArea()).isEqualTo(mockSchoolArea);
             softly.assertThat(result.getDescription()).isEqualTo("핸드폰 액정이 깨져 있어요.");
             softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
@@ -209,7 +209,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
         );
     }
 
-    private LostItemRegisterRequest createECTDummyRequest(Long categoryId) {
+    private LostItemRegisterRequest createETCDummyRequest(Long categoryId) {
         return new LostItemRegisterRequest(
                 "핸드폰 액정이 깨져 있어요.",
                 "학술 정보원 2층 데스크",

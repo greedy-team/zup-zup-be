@@ -49,20 +49,20 @@ public class LostItemRegisterService {
         Category category = getCategory(command.categoryId());
 
         if (category.isNotQuizCategory()){
-            return registECTLostItem(command, category);
+            return registETCLostItem(command, category);
         }
 
-        return registNonECTLostItem(command, category);
+        return registNonETCLostItem(command, category);
     }
 
-    private LostItem registECTLostItem(CreateLostItemCommand command, Category category) {
+    private LostItem registETCLostItem(CreateLostItemCommand command, Category category) {
         SchoolArea foundSchoolArea = schoolAreaRepository.getAreaById(command.foundAreaId());
         LostItem newLostItem = saveLostItem(command, category, foundSchoolArea);
         saveLostItemImage(command.images(), newLostItem);
         return newLostItem;
     }
 
-    private LostItem registNonECTLostItem(CreateLostItemCommand command, Category category) {
+    private LostItem registNonETCLostItem(CreateLostItemCommand command, Category category) {
         if (command.featureOptions() == null || command.featureOptions().isEmpty()) {
             throw new ApplicationException(LostItemException.FEATURE_REQUIRED_FOR_NON_ETC_CATEGORY);
         }
