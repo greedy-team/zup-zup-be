@@ -26,7 +26,7 @@ public record LostItemRegisterRequest(
         Long categoryId,
 
         @Valid
-        @NotEmpty(message = "분실물의 특징을 하나 이상 선택해 주세요.")
+        @NotNull(message = "특징 옵션 목록은 null일 수 없습니다. 필요 없을 경우 빈 배열을 보내 주세요.")
         List<ItemFeatureRequest> featureOptions
 ) {
         public CreateLostItemCommand toCommand(List<MultipartFile> images) {

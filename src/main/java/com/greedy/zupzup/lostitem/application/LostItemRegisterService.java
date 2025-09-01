@@ -14,6 +14,7 @@ import com.greedy.zupzup.lostitem.application.dto.CreateLostItemCommand;
 import com.greedy.zupzup.lostitem.application.dto.ItemFeatureOptionCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
@@ -46,14 +47,31 @@ public class LostItemRegisterService {
     public LostItem registLostItem(CreateLostItemCommand command) {
 
         Category category = getCategory(command.categoryId());
-        List<Pair<Feature, FeatureOption>> itemFeatureAndOptions = getValidFeatureAndOptions(category, command.featureOptions());
 
+        if (category.isNotQuizCategory()){
+            return registECTLostItem(command, category);
+        }
+
+        return registNonECTLostItem(command, category);
+    }
+
+    private LostItem registECTLostItem(CreateLostItemCommand command, Category category) {
         SchoolArea foundSchoolArea = schoolAreaRepository.getAreaById(command.foundAreaId());
+        LostItem newLostItem = saveLostItem(command, category, foundSchoolArea);
+        saveLostItemImage(command.images(), newLostItem);
+        return newLostItem;
+    }
 
+    private LostItem registNonECTLostItem(CreateLostItemCommand command, Category category) {
+        if (command.featureOptions() == null || command.featureOptions().isEmpty()) {
+            throw new ApplicationException(LostItemException.FEATURE_REQUIRED_FOR_NON_ETC_CATEGORY);
+        }
+
+        List<Pair<Feature, FeatureOption>> itemFeatureAndOptions = getValidFeatureAndOptions(category, command.featureOptions());
+        SchoolArea foundSchoolArea = schoolAreaRepository.getAreaById(command.foundAreaId());
         LostItem newLostItem = saveLostItem(command, category, foundSchoolArea);
         saveLostItemImage(command.images(), newLostItem);
         saveLostItemFeatureAndOptions(itemFeatureAndOptions, newLostItem);
-
         return newLostItem;
     }
 
