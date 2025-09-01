@@ -32,14 +32,11 @@ public class GlobalExceptionHandler {
         ExceptionCode code = ex.getCode();
         String instance = request.getRequestURI();
 
-        String detail = (ex.getDetailOverride() != null) ? ex.getDetailOverride() : code.getDetail();
-
         log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
-                code.getHttpStatus().value(), code.getTitle(), detail, instance);
+                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), instance);
 
-        return createErrorResponse(code, detail, instance);
+        return createErrorResponse(code, instance);
     }
-
 
     /**
      * S3, 외부 API 등 외부 인프라와 연동에 실패 시 발생하는 예외를 처리합니다.
