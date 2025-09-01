@@ -27,10 +27,10 @@ public interface LostItemControllerDocs {
 
     @Operation(
             summary = "분실물 등록",
-            description = "이미지를(최대 3장)과 분실물 정보(JSON)를 함께 업로드합니다."
+            description = "이미지를(최대 3장)과 분실물 정보(JSON)를 함께 업로드합니다. , 기타 카테고리의 분실물의 경우에는 특징값 요청시 featureOptions 배열을 빈 배열로 요청하면 됩니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "분실물 등록에 성공힌 경우",
+            @ApiResponse(responseCode = "201", description = "분실물 등록에 성공힌 경우",
                     content = @Content(
                             schema = @Schema(implementation = LostItemRegisterResponse.class),
                             examples = @ExampleObject(
@@ -49,6 +49,18 @@ public interface LostItemControllerDocs {
                     content = @Content(
                             schema = @Schema(implementation = ErrorResponse.class),
                             examples = {
+                                    @ExampleObject(
+                                            name = "기타 카테고리의 분실물이 아닌데, 분실물 특징을 누락하여 요청한 경우",
+                                            value = """
+                                                    {
+                                                      "title": "분실물 특징 입력 누락",
+                                                      "status": 400,
+                                                      "detail": "분실물 카테고리가 '기타'가 아닌 경우, 특징값 입력이 필요합니다.",
+                                                      "instance": "/api/lost-items"
+                                                    }
+                                                    """
+                                    ),
+
                                     @ExampleObject(
                                             name = "필수 입력값(보관 장소, 상세 습득장소)을 누락하여 요청한 경우",
                                             value = """
