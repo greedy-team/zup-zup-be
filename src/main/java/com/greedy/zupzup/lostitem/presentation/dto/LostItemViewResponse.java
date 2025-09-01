@@ -34,9 +34,12 @@ public record LostItemViewResponse(
     }
 
     public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
-        String finalImage = (!Objects.equals(c.categoryIconUrl(), "") && !c.categoryIconUrl().isBlank())
-                ? c.categoryIconUrl()
-                : representativeImageUrl;
+        boolean iconPresent = c.categoryIconUrl() != null && !c.categoryIconUrl().isBlank();
+        boolean useRep = "기타".equals(c.categoryName()) || !iconPresent;
+
+        String finalImage = useRep
+                ? (representativeImageUrl != null ? representativeImageUrl : c.categoryIconUrl())
+                : c.categoryIconUrl();
 
         return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),

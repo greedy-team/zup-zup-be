@@ -47,12 +47,19 @@ public class LostItemViewService {
 
         statusGuardForSimpleView(item);
 
+        String categoryName = (item.getCategory() != null) ? item.getCategory().getName() : "";
         String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : "";
-        String finalImage = (!Objects.equals(icon, "") && !icon.isBlank())
-                ? icon
-                : getRepresentativeImageMapByItemIds(List.of(lostItemId)).get(lostItemId);
 
-        return LostItemSimpleViewCommand.of(item, finalImage);
+        boolean isEtc = "기타".equals(categoryName);
+        boolean hasIcon = icon != null && !icon.isBlank();
+
+        if (!isEtc && hasIcon) {
+            return LostItemSimpleViewCommand.of(item, icon);
+        }
+
+        String rep = getRepresentativeImageMapByItemIds(List.of(lostItemId))
+                .getOrDefault(lostItemId, "");
+        return LostItemSimpleViewCommand.of(item, rep);
     }
 
     /**

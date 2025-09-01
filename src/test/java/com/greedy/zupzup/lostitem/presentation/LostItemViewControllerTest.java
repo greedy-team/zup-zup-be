@@ -61,7 +61,7 @@ class LostItemViewControllerTest extends ControllerTest {
         }
 
         @Test
-        void 카테고리_아이콘_NULL이면_목록_대표이미지는_0번_사진_URL_200_OK를_응답한다() {
+        void 카테고리_이름이_기타면_목록_대표이미지는_0번_사진_URL_200_OK를_응답한다() {
             // given
             Category etc = givenEtcCategory();
             ReflectionTestUtils.setField(etc, "iconUrl", "");
@@ -73,7 +73,7 @@ class LostItemViewControllerTest extends ControllerTest {
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .queryParam("page", 1)
-                    .queryParam("limit", 10)
+                    .queryParam("limit", 50)
                     .when()
                     .get("/api/lost-items")
                     .then().log().all()
@@ -135,8 +135,6 @@ class LostItemViewControllerTest extends ControllerTest {
                     .then()
                     .statusCode(400);
         }
-
-
     }
 
     @Nested
@@ -177,10 +175,10 @@ class LostItemViewControllerTest extends ControllerTest {
         }
 
         @Test
-        void 카테고리_아이콘_NULL이면_단건_대표이미지는_0번_사진_URL_200_OK을_응답한다() {
+        void 카테고리_이름이_기타면_단건_대표이미지는_0번_사진_URL_200_OK를_응답한다() {
             // given
             Category etc = givenEtcCategory();
-            ReflectionTestUtils.setField(etc, "iconUrl", "");
+            ReflectionTestUtils.setField(etc, "iconUrl", "https://icon.com/etc.svg");
             categoryRepository.saveAndFlush(etc);
 
             LostItem item = givenNonQuizLostItem(owner, etc);
