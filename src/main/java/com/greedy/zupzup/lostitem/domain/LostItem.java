@@ -2,7 +2,6 @@ package com.greedy.zupzup.lostitem.domain;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.BaseTimeEntity;
-import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -73,8 +72,8 @@ public class LostItem extends BaseTimeEntity {
         this.foundArea = foundArea;
     }
 
-    public boolean isNotQuizCategory() {
-        return this.category.isNotQuizCategory();
+    public boolean isEtcCategory() {
+        return this.category.isEtcCategory();
     }
 
     public boolean isPledgeable() {

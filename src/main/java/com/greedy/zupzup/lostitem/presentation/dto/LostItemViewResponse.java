@@ -34,18 +34,23 @@ public record LostItemViewResponse(
     }
 
     public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
-        boolean iconPresent = c.categoryIconUrl() != null && !c.categoryIconUrl().isBlank();
-        boolean useRep = "기타".equals(c.categoryName()) || !iconPresent;
-
-        String finalImage = useRep
-                ? (representativeImageUrl != null ? representativeImageUrl : c.categoryIconUrl())
-                : c.categoryIconUrl();
-
+        final String finalImage = pickListImage(c, representativeImageUrl);
         return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
                 finalImage
         );
+    }
+
+    private static String pickListImage(LostItemListCommand c, String repUrl) {
+        if ("기타".equals(c.categoryName())) {
+            return repUrl;
+        }
+        return hasText(c.categoryIconUrl()) ? c.categoryIconUrl() : repUrl;
+    }
+
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
     }
 }

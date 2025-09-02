@@ -3,7 +3,6 @@ package com.greedy.zupzup.lostitem.application;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
-import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -35,7 +34,7 @@ public class LostItemDetailViewService {
         Member member = memberRepository.getById(memberId);
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
 
-        boolean quizRequired = !item.isNotQuizCategory();
+        boolean quizRequired = !item.isEtcCategory();
 
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
 
@@ -66,7 +65,7 @@ public class LostItemDetailViewService {
         Member member = memberRepository.getById(memberId);
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
 
-        boolean quizRequired = !item.isNotQuizCategory();
+        boolean quizRequired = !item.isEtcCategory();
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
 
@@ -94,7 +93,7 @@ public class LostItemDetailViewService {
         Member member = memberRepository.getById(memberId);
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
 
-        boolean quizRequired = !item.isNotQuizCategory();
+        boolean quizRequired = !item.isEtcCategory();
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
         boolean quizPassed = quizAttemptRepository
                 .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());

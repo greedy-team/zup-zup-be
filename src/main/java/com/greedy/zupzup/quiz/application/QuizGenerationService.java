@@ -48,7 +48,7 @@ public class QuizGenerationService {
                     }
                 });
 
-        if (lostItem.isNotQuizCategory()) {
+        if (lostItem.isEtcCategory()) {
             return Collections.emptyList();
         }
 
