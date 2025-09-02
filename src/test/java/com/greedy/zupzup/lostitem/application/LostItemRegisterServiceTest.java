@@ -6,6 +6,7 @@ import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.category.exception.CategoryException;
 import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.common.ServiceUnitTest;
+import com.greedy.zupzup.common.fixture.CategoryFixture;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.application.dto.CreateLostItemCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.*;
 class LostItemRegisterServiceTest extends ServiceUnitTest {
 
     private static final Long VALID_CATEGORY_ID = 1L;
+    private static final Long VALID_ETC_CATEGORY_ID = 2L;
     private static final Long VALID_FEATURE_ID = 2L;
     private static final Long VALID_OPTION_ID = 3L;
     private static final Long VALID_FOUND_AREA_ID = 4L;
@@ -48,6 +50,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     private LostItemRegisterService lostItemRegisterService;
 
     private Category mockCategory;
+    private Category mockETCCategory;
     private Feature mockFeature;
     private List<FeatureOption> mockOptions;
     private SchoolArea mockSchoolArea;
@@ -55,11 +58,13 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     @BeforeEach
     void setUp() {
         mockCategory = ELECTRONIC();
+        mockETCCategory = CategoryFixture.ETC();
         mockFeature = ELECTRONIC_COLOR(mockCategory);
         mockOptions = ELECTRONIC_COLOR_OPTIONS(mockFeature);
         mockSchoolArea = AI_CENTER();
 
         ReflectionTestUtils.setField(mockCategory, "id", VALID_CATEGORY_ID);
+        ReflectionTestUtils.setField(mockETCCategory, "id", VALID_ETC_CATEGORY_ID);
         ReflectionTestUtils.setField(mockFeature, "id", VALID_FEATURE_ID);
         ReflectionTestUtils.setField(mockOptions.get(0), "id", VALID_OPTION_ID);
         ReflectionTestUtils.setField(mockSchoolArea, "id", VALID_FOUND_AREA_ID);
@@ -97,6 +102,38 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
         then(lostItemFeatureRepository).should(times(1)).saveAll(anyList());
         then(s3ImageFileManager).should(times(3)).upload(any(MultipartFile.class), any(String.class));
     }
+
+
+    @Test
+    void 기타_분실물은_특징값_없이_등록에_성공해야_한다() {
+
+        // given
+        LostItemRegisterRequest request = createETCDummyRequest(VALID_ETC_CATEGORY_ID);
+        List<MultipartFile> images = createDummyImages(3);
+        CreateLostItemCommand command = CreateLostItemCommand.of(request, images);
+
+        given(categoryRepository.findWithFeaturesById(request.categoryId())).willReturn(Optional.of(mockETCCategory));
+        given(schoolAreaRepository.getAreaById(request.foundAreaId())).willReturn(mockSchoolArea);
+        given(s3ImageFileManager.upload(any(MultipartFile.class), any(String.class))).willReturn("http://image.url/test.jpg");
+
+        // when
+        LostItem result = lostItemRegisterService.registLostItem(command);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(result).isNotNull();
+            softly.assertThat(result.getCategory()).isEqualTo(mockETCCategory);
+            softly.assertThat(result.getFoundArea()).isEqualTo(mockSchoolArea);
+            softly.assertThat(result.getDescription()).isEqualTo("핸드폰 액정이 깨져 있어요.");
+            softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+        });
+
+        then(lostItemRepository).should(times(1)).save(any(LostItem.class));
+        then(lostItemImageRepository).should(times(1)).saveAll(anyList());
+        then(lostItemFeatureRepository).should(never()).saveAll(anyList());
+        then(s3ImageFileManager).should(times(3)).upload(any(MultipartFile.class), any(String.class));
+    }
+
 
     @Test
     void 존재하지_않는_카테고리로_분실물_등록을_요청하면_예외가_발생해야_한다() {
@@ -169,6 +206,17 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
                 "AI 센터 B205",
                 categoryId,
                 List.of(new ItemFeatureRequest(featureId, optionId))
+        );
+    }
+
+    private LostItemRegisterRequest createETCDummyRequest(Long categoryId) {
+        return new LostItemRegisterRequest(
+                "핸드폰 액정이 깨져 있어요.",
+                "학술 정보원 2층 데스크",
+                VALID_FOUND_AREA_ID,
+                "AI 센터 B205",
+                categoryId,
+                List.of()
         );
     }
 
