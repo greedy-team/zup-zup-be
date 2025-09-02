@@ -11,7 +11,6 @@ import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,10 +46,9 @@ public class LostItemViewService {
 
         statusGuardForSimpleView(item);
 
-        String categoryName = (item.getCategory() != null) ? item.getCategory().getName() : "";
         String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : "";
 
-        boolean isEtc = "기타".equals(categoryName);
+        boolean isEtc = item.isNotQuizCategory();
         boolean hasIcon = icon != null && !icon.isBlank();
 
         if (!isEtc && hasIcon) {
