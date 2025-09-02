@@ -72,8 +72,8 @@ public class LostItem extends BaseTimeEntity {
         this.foundArea = foundArea;
     }
 
-    public boolean isNotQuizCategory() {
-        return this.category.isETCategory();
+    public boolean isEtcCategory() {
+        return this.category.isEtcCategory();
     }
 
     public boolean isPledgeable() {

@@ -43,7 +43,7 @@ public class Category extends BaseTimeEntity {
     @Builder.Default
     private List<Feature> features = new ArrayList<>();
 
-    public boolean isETCategory() {
+    public boolean isEtcCategory() {
         return ETC_CATEGORY_NAME.equals(this.name);
     }
 }

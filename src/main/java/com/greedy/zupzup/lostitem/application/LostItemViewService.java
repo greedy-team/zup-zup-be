@@ -47,8 +47,7 @@ public class LostItemViewService {
 
         statusGuardForSimpleView(item);
 
-        boolean isEtc = item.getCategory() != null
-                && "기타".equals(item.getCategory().getName());
+        boolean isEtc = item.isEtcCategory();
 
         if (!isEtc) {
             return LostItemSimpleViewCommand.of(item, Objects.requireNonNull(item.getCategory()).getIconUrl());

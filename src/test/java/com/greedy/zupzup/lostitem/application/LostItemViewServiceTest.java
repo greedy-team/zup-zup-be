@@ -168,17 +168,18 @@ class LostItemViewServiceTest extends ServiceUnitTest {
     @Test
     void 단건_조회_카테고리가_기타면_아이콘이_있어도_0번_이미지_URL을_대표로_사용한다() {
         Long itemId = 3L;
+        LostItem item = mock(LostItem.class);
 
         Category category = mock(Category.class);
         when(category.getId()).thenReturn(12L);
         when(category.getName()).thenReturn("기타");
         when(category.getIconUrl()).thenReturn("https://icon.com/etc.svg");
+        when(item.isEtcCategory()).thenReturn(true);
 
         SchoolArea area = mock(SchoolArea.class);
         when(area.getId()).thenReturn(102L);
         when(area.getAreaName()).thenReturn("도서관");
 
-        LostItem item = mock(LostItem.class);
         when(item.getId()).thenReturn(itemId);
         when(item.getStatus()).thenReturn(LostItemStatus.REGISTERED);
         when(item.getCategory()).thenReturn(category);

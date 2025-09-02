@@ -45,7 +45,7 @@ public class PledgeService {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
-        if (!lostItem.isNotQuizCategory()) {
+        if (!lostItem.isEtcCategory()) {
             QuizAttempt quizAttempt = quizAttemptRepository.getByLostItemIdAndMemberId(lostItem.getId(), member.getId());
             if (!quizAttempt.getIsCorrect()) {
                 throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
