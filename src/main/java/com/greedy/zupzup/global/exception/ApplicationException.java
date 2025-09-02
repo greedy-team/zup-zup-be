@@ -13,9 +13,4 @@ public class ApplicationException extends RuntimeException {
         super(code.getDetail());
         this.code = code;
     }
-
-    public ApplicationException(ExceptionCode code, List<String> errorFields) {
-        super(String.join(", ", errorFields) + " " + code.getDetail());
-        this.code = code;
-    }
 }

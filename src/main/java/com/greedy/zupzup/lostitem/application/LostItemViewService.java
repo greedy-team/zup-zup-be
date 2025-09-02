@@ -11,7 +11,6 @@ import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,12 +44,20 @@ public class LostItemViewService {
     public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
         LostItem item = lostItemRepository.getWithCategoryById(lostItemId);
 
-        String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : "";
-        String finalImage = (!Objects.equals(icon, "") && !icon.isBlank())
-                ? icon
-                : getRepresentativeImageMapByItemIds(List.of(lostItemId)).get(lostItemId);
+        statusGuardForSimpleView(item);
 
-        return LostItemSimpleViewCommand.of(item, finalImage);
+        String icon = (item.getCategory() != null) ? item.getCategory().getIconUrl() : "";
+
+        boolean isEtc = item.isNotQuizCategory();
+        boolean hasIcon = icon != null && !icon.isBlank();
+
+        if (!isEtc && hasIcon) {
+            return LostItemSimpleViewCommand.of(item, icon);
+        }
+
+        String rep = getRepresentativeImageMapByItemIds(List.of(lostItemId))
+                .getOrDefault(lostItemId, "");
+        return LostItemSimpleViewCommand.of(item, rep);
     }
 
     /**
@@ -63,4 +70,20 @@ public class LostItemViewService {
                         RepresentativeImageProjection::getImageUrl
                 ));
     }
+
+    private void statusGuardForSimpleView(LostItem item) {
+        LostItemStatus status = item.getStatus();
+        if (status == LostItemStatus.REGISTERED) {
+            return;
+        }
+
+        LostItemException code = switch (status) {
+            case PLEDGED -> LostItemException.ACCESS_FORBIDDEN_PLEDGED;
+            case FOUND -> LostItemException.ACCESS_FORBIDDEN_FOUND;
+            default -> LostItemException.ACCESS_FORBIDDEN;
+        };
+
+        throw new ApplicationException(code);
+    }
+
 }

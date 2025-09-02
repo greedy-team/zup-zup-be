@@ -27,11 +27,15 @@ public class GlobalExceptionHandler {
      * 어플리케이션 로직에서 발생시킨 예외를 처리합니다.
      */
     @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException ex,
+                                                                    HttpServletRequest request) {
         ExceptionCode code = ex.getCode();
+        String instance = request.getRequestURI();
+
         log.info("비즈니스 로직 예외 | code={}, title=\"{}\", detail=\"{}\", instance={}",
-                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), request.getRequestURI());
-        return createErrorResponse(ex.getCode(), request.getRequestURI());
+                code.getHttpStatus().value(), code.getTitle(), code.getDetail(), instance);
+
+        return createErrorResponse(code, instance);
     }
 
     /**

@@ -85,4 +85,11 @@ public class LostItem extends BaseTimeEntity {
         this.status = LostItemStatus.PLEDGED;
         this.pledgedAt = LocalDate.now();
     }
+
+    public boolean canAccess(boolean pledgedByMe) {
+        if (this.status == LostItemStatus.FOUND) return false;
+        if (this.status == LostItemStatus.PLEDGED && !pledgedByMe) return false;
+        return true;
+    }
+
 }
