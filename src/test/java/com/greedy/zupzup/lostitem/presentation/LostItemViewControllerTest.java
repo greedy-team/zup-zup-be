@@ -64,7 +64,7 @@ class LostItemViewControllerTest extends ControllerTest {
         void 카테고리_이름이_기타면_목록_대표이미지는_0번_사진_URL_200_OK를_응답한다() {
             // given
             Category etc = givenEtcCategory();
-            ReflectionTestUtils.setField(etc, "iconUrl", "");
+            ReflectionTestUtils.setField(etc, "iconUrl", "https://icon.com/etc.svg");
             categoryRepository.saveAndFlush(etc);
 
             LostItem item = givenNonQuizLostItem(owner, etc);

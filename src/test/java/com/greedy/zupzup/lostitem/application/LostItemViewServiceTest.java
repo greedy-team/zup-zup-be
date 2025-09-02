@@ -16,6 +16,7 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
 import com.greedy.zupzup.lostitem.repository.LostItemListProjection;
 import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
@@ -67,6 +68,41 @@ class LostItemViewServiceTest extends ServiceUnitTest {
             softly.assertThat(result.getContent().get(0).schoolAreaName()).isEqualTo("AI센터");
         });
     }
+
+    @Test
+    void 목록_조회_카테고리가_기타면_아이콘이_있어도_대표사진을_사용한다() {
+        // given
+        LostItemListProjection p1 = new ListProj(
+                11L, 12L, "기타", "https://icon.com/etc.svg",
+                102L, "도서관", "도서관 1층", LocalDateTime.now().minusHours(3)
+        );
+
+        Page<LostItemListProjection> page = new PageImpl<>(List.of(p1));
+        given(lostItemRepository.findList(
+                isNull(), isNull(), eq(LostItemStatus.REGISTERED), any(Pageable.class)
+        )).willReturn(page);
+
+        String firstImageUrl = "https://images.example.com/lost/11/0.jpg";
+        given(lostItemImageRepository.findRepresentativeImages(List.of(11L)))
+                .willReturn(List.of(new RepImg(11L, firstImageUrl)));
+
+        // when
+        Page<LostItemListCommand> result = service.getLostItems(null, null, 1, 10);
+
+        Map<Long, String> repMap = service.getRepresentativeImageMapByItemIds(
+                result.map(LostItemListCommand::id).getContent()
+        );
+        String repUrl = repMap.get(11L);
+        LostItemViewResponse view = LostItemViewResponse.from(result.getContent().get(0), repUrl);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(view.categoryName()).isEqualTo("기타");
+            softly.assertThat(view.representativeImageUrl()).isEqualTo(firstImageUrl);
+        });
+        then(lostItemImageRepository).should().findRepresentativeImages(List.of(11L));
+    }
+
 
     @Test
     void 목록_조회에_카테고리_및_구역_필터가_전달된다() {
@@ -131,17 +167,14 @@ class LostItemViewServiceTest extends ServiceUnitTest {
 
     @Test
     void 단건_조회_카테고리가_기타면_아이콘이_있어도_0번_이미지_URL을_대표로_사용한다() {
-        // given
         Long itemId = 3L;
 
-        Category category = mock(
-                Category.class);
+        Category category = mock(Category.class);
         when(category.getId()).thenReturn(12L);
         when(category.getName()).thenReturn("기타");
         when(category.getIconUrl()).thenReturn("https://icon.com/etc.svg");
 
-        SchoolArea area = mock(
-                SchoolArea.class);
+        SchoolArea area = mock(SchoolArea.class);
         when(area.getId()).thenReturn(102L);
         when(area.getAreaName()).thenReturn("도서관");
 
@@ -159,10 +192,8 @@ class LostItemViewServiceTest extends ServiceUnitTest {
         given(lostItemImageRepository.findRepresentativeImages(List.of(itemId)))
                 .willReturn(List.of(new RepImg(itemId, firstImageUrl)));
 
-        // when
         LostItemSimpleViewCommand view = service.getSimpleView(itemId);
 
-        // then
         assertSoftly(softly -> {
             softly.assertThat(view.id()).isEqualTo(itemId);
             softly.assertThat(view.representativeImageUrl()).isEqualTo(firstImageUrl);

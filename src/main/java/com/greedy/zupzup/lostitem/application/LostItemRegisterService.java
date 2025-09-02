@@ -48,7 +48,7 @@ public class LostItemRegisterService {
 
         Category category = getCategory(command.categoryId());
 
-        if (category.isNotQuizCategory()){
+        if (category.isETCategory()){
             return registETCLostItem(command, category);
         }
 

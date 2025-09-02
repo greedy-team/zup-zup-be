@@ -34,12 +34,11 @@ public record LostItemViewResponse(
     }
 
     public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
-        boolean iconPresent = c.categoryIconUrl() != null && !c.categoryIconUrl().isBlank();
-        boolean useRep = "기타".equals(c.categoryName()) || !iconPresent;
-
-        String finalImage = useRep
-                ? (representativeImageUrl != null ? representativeImageUrl : c.categoryIconUrl())
-                : c.categoryIconUrl();
+        String finalImage = "기타".equals(c.categoryName())
+                ? representativeImageUrl
+                : (c.categoryIconUrl() != null && !c.categoryIconUrl().isBlank()
+                        ? c.categoryIconUrl()
+                        : representativeImageUrl);
 
         return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
@@ -48,4 +47,6 @@ public record LostItemViewResponse(
                 finalImage
         );
     }
+
+
 }
