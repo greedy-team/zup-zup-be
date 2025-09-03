@@ -5,6 +5,12 @@ server:
     session:
       timeout: ${STUDENT_VERIFICATION_SESSION_TIME:1m}
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB     # 개별 파일 최대 크기
+      max-request-size: 50MB  # 전체 요청 최대 크기
+
 cloud:
   aws:
     credentials:
@@ -30,4 +36,3 @@ zupzup:
       access:
         secret: ${ACCESS_TOKEN_SECRET_KEY:accessFSFvPh5v9x3w+T8fA9gB7eC6dF3gH5jJ2kL4mN1oP0rS1c}
         expiration-second: ${ACCESS_TOKEN_EXPIRATION:6000}  # 초 단위
-
