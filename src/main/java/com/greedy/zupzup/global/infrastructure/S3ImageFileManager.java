@@ -23,7 +23,7 @@ public class S3ImageFileManager {
     private static final String PATH_DELIMITER = "/";
     private static final String FILE_EXTENSION_DELIMITER = ".";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;     // 최대 이미지 크기 10MB
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "heic", "webp");
 
     private final S3Client s3Client;
     private final String bucketName;
