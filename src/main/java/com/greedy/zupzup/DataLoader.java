@@ -48,7 +48,8 @@ public class DataLoader implements CommandLineRunner {
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     private final ObjectMapper objectMapper;
 
-    private record SchoolAreaInitDto(String areaName, List<List<Double>> coordinates) {}
+    private record SchoolAreaInitDto(String areaName, List<List<Double>> coordinates) {
+    }
 
     @Override
     @Transactional
@@ -61,13 +62,14 @@ public class DataLoader implements CommandLineRunner {
         log.info("========== 개발용 임시 데이터 초기화 완료 ==========");
     }
 
-    private void initSchoolAreaData() throws Exception{
+    private void initSchoolAreaData() throws Exception {
         log.info("구역 정보를 초기화합니다.");
         if (schoolAreaRepository.count() == 0) {
             ClassPathResource resource = new ClassPathResource("data/school-areas.json");
             InputStream inputStream = resource.getInputStream();
 
-            List<SchoolAreaInitDto> inputs = objectMapper.readValue(inputStream, new TypeReference<>() {});
+            List<SchoolAreaInitDto> inputs = objectMapper.readValue(inputStream, new TypeReference<>() {
+            });
 
             List<SchoolArea> schoolAreas = inputs.stream()
                     .map(input -> {
@@ -163,7 +165,7 @@ public class DataLoader implements CommandLineRunner {
 
             LostItemImage phoneImage = LostItemImage.builder()
                     .imageKey("https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/dev/iphone.webp")
-                    .imageOrder(1).lostItem(phoneLostItem).build();
+                    .imageOrder(0).lostItem(phoneLostItem).build();
             lostItemImageRepository.save(phoneImage);
 
             Feature brandFeature = phoneCategory.getFeatures().get(0);
@@ -190,7 +192,7 @@ public class DataLoader implements CommandLineRunner {
 
             LostItemImage umbrellaImage = LostItemImage.builder()
                     .imageKey("https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/dev/umbrella.webp")
-                    .imageOrder(1).lostItem(etcLostItem).build();
+                    .imageOrder(0).lostItem(etcLostItem).build();
             lostItemImageRepository.save(umbrellaImage);
 
             log.info("임시 분실물 정보 초기화 완료!");

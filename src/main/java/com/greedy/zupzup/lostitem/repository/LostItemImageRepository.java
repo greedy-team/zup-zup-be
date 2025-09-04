@@ -10,16 +10,11 @@ import org.springframework.data.repository.query.Param;
 public interface LostItemImageRepository extends JpaRepository<LostItemImage, Long> {
 
     @Query("""
-        select i.lostItem.id as lostItemId,
-               coalesce(i.imageKey, '') as imageUrl
-          from LostItemImage i
-         where i.lostItem.id in :ids
-           and i.imageOrder = (
-                select min(i2.imageOrder)
-                  from LostItemImage i2
-                 where i2.lostItem.id = i.lostItem.id
-           )
-        """)
+             select i.lostItem.id as lostItemId, i.imageKey as imageUrl
+                        from LostItemImage i
+                        where i.imageOrder = 0 and i.lostItem.id in :ids
+               )
+            """)
     List<RepresentativeImageProjection> findRepresentativeImages(@Param("ids") Collection<Long> ids);
 
     @Query("""
