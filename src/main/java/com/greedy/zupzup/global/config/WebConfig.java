@@ -22,7 +22,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     private static final String[] ALLOWED_ORIGINS = {
             "https://api.sejong-zupzup.kr", // 메인 API 서버
-            "http://localhost:5173"
+            "https://sejong-zupzup.kr",
+            "http://localhost:5173",
+            "http://localhost:4173"
     };
 
     @Override
