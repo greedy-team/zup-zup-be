@@ -42,4 +42,8 @@ public class QuizAttempt extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Boolean isCorrect;
+
+    public void updateResult(boolean isCorrect) {
+        this.isCorrect = isCorrect;
+    }
 }
