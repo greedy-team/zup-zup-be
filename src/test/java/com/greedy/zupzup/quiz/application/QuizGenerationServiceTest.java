@@ -66,7 +66,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(
                 mockFeatures);
 
@@ -85,7 +85,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         then(memberRepository).should().getById(TEST_MEMBER_ID);
         then(lostItemRepository).should().getWithCategoryById(TEST_LOST_ITEM_ID);
-        then(quizAttemptRepository).should().findByLostItemIdAndMemberId(anyLong(), anyLong());
+        then(quizAttemptRepository).should().existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong());
         then(lostItemFeatureRepository).should().findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID);
     }
 
@@ -110,12 +110,9 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     void 이미_퀴즈를_틀린_기록이_있는_경우_예외가_발생해야_한다() {
 
         // given
-        QuizAttempt incorrectQuizAttempt = INCORRECT_QUIZ_ATTEMPT(member, pledgeableLostItem);
-
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(
-                Optional.of(incorrectQuizAttempt));
+        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
@@ -130,7 +127,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(ETC_CATEGORY_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
 
         // when
         List<QuizDto> result = quizGenerationService.getLostItemQuizzes(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID);
@@ -148,7 +145,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(
                 mockFeatures);
 
