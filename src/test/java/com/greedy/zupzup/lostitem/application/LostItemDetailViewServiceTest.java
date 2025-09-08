@@ -71,7 +71,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         @Test
         void 퀴즈_통과시_200_OK를_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(전자기기_서약미완료);
-            given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
+            given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(true);
 
             LostItemDetailViewCommand result = service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID);
@@ -85,7 +85,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         @Test
         void 퀴즈_미통과면_403_FORBIDDEN를_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(전자기기_서약완료);
-            given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
+            given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(false);
 
             assertThatThrownBy(() -> service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID))
@@ -116,7 +116,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         void 퀴즈_통과_및_서약완료면_보관위치와_200_OK를_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(전자기기_서약완료);
             given(pledgeRepository.existsByLostItem_IdAndOwner_Id(ITEM_ID, MEMBER_ID)).willReturn(true);
-            given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
+            given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(true);
 
             String area = service.getDepositArea(ITEM_ID, MEMBER_ID);
@@ -157,7 +157,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         void 퀴즈_통과_및_서약완료면_200_OK를_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(전자기기_서약완료);
             given(pledgeRepository.existsByLostItem_IdAndOwner_Id(ITEM_ID, MEMBER_ID)).willReturn(true);
-            given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
+            given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(true);
 
             LostItemDetailViewCommand result = service.getDetail(ITEM_ID, MEMBER_ID);
@@ -170,7 +170,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         void 서약만_했고_퀴즈미통과면_403_FORBIDDEN을_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(전자기기_서약완료);
             given(pledgeRepository.existsByLostItem_IdAndOwner_Id(ITEM_ID, MEMBER_ID)).willReturn(true);
-            given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
+            given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(false);
 
             assertThatThrownBy(() -> service.getDetail(ITEM_ID, MEMBER_ID))

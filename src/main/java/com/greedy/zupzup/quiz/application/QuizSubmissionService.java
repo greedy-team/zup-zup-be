@@ -54,12 +54,11 @@ public class QuizSubmissionService {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
-        quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), member.getId())
-                .ifPresent(attempt -> {
-                    if (!attempt.getIsCorrect()) {
-                        throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
-                    }
-                });
+        boolean hasIncorrectAttempt = quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(lostItem.getId(), member.getId());
+
+        if (hasIncorrectAttempt) {
+            throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
+        }
     }
 
     private void saveQuizAttempt(LostItem lostItem, Member member, boolean isCorrect) {

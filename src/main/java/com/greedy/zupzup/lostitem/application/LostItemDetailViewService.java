@@ -39,7 +39,7 @@ public class LostItemDetailViewService {
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
 
         boolean quizPassed = quizAttemptRepository
-                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+                .existsByLostItemIdAndMemberIdAndIsCorrectTrue(item.getId(), member.getId());
 
         if (!item.canAccess(pledgedByMe)) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
@@ -67,7 +67,7 @@ public class LostItemDetailViewService {
 
         boolean quizRequired = !item.isEtcCategory();
         boolean quizPassed = quizAttemptRepository
-                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+                .existsByLostItemIdAndMemberIdAndIsCorrectTrue(item.getId(), member.getId());
 
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
         if (!item.canAccess(pledgedByMe)) {
@@ -96,7 +96,7 @@ public class LostItemDetailViewService {
         boolean quizRequired = !item.isEtcCategory();
         boolean pledgedByMe = pledgeRepository.existsByLostItem_IdAndOwner_Id(item.getId(), member.getId());
         boolean quizPassed = quizAttemptRepository
-                .existsByLostItem_IdAndMember_IdAndIsCorrectTrue(item.getId(), member.getId());
+                .existsByLostItemIdAndMemberIdAndIsCorrectTrue(item.getId(), member.getId());
 
         if (!item.canAccess(pledgedByMe)) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
