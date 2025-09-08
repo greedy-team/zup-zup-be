@@ -15,7 +15,7 @@ public interface SchoolAreaRepository extends JpaRepository<SchoolArea, Long> {
     @Query(value = """
             select sa
             from SchoolArea sa
-            where ST_Contains(sa.area, :point) = true
+            where ST_Contains(sa.area, :point)
             """)
     Optional<SchoolArea> findSchoolAreaByPoint(@Param("point") Point point);
 
