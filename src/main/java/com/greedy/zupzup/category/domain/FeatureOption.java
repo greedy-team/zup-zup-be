@@ -1,6 +1,5 @@
 package com.greedy.zupzup.category.domain;
 
-import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,7 +23,7 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class FeatureOption extends BaseTimeEntity {
+public class FeatureOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

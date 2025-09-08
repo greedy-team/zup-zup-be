@@ -1,6 +1,5 @@
 package com.greedy.zupzup.schoolarea.domain;
 
-import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +19,7 @@ import org.locationtech.jts.geom.Polygon;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class SchoolArea extends BaseTimeEntity {
+public class SchoolArea {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
