@@ -47,7 +47,7 @@ sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
 # 3. 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
 echo "> '$TARGET_ENV' 컨테이너 Health Check" >> $DEPLOY_LOG
 for i in {1..12}; do
-  # curl 명령으로 새 컨테이너가 응답하는지 확인합니다.
+  # curl 명령으로 새 컨테이너가 응답하는지 확인합
   if curl -s --fail http://localhost:$TARGET_PORT > /dev/null; then
     echo "  → $APP_NAME 애플리케이션 실행 성공!" >> $DEPLOY_LOG
 
