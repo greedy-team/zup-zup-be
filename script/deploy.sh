@@ -48,7 +48,7 @@ sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
 echo "> '$TARGET_ENV' 컨테이너 Health Check" >> $DEPLOY_LOG
 for i in {1..12}; do
   # curl 명령으로 새 컨테이너가 응답하는지 확인합
-  if curl -s --fail http://localhost:$TARGET_PORT > /dev/null; then
+  if curl -s --fail http://localhost:$TARGET_PORT/actuator/health > /dev/null; then
     echo "  → $APP_NAME 애플리케이션 실행 성공!" >> $DEPLOY_LOG
 
     # 4. Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
