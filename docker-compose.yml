@@ -27,7 +27,11 @@ services:
       - "8080:8080"
     env_file:
      - ./.env
+    environment:
+      - LOGGING_LEVEL_ROOT=DEBUG
     restart: always
+    depends_on:
+      - mysql-server
 
   web-green:
     image: sejongzupzup/api-server:latest
@@ -36,4 +40,8 @@ services:
       - "8081:8080"
     env_file:
       - ./.env
+    environment:
+      - LOGGING_LEVEL_ROOT=DEBUG
     restart: always
+    depends_on:
+      - mysql-server

@@ -61,7 +61,7 @@ for i in {1..10}; do
     echo "   → 종료 완료" >> $DEPLOY_LOG
 
     # 6. 보안을 위해 환경변수 파일을 삭제
-    rm -f .env
+    # rm -f .env
 
     echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
     exit 0
