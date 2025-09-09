@@ -76,6 +76,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cat << EOF > /home/ubuntu/zupzup/.env
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
             DB_HOST=${{ secrets.DB_HOST }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
