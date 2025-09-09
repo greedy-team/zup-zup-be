@@ -7,7 +7,7 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
-NGINX_CONFIG_FILE="/etc/nginx/sites-available/api.sejong-zupzup.kr.conf"
+UPSTREAM_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
 on_error() {
@@ -64,7 +64,7 @@ for i in {1..12}; do
     echo "   → 종료 완료" >> $DEPLOY_LOG
 
     # 6. 보안을 위해 환경변수 파일을 삭제
-    rm -f .env
+    # rm -f .env
 
     echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
     exit 0
