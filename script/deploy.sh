@@ -7,7 +7,7 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
-UPSTREAM_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
+NGINX_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"  # 변수명 수정
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
 on_error() {
@@ -59,9 +59,11 @@ for i in {1..12}; do
     sudo nginx -t && sudo systemctl restart nginx
     echo "  → Nginx 재시작 완료" >> $DEPLOY_LOG
 
-    # 5. 기존에 실행되던 구버전 애플리케이션을 종료
+    # 5. 기존에 실행되던 구버전 애플리케이션을 종료 (containerId 사용)
     echo "> 기존 '$CURRENT_ENV' 애플리케이션을 종료" >> $DEPLOY_LOG
-    sudo docker-compose -f $DOCKER_COMPOSE_FILE stop "web-$CURRENT_ENV"
+    containerId=$(sudo docker ps | grep "web-$CURRENT_ENV" | awk '{print $1}')
+    echo "  → 기존 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+    sudo docker kill $containerId || true
     sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
     # 사용하지 않는 도커 이미지를 정리하여 용량을 확보
     sudo docker image prune -af
@@ -83,7 +85,9 @@ echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 �
 sudo docker logs --tail 50 "zupzup-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
 echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
-sudo docker-compose -f $DOCKER_COMPOSE_FILE stop "web-$TARGET_ENV"
+containerId=$(sudo docker ps | grep "web-$TARGET_ENV" | awk '{print $1}')
+echo "  → 롤백할 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+sudo docker kill $containerId || true
 sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
 echo "********** [배포 실패] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
 exit 1
