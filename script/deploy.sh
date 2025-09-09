@@ -38,6 +38,10 @@ echo "> 새로운 '$TARGET_ENV'($APP_NAME) 애플리케이션 실행 (Port: $TAR
 echo "  → Docker Hub에서 최신 이미지를 pull" >> $DEPLOY_LOG
 sudo docker-compose -f $DOCKER_COMPOSE_FILE pull "web-$TARGET_ENV"
 echo "  → '$TARGET_ENV' 컨테이너를 실행" >> $DEPLOY_LOG
+sudo docker-compose -f $DOCKER_COMPOSE_FILE stop "web-$TARGET_ENV" || true
+sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV" || true
+
+# 깨끗한 상태에서 컨테이너를 새로 생성
 sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
 
 # 3. 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
