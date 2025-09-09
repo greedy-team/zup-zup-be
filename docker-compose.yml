@@ -29,6 +29,7 @@ services:
      - ./.env
     environment:
       - LOGGING_LEVEL_ROOT=DEBUG
+      - SPRING_PROFILES_ACTIVE=prod
     restart: always
     depends_on:
       - mysql-server
@@ -42,6 +43,7 @@ services:
       - ./.env
     environment:
       - LOGGING_LEVEL_ROOT=DEBUG
+      - SPRING_PROFILES_ACTIVE=prod
     restart: always
     depends_on:
       - mysql-server
