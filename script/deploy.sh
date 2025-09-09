@@ -6,7 +6,7 @@ set -e
 # --- 변수 설정 ---
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
-DOCKER_COMPOSE_FILE="$PROJECT_ROOT/docker-compose-prod.yml"
+DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
 NGINX_CONFIG_FILE="/etc/nginx/sites-available/api.sejong-zupzup.kr.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
