@@ -82,7 +82,7 @@ done
 # Health Check가 최종적으로 실패한 경우, 롤백을 시작
 echo "  → $APP_NAME 애플리케이션 실행 실패" >> $DEPLOY_LOG
 echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 출력" >> $DEPLOY_LOG
-sudo docker logs --tail 50 "zupzup-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
+sudo docker logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
 echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
 containerId=$(sudo docker ps | grep "web-$TARGET_ENV" | awk '{print $1}')
