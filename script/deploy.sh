@@ -22,7 +22,7 @@ trap on_error ERR
 echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
 cd $PROJECT_ROOT
 
-# 1. 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
+# 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
 if sudo grep -q "server 127.0.0.1:8080;" $UPSTREAM_CONFIG_FILE; then
   CURRENT_ENV="blue"
   TARGET_PORT=8081
@@ -32,8 +32,9 @@ else
   TARGET_PORT=8080
   TARGET_ENV="blue"
 fi
+echo "> 현재 환경: '$CURRENT_ENV', 타겟 환경: '$TARGET_ENV'" >> $DEPLOY_LOG
 
-# 2. 새로운 버전의 애플리케이션을 실행
+# 새로운 버전의 애플리케이션을 실행
 echo "> 새로운 '$TARGET_ENV'($APP_NAME) 애플리케이션 실행 (Port: $TARGET_PORT)" >> $DEPLOY_LOG
 echo "  → Docker Hub에서 최신 이미지를 pull" >> $DEPLOY_LOG
 sudo docker-compose -f $DOCKER_COMPOSE_FILE pull "web-$TARGET_ENV"
@@ -44,33 +45,39 @@ sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV" || true
 # 깨끗한 상태에서 컨테이너를 새로 생성
 sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
 
-# 3. 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
+# 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
 echo "> '$TARGET_ENV' 컨테이너 Health Check" >> $DEPLOY_LOG
 for i in {1..12}; do
   # curl 명령으로 새 컨테이너가 응답하는지 확인합
   if curl -s --fail http://localhost:$TARGET_PORT/actuator/health > /dev/null; then
     echo "  → $APP_NAME 애플리케이션 실행 성공!" >> $DEPLOY_LOG
 
-    # 4. Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
+    # Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
     echo "> Nginx 트래픽을 '$TARGET_ENV'(으)로 전환" >> $DEPLOY_LOG
-    echo "upstream zupzup_api_servers { server 127.0.0.1:$TARGET_PORT; }" | sudo tee $UPSTREAM_CONFIG_FILE
+    sudo sed -i "s/server 127.0.0.1:[0-9]\{4,\};/server 127.0.0.1:$TARGET_PORT;/" $UPSTREAM_CONFIG_FILE
 
     # Nginx 설정에 문법 오류가 없는지 테스트한 후, 재시작하여 변경사항을 적용
     sudo nginx -t && sudo systemctl restart nginx
     echo "  → Nginx 재시작 완료" >> $DEPLOY_LOG
 
-    # 5. 기존에 실행되던 구버전 애플리케이션을 종료 (containerId 사용)
+    # 기존에 실행되던 구버전 애플리케이션을 종료
     echo "> 기존 '$CURRENT_ENV' 애플리케이션을 종료" >> $DEPLOY_LOG
-    containerId=$(sudo docker ps | grep "web-$CURRENT_ENV" | awk '{print $1}')
-    echo "  → 기존 컨테이너 ID: $containerId" >> $DEPLOY_LOG
-    sudo docker kill $containerId || true
-    sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
-    # 사용하지 않는 도커 이미지를 정리하여 용량을 확보
-    sudo docker image prune -af
-    echo "   → 종료 완료" >> $DEPLOY_LOG
+    containerId=$(sudo docker ps -q --filter "name=web-$CURRENT_ENV")
+    if [ -n "$containerId" ]; then
+        echo "  → 기존 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+        sudo docker kill $containerId
+        sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
+        echo "   → 종료 완료" >> $DEPLOY_LOG
+    else
+        echo "  → 종료할 기존 '$CURRENT_ENV' 컨테이너가 없습니다." >> $DEPLOY_LOG
+    fi
 
-    # 6. 보안을 위해 환경변수 파일을 삭제
-    # rm -f .env
+    # 사용하지 않는 댕글링 이미지만 정리
+    echo "> 사용하지 않는 도커 이미지 정리" >> $DEPLOY_LOG
+    sudo docker image prune -f
+
+    # 보안을 위해 환경변수 파일을 삭제
+    rm -f .env
 
     echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
     exit 0
