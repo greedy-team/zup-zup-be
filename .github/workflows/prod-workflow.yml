@@ -64,9 +64,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: |
-            script/deploy.sh
-            docker-compose-prod.yml
+          source: "docker-compose-prod.yml,script/deploy.sh"
           target: "/home/ubuntu/zupzup"
           overwrite: true
 
