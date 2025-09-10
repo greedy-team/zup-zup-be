@@ -7,7 +7,7 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
-NGINX_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"  # 변수명 수정
+NGINX_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
 on_error() {
@@ -23,7 +23,7 @@ echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
 cd $PROJECT_ROOT
 
 # 1. 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
-if sudo grep -q "proxy_pass http://127.0.0.1:8080" $NGINX_CONFIG_FILE; then
+if sudo grep -q "server 127.0.0.1:8080;" $UPSTREAM_CONFIG_FILE; then
   CURRENT_ENV="blue"
   TARGET_PORT=8081
   TARGET_ENV="green"
@@ -53,7 +53,7 @@ for i in {1..12}; do
 
     # 4. Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
     echo "> Nginx 트래픽을 '$TARGET_ENV'(으)로 전환" >> $DEPLOY_LOG
-    sudo sed -i "s/127.0.0.1:[0-9]\{4\}/127.0.0.1:$TARGET_PORT/g" $NGINX_CONFIG_FILE
+    echo "upstream zupzup_api_servers { server 127.0.0.1:$TARGET_PORT; }" | sudo tee $UPSTREAM_CONFIG_FILE
 
     # Nginx 설정에 문법 오류가 없는지 테스트한 후, 재시작하여 변경사항을 적용
     sudo nginx -t && sudo systemctl restart nginx
