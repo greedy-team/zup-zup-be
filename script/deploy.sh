@@ -7,7 +7,7 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
-NGINX_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
+UPSTREAM_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
 on_error() {
