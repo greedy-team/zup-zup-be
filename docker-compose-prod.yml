@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web-blue:
     image: sejongzupzup/api-server:latest
-    container_name: zupzup-blue
+    container_name: web-blue
     ports:
       - "8080:8080"
     env_file:
@@ -11,10 +11,12 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
+    volumes:
+      - /home/ubuntu/zupzup/logs/blue:/app/logs
 
   web-green:
     image: sejongzupzup/api-server:latest
-    container_name: zupzup-green
+    container_name: web-green
     ports:
       - "8081:8080"
     env_file:
@@ -22,3 +24,5 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
+    volumes:
+      - /home/ubuntu/zupzup/logs/green:/app/logs
