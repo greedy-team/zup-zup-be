@@ -12,7 +12,7 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
     volumes:
-      - /home/ubuntu/zupzup/logs/blue:/app/logs
+      - /home/ubuntu/zupzup/logs:/app/logs
 
   web-green:
     image: sejongzupzup/api-server:latest
@@ -25,4 +25,4 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
     volumes:
-      - /home/ubuntu/zupzup/logs/green:/app/logs
+      - /home/ubuntu/zupzup/logs:/app/logs
