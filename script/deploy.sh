@@ -11,7 +11,7 @@ UPSTREAM_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
 on_error() {
-  echo "********** [배포 중 에러 발생] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
+  echo "********** [배포 중 에러 발생] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
   echo "   -> 실패한 명령어: '$BASH_COMMAND'" >> $DEPLOY_LOG
   echo "   -> 위치: ${BASH_SOURCE[0]}:${LINENO}" >> $DEPLOY_LOG
   exit 1
@@ -19,7 +19,7 @@ on_error() {
 trap on_error ERR
 
 # --- 배포 시작 ---
-echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
+echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S') ===========" >> $DEPLOY_LOG
 cd $PROJECT_ROOT
 
 # 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
@@ -79,7 +79,7 @@ for i in {1..12}; do
     # 보안을 위해 환경변수 파일을 삭제
     rm -f .env
 
-    echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S')" >> $DEPLOY_LOG
+    echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S') ===========" >> $DEPLOY_LOG
     exit 0
   fi
   echo "  → Health Check 대기 중... ($i/12)" >> $DEPLOY_LOG
