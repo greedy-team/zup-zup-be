@@ -7,8 +7,12 @@ set -e
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
 DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
-UPSTREAM_CONFIG_FILE="/etc/nginx/sites-available/upstream.conf"
 DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
+
+NGINX_CONFIG_DIR="/etc/nginx/sites-available"
+UPSTREAM_BLUE_CONF="$NGINX_CONFIG_DIR/upstream.blue.conf"
+UPSTREAM_GREEN_CONF="$NGINX_CONFIG_DIR/upstream.green.conf"
+UPSTREAM_ACTIVE_LINK="$NGINX_CONFIG_DIR/upstream.active.conf"
 
 on_error() {
   echo "********** [배포 중 에러 발생] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
@@ -23,14 +27,16 @@ echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S') ===========" >>
 cd $PROJECT_ROOT
 
 # 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
-if sudo grep -q "server 127.0.0.1:8080;" $UPSTREAM_CONFIG_FILE; then
+if [ "$(readlink $UPSTREAM_ACTIVE_LINK)" == "$UPSTREAM_BLUE_CONF" ]; then
   CURRENT_ENV="blue"
   TARGET_PORT=8081
   TARGET_ENV="green"
+  TARGET_CONF="$UPSTREAM_GREEN_CONF"
 else
   CURRENT_ENV="green"
   TARGET_PORT=8080
   TARGET_ENV="blue"
+  TARGET_CONF="$UPSTREAM_BLUE_CONF"
 fi
 echo "> 현재 환경: '$CURRENT_ENV', 타겟 환경: '$TARGET_ENV'" >> $DEPLOY_LOG
 
@@ -54,7 +60,7 @@ for i in {1..12}; do
 
     # Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
     echo "> Nginx 트래픽을 '$TARGET_ENV'(으)로 전환" >> $DEPLOY_LOG
-    sudo sed -i "s/server 127.0.0.1:[0-9]\{4,\};/server 127.0.0.1:$TARGET_PORT;/" $UPSTREAM_CONFIG_FILE
+    sudo ln -sfn "$TARGET_CONF" "$UPSTREAM_ACTIVE_LINK"
 
     # Nginx 설정에 문법 오류가 없는지 테스트한 후, 재시작하여 변경사항을 적용
     sudo nginx -t && sudo systemctl reload nginx
@@ -92,9 +98,13 @@ echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 �
 sudo docker logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
 echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
-containerId=$(sudo docker ps | grep "web-$TARGET_ENV" | awk '{print $1}')
-echo "  → 롤백할 컨테이너 ID: $containerId" >> $DEPLOY_LOG
-sudo docker kill $containerId || true
-sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
+containerId=$(sudo docker ps -a -q --filter "name=web-$TARGET_ENV")
+if [ -n "$containerId" ]; then
+    echo "  → 롤백할 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+    sudo docker kill $containerId || true
+    sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
+else
+    echo "  → 롤백할 '$TARGET_ENV' 컨테이너를 찾을 수 없습니다." >> $DEPLOY_LOG
+fi
 echo "********** [배포 실패] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
 exit 1
