@@ -58,7 +58,7 @@ jobs:
           docker build -t sejongzupzup/api-server:latest .
           docker push sejongzupzup/api-server:latest
 
-      - name: 💾 EC2에 JAR 파일 전송...
+      - name: 💾 EC2에 배포 관련 파일 전송...
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
