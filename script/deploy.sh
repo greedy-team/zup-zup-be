@@ -57,7 +57,7 @@ for i in {1..12}; do
     sudo sed -i "s/server 127.0.0.1:[0-9]\{4,\};/server 127.0.0.1:$TARGET_PORT;/" $UPSTREAM_CONFIG_FILE
 
     # Nginx 설정에 문법 오류가 없는지 테스트한 후, 재시작하여 변경사항을 적용
-    sudo nginx -t && sudo systemctl restart nginx
+    sudo nginx -t && sudo systemctl reload nginx
     echo "  → Nginx 재시작 완료" >> $DEPLOY_LOG
 
     # 기존에 실행되던 구버전 애플리케이션을 종료
