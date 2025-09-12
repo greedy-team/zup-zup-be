@@ -1,6 +1,5 @@
 package com.greedy.zupzup.category.domain;
 
-import com.greedy.zupzup.global.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +22,7 @@ import jakarta.persistence.Table;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Category extends BaseTimeEntity {
+public class Category {
 
     private static final String ETC_CATEGORY_NAME = "기타";
 

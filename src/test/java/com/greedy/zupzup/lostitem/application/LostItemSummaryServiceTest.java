@@ -50,7 +50,7 @@ class LostItemSummaryServiceTest extends ServiceUnitTest {
             );
 
             given(lostItemRepository.findAreaSummaries(
-                    isNull(), eq(LostItemStatus.REGISTERED)))
+                    isNull(), eq(LostItemStatus.REGISTERED.name())))
                     .willReturn(rows);
 
             // when
@@ -67,7 +67,7 @@ class LostItemSummaryServiceTest extends ServiceUnitTest {
                 softly.assertThat(result.get(1).lostCount()).isEqualTo(1L);
             });
 
-            verify(lostItemRepository).findAreaSummaries(null, LostItemStatus.REGISTERED);
+            verify(lostItemRepository).findAreaSummaries(null, LostItemStatus.REGISTERED.name());
         }
 
         @Test
@@ -78,7 +78,7 @@ class LostItemSummaryServiceTest extends ServiceUnitTest {
                     List.of(new SummaryProj(3L, "도서관", 5L));
 
             given(lostItemRepository.findAreaSummaries(
-                    eq(categoryId), eq(LostItemStatus.REGISTERED)))
+                    eq(categoryId), eq(LostItemStatus.REGISTERED.name())))
                     .willReturn(rows);
             // when
             List<LostItemSummaryCommand> result = service.getSummary(categoryId);
@@ -91,13 +91,13 @@ class LostItemSummaryServiceTest extends ServiceUnitTest {
                 softly.assertThat(result.get(0).lostCount()).isEqualTo(5L);
             });
 
-            verify(lostItemRepository).findAreaSummaries(categoryId, LostItemStatus.REGISTERED);
+            verify(lostItemRepository).findAreaSummaries(categoryId, LostItemStatus.REGISTERED.name());
         }
 
         @Test
         void 결과가_없으면_빈_목록을_반환한다() {
             // given
-            given(lostItemRepository.findAreaSummaries(null, LostItemStatus.REGISTERED))
+            given(lostItemRepository.findAreaSummaries(null, LostItemStatus.REGISTERED.name()))
                     .willReturn(List.of());
 
             // when
@@ -106,7 +106,7 @@ class LostItemSummaryServiceTest extends ServiceUnitTest {
             // then
             assertSoftly(softly -> softly.assertThat(result).isEmpty());
 
-            verify(lostItemRepository).findAreaSummaries(null, LostItemStatus.REGISTERED);
+            verify(lostItemRepository).findAreaSummaries(null, LostItemStatus.REGISTERED.name());
         }
     }
 }

@@ -9,6 +9,12 @@
     <include resource="logback/console/info-console.xml"/>
     <include resource="logback/console/warn-console.xml"/>
     <include resource="logback/console/error-console.xml"/>
+    <include resource="logback/console/sql-console.xml"/>
+
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+      <appender-ref ref="SQL_CONSOLE"/>
+    </logger>
+
     <root level="info">
       <appender-ref ref="INFO_CONSOLE"/>
       <appender-ref ref="WARN_CONSOLE"/>
