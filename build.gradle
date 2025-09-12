@@ -36,6 +36,7 @@ dependencies {
 
 	implementation 'org.hibernate.orm:hibernate-spatial'
 	implementation 'org.locationtech.jts:jts-core'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	implementation 'software.amazon.awssdk:s3:2.25.11'
 

@@ -1,85 +1,110 @@
 #!/bin/bash
 
-# 명령 에러 발생 시 종료
+# 명령 실행 중 에러가 발생하면 즉시 스크립트를 종료합니다.
 set -e
 
+# --- 변수 설정 ---
 PROJECT_ROOT="/home/ubuntu/zupzup"
 APP_NAME="sejong-zupzup"
+DOCKER_COMPOSE_FILE="docker-compose-prod.yml"
+DEPLOY_LOG="$PROJECT_ROOT/logs/deploy/deploy.log"
 
-APP_ERROR_LOG="/home/ubuntu/zupzup/logs/deploy/jvm_error.log"
-DEPLOY_LOG="/home/ubuntu/zupzup/logs/deploy/deploy.log"
+NGINX_CONFIG_DIR="/etc/nginx/sites-available"
+UPSTREAM_BLUE_CONF="$NGINX_CONFIG_DIR/upstream.blue.conf"
+UPSTREAM_GREEN_CONF="$NGINX_CONFIG_DIR/upstream.green.conf"
+UPSTREAM_ACTIVE_LINK="$NGINX_CONFIG_DIR/upstream.active.conf"
 
-
-# 배포 중 에러 발생으로 중단 시 로그 기록 함수
 on_error() {
-  echo "********** [배포 중 에러 발생] : $(date +%Y-%m-%d\ %H:%M:%S) **********" >> $DEPLOY_LOG
+  echo "********** [배포 중 에러 발생] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
   echo "   -> 실패한 명령어: '$BASH_COMMAND'" >> $DEPLOY_LOG
-  echo "   -> 위치: ${BASH_SOURCE[1]}:${LINENO[1]}" >> $DEPLOY_LOG
+  echo "   -> 위치: ${BASH_SOURCE[0]}:${LINENO}" >> $DEPLOY_LOG
   exit 1
 }
 trap on_error ERR
 
-echo "=========== [배포 시작] : $(date +%Y-%m-%d\ %H:%M:%S) ===========" >> $DEPLOY_LOG
-
+# --- 배포 시작 ---
+echo "=========== [배포 시작] : $(date +'%Y-%m-%d %H:%M:%S') ===========" >> $DEPLOY_LOG
 cd $PROJECT_ROOT
 
-
-# 1. jar 파일 선택
-JAR_FILE=$PROJECT_ROOT/build/libs/*.jar
-
-
-# 2. 실행 중인 sejong-zupzup 애플리케이션이 PID 조회
-CURRENT_PID=$(pgrep -f "$APP_NAME" || true)
-
-
-# 3. 실행 중인 sejong-zupzup 애플리케이션이 있으면 종료
-echo "> 실행 중인 sejong-zupzup 애플리케이션이 있다면 종료 " >> $DEPLOY_LOG
-if [ -z "$CURRENT_PID" ]; then
-  echo "  → 현재 실행 중인 애플리케이션이 없습니다." >> $DEPLOY_LOG
+# 현재 Nginx가 바라보는 포트 번호를 확인하여 타겟 환경을 결정
+if [ "$(readlink $UPSTREAM_ACTIVE_LINK)" == "$UPSTREAM_BLUE_CONF" ]; then
+  CURRENT_ENV="blue"
+  TARGET_PORT=8081
+  TARGET_ENV="green"
+  TARGET_CONF="$UPSTREAM_GREEN_CONF"
 else
-  echo "  → 실행 중인 애플리케이션 종료 (PID: $CURRENT_PID)" >> $DEPLOY_LOG
-  kill -15 $CURRENT_PID
+  CURRENT_ENV="green"
+  TARGET_PORT=8080
+  TARGET_ENV="blue"
+  TARGET_CONF="$UPSTREAM_BLUE_CONF"
+fi
+echo "> 현재 환경: '$CURRENT_ENV', 타겟 환경: '$TARGET_ENV'" >> $DEPLOY_LOG
 
-  for _ in {1..10}
-  do
-    if ! ps -p $CURRENT_PID > /dev/null 2>&1; then
-      echo "   → 종료 완료" >> $DEPLOY_LOG
-      break
+# 새로운 버전의 애플리케이션을 실행
+echo "> 새로운 '$TARGET_ENV'($APP_NAME) 애플리케이션 실행 (Port: $TARGET_PORT)" >> $DEPLOY_LOG
+echo "  → Docker Hub에서 최신 이미지를 pull" >> $DEPLOY_LOG
+sudo docker-compose -f $DOCKER_COMPOSE_FILE pull "web-$TARGET_ENV"
+echo "  → '$TARGET_ENV' 컨테이너를 실행" >> $DEPLOY_LOG
+sudo docker-compose -f $DOCKER_COMPOSE_FILE stop "web-$TARGET_ENV" || true
+sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV" || true
+
+# 깨끗한 상태에서 컨테이너를 새로 생성
+sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
+
+# 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
+echo "> '$TARGET_ENV' 컨테이너 Health Check" >> $DEPLOY_LOG
+for i in {1..12}; do
+  # curl 명령으로 새 컨테이너가 응답하는지 확인합
+  if curl -s --fail http://localhost:$TARGET_PORT/actuator/health > /dev/null; then
+    echo "  → $APP_NAME 애플리케이션 실행 성공!" >> $DEPLOY_LOG
+
+    # Nginx 트래픽을 새로운 컨테이너로 안전하게 전환
+    echo "> Nginx 트래픽을 '$TARGET_ENV'(으)로 전환" >> $DEPLOY_LOG
+    sudo ln -sfn "$TARGET_CONF" "$UPSTREAM_ACTIVE_LINK"
+
+    # Nginx 설정에 문법 오류가 없는지 테스트한 후, 재시작하여 변경사항을 적용
+    sudo nginx -t && sudo systemctl reload nginx
+    echo "  → Nginx 재시작 완료" >> $DEPLOY_LOG
+
+    # 기존에 실행되던 구버전 애플리케이션을 종료
+    echo "> 기존 '$CURRENT_ENV' 애플리케이션을 종료" >> $DEPLOY_LOG
+    containerId=$(sudo docker ps -q --filter "name=web-$CURRENT_ENV")
+    if [ -n "$containerId" ]; then
+        echo "  → 기존 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+        sudo docker kill $containerId
+        sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
+        echo "   → 종료 완료" >> $DEPLOY_LOG
+    else
+        echo "  → 종료할 기존 '$CURRENT_ENV' 컨테이너가 없습니다." >> $DEPLOY_LOG
     fi
-    sleep 1
-  done
 
-  if ps -p $CURRENT_PID > /dev/null 2>&1; then
-    echo "   → 정상 종료 실패, 강제 종료 시도." >> $DEPLOY_LOG
-    kill -9 $CURRENT_PID
-    sleep 2
+    # 사용하지 않는 댕글링 이미지만 정리
+    echo "> 사용하지 않는 도커 이미지 정리" >> $DEPLOY_LOG
+    sudo docker image prune -f
+
+    # 보안을 위해 환경변수 파일을 삭제
+    rm -f .env
+
+    echo "=========== [배포 완료] : $(date +'%Y-%m-%d %H:%M:%S') ===========" >> $DEPLOY_LOG
+    exit 0
   fi
-fi
+  echo "  → Health Check 대기 중... ($i/12)" >> $DEPLOY_LOG
+  sleep 5
+done
 
+# Health Check가 최종적으로 실패한 경우, 롤백을 시작
+echo "  → $APP_NAME 애플리케이션 실행 실패" >> $DEPLOY_LOG
+echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 출력" >> $DEPLOY_LOG
+sudo docker logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
-# 4. 새 애플리케이션 백그라운드 실행
-echo "> 새로운 sejong-zupzup 애플리케이션 실행" >> $DEPLOY_LOG
-nohup java \
-    -Dspring.profiles.active=prod \
-    -DDB_HOST="$DB_HOST" \
-    -DDB_USERNAME="$DB_USERNAME" \
-    -DDB_PASSWORD="$DB_PASSWORD" \
-    -DAWS_S3_ACCESS_KEY="$AWS_S3_ACCESS_KEY" \
-    -DAWS_S3_SECRET_ACCESS_KEY="$AWS_S3_SECRET_ACCESS_KEY" \
-    -DAWS_S3_BUCKET_NAME="$AWS_S3_BUCKET_NAME" \
-    -DACCESS_TOKEN_SECRET_KEY="$ACCESS_TOKEN_SECRET_KEY" \
-    -DACCESS_TOKEN_EXPIRATION="$ACCESS_TOKEN_EXPIRATION" \
-    -DSTUDENT_VERIFICATION_SESSION_TIME="$STUDENT_VERIFICATION_SESSION_TIME" \
-    -jar $JAR_FILE > /dev/null 2> $APP_ERROR_LOG &
-
-
-# 5. 애플리케이션 실행 여부 체크
-NEW_PID=$(pgrep -f "$APP_NAME")
-if [ -n "$NEW_PID" ]; then
-  echo "  → sejong-zupzup 애플리케이션 실행 성공 (PID: $NEW_PID)" >> $DEPLOY_LOG
+echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
+containerId=$(sudo docker ps -a -q --filter "name=web-$TARGET_ENV")
+if [ -n "$containerId" ]; then
+    echo "  → 롤백할 컨테이너 ID: $containerId" >> $DEPLOY_LOG
+    sudo docker kill $containerId || true
+    sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
 else
-  echo "  → sejong-zupzup 애플리케이션 실행 실패" >> $DEPLOY_LOG
-  exit 1
+    echo "  → 롤백할 '$TARGET_ENV' 컨테이너를 찾을 수 없습니다." >> $DEPLOY_LOG
 fi
-
-echo "=========== [배포 완료] : $(date +%Y-%m-%d\ %H:%M:%S) ===========" >> $DEPLOY_LOG
+echo "********** [배포 실패] : $(date +'%Y-%m-%d %H:%M:%S') **********" >> $DEPLOY_LOG
+exit 1
