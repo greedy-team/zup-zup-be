@@ -55,7 +55,7 @@ public class QuizSubmissionService {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
-        Optional<QuizAttempt> attemptOpt = quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), member.getId());
+        Optional<QuizAttempt> attemptOpt = quizAttemptRepository.findByLostItem_IdAndMember_Id(lostItem.getId(), member.getId());
 
         attemptOpt.ifPresent(attempt -> {
             if (!attempt.getIsCorrect()) {

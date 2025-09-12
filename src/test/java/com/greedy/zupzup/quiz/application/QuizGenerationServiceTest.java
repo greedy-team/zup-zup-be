@@ -14,17 +14,14 @@ import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.quiz.application.dto.OptionDto;
 import com.greedy.zupzup.quiz.application.dto.QuizDto;
-import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import com.greedy.zupzup.quiz.exception.QuizException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static com.greedy.zupzup.common.fixture.QuizAttemptFixture.INCORRECT_QUIZ_ATTEMPT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -66,7 +63,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(
                 mockFeatures);
 
@@ -85,7 +82,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         then(memberRepository).should().getById(TEST_MEMBER_ID);
         then(lostItemRepository).should().getWithCategoryById(TEST_LOST_ITEM_ID);
-        then(quizAttemptRepository).should().existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong());
+        then(quizAttemptRepository).should().existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong());
         then(lostItemFeatureRepository).should().findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID);
     }
 
@@ -102,7 +99,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
                 .isInstanceOf(ApplicationException.class)
                 .hasMessage(LostItemException.ALREADY_PLEDGED.getDetail());
 
-        then(quizAttemptRepository).should(never()).findByLostItemIdAndMemberId(anyLong(), anyLong());
+        then(quizAttemptRepository).should(never()).findByLostItem_IdAndMember_Id(anyLong(), anyLong());
         then(lostItemFeatureRepository).should(never()).findWithFeatureAndOptionsByLostItemId(anyLong());
     }
 
@@ -112,7 +109,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(true);
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
@@ -127,7 +124,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(ETC_CATEGORY_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
-        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
 
         // when
         List<QuizDto> result = quizGenerationService.getLostItemQuizzes(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID);
@@ -145,7 +142,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(false);
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(
                 mockFeatures);
 

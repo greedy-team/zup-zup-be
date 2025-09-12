@@ -41,7 +41,7 @@ public class QuizGenerationService {
         Member member = memberRepository.getById(memberId);
         LostItem lostItem = findAndValidateLostItem(lostItemId);
 
-        boolean hasIncorrectAttempt = quizAttemptRepository.existsByLostItemIdAndMemberIdAndIsCorrectIsFalse(lostItem.getId(), member.getId());
+        boolean hasIncorrectAttempt = quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(lostItem.getId(), member.getId());
 
         if (hasIncorrectAttempt) {
             throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);

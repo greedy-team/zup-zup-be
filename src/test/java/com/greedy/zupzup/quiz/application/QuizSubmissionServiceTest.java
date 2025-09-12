@@ -60,7 +60,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.findByLostItem_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.empty());
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
@@ -82,7 +82,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.findByLostItem_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.empty());
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
@@ -101,7 +101,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(quizAttemptRepository.findByLostItem_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.empty());
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
@@ -134,7 +134,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-        given(quizAttemptRepository.findByLostItemIdAndMemberId(anyLong(), anyLong())).willReturn(Optional.of(incorrectQuizAttempt));
+        given(quizAttemptRepository.findByLostItem_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.of(incorrectQuizAttempt));
 
         // when & then
         assertThatThrownBy(() -> quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, List.of()))
