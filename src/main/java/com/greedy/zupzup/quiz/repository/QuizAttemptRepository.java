@@ -8,14 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
 
-    boolean existsByLostItemIdAndMemberId(Long lostItemId, Long memberId);
+    boolean existsByLostItem_IdAndMember_Id(Long lostItemId, Long memberId);
+
+    boolean existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(Long lostItemId, Long memberId);
 
     boolean existsByLostItem_IdAndMember_IdAndIsCorrectTrue(Long lostItemId, Long memberId);
 
-    Optional<QuizAttempt> findByLostItemIdAndMemberId(Long lostItemId, Long memberId);
+    Optional<QuizAttempt> findByLostItem_IdAndMember_Id(Long lostItemId, Long memberId);
 
     default QuizAttempt getByLostItemIdAndMemberId(Long lostItemId, Long memberId) {
-        return findByLostItemIdAndMemberId(lostItemId, memberId)
+        return findByLostItem_IdAndMember_Id(lostItemId, memberId)
                 .orElseThrow(() -> new ApplicationException(QuizException.QUIZ_NOT_PASSED));
     }
 }

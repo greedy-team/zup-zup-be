@@ -15,6 +15,7 @@ import com.greedy.zupzup.quiz.exception.QuizException;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,38 +38,46 @@ public class QuizSubmissionService {
         LostItem lostItem = lostItemRepository.getById(lostItemId);
         Member member = memberRepository.getById(memberId);
 
-        validateSubmissionPossibility(lostItem, member);
+        Optional<QuizAttempt> existingAttemptOpt = validateSubmissionPossibility(lostItem, member);
 
         List<LostItemFeature> correctFeatures = lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(
                 lostItem.getId());
         Map<Long, Long> correctAnswerMap = createCorrectAnswerMap(correctFeatures);
         boolean isCorrect = checkAnswers(correctAnswerMap, answers, correctFeatures.size());
 
-        saveQuizAttempt(lostItem, member, isCorrect);
+        saveQuizAttempt(existingAttemptOpt, lostItem, member, isCorrect);
 
         return isCorrect ? QuizResultDto.correct(lostItem) : QuizResultDto.incorrect();
     }
 
-    private void validateSubmissionPossibility(LostItem lostItem, Member member) {
+    private Optional<QuizAttempt> validateSubmissionPossibility(LostItem lostItem, Member member) {
         if (!lostItem.isPledgeable()) {
             throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
         }
 
-        quizAttemptRepository.findByLostItemIdAndMemberId(lostItem.getId(), member.getId())
-                .ifPresent(attempt -> {
-                    if (!attempt.getIsCorrect()) {
-                        throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
-                    }
-                });
+        Optional<QuizAttempt> attemptOpt = quizAttemptRepository.findByLostItem_IdAndMember_Id(lostItem.getId(), member.getId());
+
+        attemptOpt.ifPresent(attempt -> {
+            if (!attempt.getIsCorrect()) {
+                throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
+            }
+        });
+
+        return attemptOpt;
     }
 
-    private void saveQuizAttempt(LostItem lostItem, Member member, boolean isCorrect) {
-        QuizAttempt attempt = QuizAttempt.builder()
-                .member(member)
-                .lostItem(lostItem)
-                .isCorrect(isCorrect)
-                .build();
-        quizAttemptRepository.save(attempt);
+    private void saveQuizAttempt(Optional<QuizAttempt> existingAttemptOpt, LostItem lostItem, Member member, boolean isCorrect) {
+        if (existingAttemptOpt.isPresent()) {
+            QuizAttempt existingAttempt = existingAttemptOpt.get();
+            existingAttempt.updateResult(isCorrect);
+        } else {
+            QuizAttempt newAttempt = QuizAttempt.builder()
+                    .member(member)
+                    .lostItem(lostItem)
+                    .isCorrect(isCorrect)
+                    .build();
+            quizAttemptRepository.save(newAttempt);
+        }
     }
 
     private Map<Long, Long> createCorrectAnswerMap(List<LostItemFeature> correctFeatures) {

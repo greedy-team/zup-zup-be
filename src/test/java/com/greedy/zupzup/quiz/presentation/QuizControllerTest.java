@@ -157,6 +157,39 @@ class QuizControllerTest extends ControllerTest {
         }
 
         @Test
+        @DisplayName("이전에 정답을 맞힌 기록이 있어도 200 OK를 응답한다")
+        void 이전에_정답을_맞힌_기록이_있어도_200_OK를_응답한다() throws Exception {
+
+            // given
+            quizAttemptRepository.save(QuizAttempt.builder()
+                    .member(member).lostItem(lostItem).isCorrect(true).build());
+
+            List<LostItemFeature> correctFeatures = lostItemFeatureRepository.findByLostItemId(lostItem.getId());
+            List<AnswerRequest> correctAnswers = correctFeatures.stream()
+                    .map(feature -> new AnswerRequest(feature.getFeature().getId(), feature.getSelectedOption().getId()))
+                    .collect(Collectors.toList());
+            QuizSubmissionRequest request = new QuizSubmissionRequest(correctAnswers);
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("access_token", accessToken)
+                    .body(objectMapper.writeValueAsString(request))
+                    .when()
+                    .post("/api/lost-items/{lostItemId}/quizzes", lostItem.getId())
+                    .then().log().all()
+                    .extract();
+
+            // then
+            QuizSubmissionResponse response = extract.as(QuizSubmissionResponse.class);
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(response.correct()).isTrue();
+                softly.assertThat(response.detail()).isNotNull();
+            });
+        }
+
+        @Test
         void 이미_틀린_기록이_있으면_403_Forbidden을_응답한다() throws Exception {
 
             // given
