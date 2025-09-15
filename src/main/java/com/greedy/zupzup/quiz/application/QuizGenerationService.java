@@ -41,11 +41,12 @@ public class QuizGenerationService {
         Member member = memberRepository.getById(memberId);
         LostItem lostItem = findAndValidateLostItem(lostItemId);
 
-        boolean hasIncorrectAttempt = quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(lostItem.getId(), member.getId());
-
-        if (hasIncorrectAttempt) {
-            throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
-        }
+        quizAttemptRepository.findByLostItem_IdAndMember_Id(lostItem.getId(), member.getId())
+                .ifPresent(attempt -> {
+                    if (!attempt.getIsCorrect()) {
+                        throw new ApplicationException(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED);
+                    }
+                });
 
         if (lostItem.isEtcCategory()) {
             return Collections.emptyList();
