@@ -73,25 +73,21 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             """)
     Optional<LostItem> findWithCategoryAndAreaById(@Param("lostItemId") Long lostItemId);
 
-    @Query(value = """
-            select 
-                sa.id as schoolAreaId,
-                sa.area_name as schoolAreaName,
-                COALESCE(t.cnt, 0) as lostCount
-            from
-                school_area sa
-                left join (
-                        select found_area_id, COUNT(*) as cnt
-                        from lost_item
-                        where status = :status
-                          and (:categoryId is NULL or category_id = :categoryId)
-                        GROUP BY found_area_id
-                    ) t on t.found_area_id = sa.id
-            """,
-            nativeQuery = true)
+    @Query("""
+            select
+                sa.id       as schoolAreaId,
+                sa.areaName as schoolAreaName,
+                coalesce(count(li.id), 0) as lostCount
+            from SchoolArea sa
+                left join LostItem li
+                    on li.foundArea.id = sa.id
+                   and li.status = :status
+                   and (:categoryId is null or li.category.id = :categoryId)
+            group by sa.id, sa.areaName
+            """)
     List<LostItemSummaryProjection> findAreaSummaries(
             @Param("categoryId") Long categoryId,
-            @Param("status") String status
+            @Param("status") LostItemStatus status
     );
 
     default LostItem getById(Long id) {
