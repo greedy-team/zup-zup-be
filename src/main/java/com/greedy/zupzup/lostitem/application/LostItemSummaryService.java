@@ -16,7 +16,7 @@ public class LostItemSummaryService {
 
     @Transactional(readOnly = true)
     public List<LostItemSummaryCommand> getSummary(Long categoryId) {
-        return repository.findAreaSummaries(categoryId, LostItemStatus.REGISTERED.name())
+        return repository.findAreaSummaries(categoryId, LostItemStatus.REGISTERED)
                 .stream()
                 .map(LostItemSummaryCommand::from)
                 .toList();
