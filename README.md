@@ -1,12 +1,23 @@
 # 🐾 세종 줍줍 (Sejong-zupzup) 🐾
 
-세종대학교 분실물 지도를 통해 잃어버린 물건의 주인을 찾아주는 웹 서비스입니다.
+### 잃어버린 물건, 이젠 헤매지 말고 간편하게 '줍줍'하세요!
+
 
 <br>
 <br>
 
+# ✨ 프로젝트 소개 
+세종 줍줍은 세종대학교 구성원들을 위한 지도 기반 분실물 찾기 웹 서비스입니다.
+
+캠퍼스 내에서 발생하는 분실물을 지도 위에 표시하여, 잃어버린 물건과 주인을 더 빠르고 쉽게 이어주는 것을 목표로 합니다.
+
+
+
+<br>
+<br>
 
 # 💡 주요 기능
+
 
 ### 1. 직관적인 분실물 찾기
 <img width="1900" height="850" alt="image" src="https://github.com/user-attachments/assets/3d893403-963e-463f-b3dd-6df729917289" />
@@ -74,15 +85,12 @@
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/fa8ab443-f95a-4515-a577-f173c82956d5" />
 
 
-
 ## ☁️ Infra
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/b44aa48b-1319-4958-891a-994d5146d358" />
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/98c04a11-4265-40f8-8e23-0ce6d3aa2eb4" />
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/e8ee98a6-dba1-4c70-9d2e-e306f5ccbad0" />
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/0aec497a-f330-4f49-9214-d4b7c36b0596" />
 <img width="70" height="70" alt="image" src="https://github.com/user-attachments/assets/2aca8880-6929-43f3-8b3d-3190fe293044" />
-
-
 
 
 
@@ -96,6 +104,7 @@
 
 <br>
 <br>
+
 
 
 # 👥 멤버 소개
