@@ -30,7 +30,7 @@ class LostItemSummaryControllerTest extends ControllerTest {
         areas = givenSchoolAreas();
 
         for (SchoolArea area : areas) {
-            givenLostItemInArea(owner, category, area);
+            givenRegisteredLostItemInArea(category, area);
         }
     }
 
@@ -56,8 +56,8 @@ class LostItemSummaryControllerTest extends ControllerTest {
         Category other = givenWalletCategory();
 
         for (SchoolArea area : areas) {
-            givenLostItemInArea(owner, other, area);
-            givenLostItemInArea(owner, other, area);
+            givenRegisteredLostItemInArea(other, area);
+            givenRegisteredLostItemInArea(other, area);
         }
 
         LostItemSummaryResponse all = RestAssured.given()

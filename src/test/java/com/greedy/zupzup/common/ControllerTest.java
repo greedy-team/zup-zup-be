@@ -144,7 +144,7 @@ public abstract class ControllerTest {
         return categoryRepository.save(CategoryFixture.ETC());
     }
 
-    protected LostItem givenLostItem(Member member, Category category) {
+    protected LostItem givenRegisteredLostItem(Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
         LostItem lostItem = LostItem.builder()
@@ -175,7 +175,7 @@ public abstract class ControllerTest {
         return lostItem;
     }
 
-    protected LostItem givenNonQuizLostItem(Member member, Category category) {
+    protected LostItem givenNonQuizLostItem(Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
         LostItem lostItem = LostItem.builder()
@@ -194,7 +194,7 @@ public abstract class ControllerTest {
         return lostItem;
     }
 
-    protected LostItem givenLostItemInArea(Member member, Category category, SchoolArea area) {
+    protected LostItem givenRegisteredLostItemInArea(Category category, SchoolArea area) {
 
         LostItem lostItem = LostItem.builder()
                 .foundAreaDetail(area.getAreaName() + " 1층")
@@ -211,5 +211,3 @@ public abstract class ControllerTest {
     }
 
 }
-
-

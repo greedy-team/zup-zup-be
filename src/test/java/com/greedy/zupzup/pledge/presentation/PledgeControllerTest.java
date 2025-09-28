@@ -32,7 +32,7 @@ class PledgeControllerTest extends ControllerTest {
         member = givenMember(TEST_PASSWORD);
         accessToken = givenAccessToken(member);
         Category category = givenElectronicsCategory();
-        quizLostItem = givenLostItem(member, category);
+        quizLostItem = givenRegisteredLostItem(category);
     }
 
     @Nested
@@ -67,7 +67,7 @@ class PledgeControllerTest extends ControllerTest {
 
             // given
             Category etcCategory = givenEtcCategory();
-            LostItem nonQuizLostItem = givenNonQuizLostItem(member, etcCategory);
+            LostItem nonQuizLostItem = givenNonQuizLostItem(etcCategory);
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()

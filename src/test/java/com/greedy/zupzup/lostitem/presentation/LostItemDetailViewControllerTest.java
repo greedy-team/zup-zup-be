@@ -42,7 +42,7 @@ class LostItemDetailViewControllerTest extends ControllerTest {
 
     private LostItem persistElectronicLostItemGraph() {
         Category electronics = givenElectronicsCategory();
-        return givenLostItem(member, electronics);
+        return givenRegisteredLostItem(electronics);
     }
 
     private void saveQuizAttempt(LostItem item, boolean correct) {
