@@ -13,7 +13,7 @@ public record SchoolAreaResponse(
                 schoolArea.getId(),
                 schoolArea.getAreaName(),
                 CoordinatesResponse.from(schoolArea.getArea()),
-                new LatLngResponse(schoolArea.getArea().getInteriorPoint().getY(), schoolArea.getArea().getInteriorPoint().getX())
+                new LatLngResponse(schoolArea.getMarker().getY(), schoolArea.getMarker().getX())
         );
     }
 }
