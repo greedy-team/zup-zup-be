@@ -31,9 +31,9 @@ class LostItemViewControllerTest extends ControllerTest {
     void setUpData() {
         owner = givenMember("pw123456!");
         category = givenElectronicsCategory();
-        anyItem = givenLostItem(owner, category);
+        anyItem = givenRegisteredLostItem(category);
 
-        IntStream.range(0, 4).forEach(i -> givenLostItem(owner, category));
+        IntStream.range(0, 4).forEach(i -> givenRegisteredLostItem(category));
     }
 
     @Nested
@@ -67,7 +67,7 @@ class LostItemViewControllerTest extends ControllerTest {
             ReflectionTestUtils.setField(etc, "iconUrl", "https://icon.com/etc.svg");
             categoryRepository.saveAndFlush(etc);
 
-            LostItem item = givenNonQuizLostItem(owner, etc);
+            LostItem item = givenNonQuizLostItem(etc);
             Long id = item.getId();
 
             // when
@@ -97,9 +97,9 @@ class LostItemViewControllerTest extends ControllerTest {
         @Test
         void 목록_조회_카테고리_필터링이_적용된다() {
             Category wallet = givenWalletCategory();
-            LostItem w1 = givenNonQuizLostItem(owner, wallet);
-            LostItem w2 = givenNonQuizLostItem(owner, wallet);
-            LostItem w3 = givenNonQuizLostItem(owner, wallet);
+            LostItem w1 = givenNonQuizLostItem(wallet);
+            LostItem w2 = givenNonQuizLostItem(wallet);
+            LostItem w3 = givenNonQuizLostItem(wallet);
 
             // when
             ExtractableResponse<Response> extract = RestAssured.given().log().all()
@@ -181,7 +181,7 @@ class LostItemViewControllerTest extends ControllerTest {
             ReflectionTestUtils.setField(etc, "iconUrl", "https://icon.com/etc.svg");
             categoryRepository.saveAndFlush(etc);
 
-            LostItem item = givenNonQuizLostItem(owner, etc);
+            LostItem item = givenNonQuizLostItem(etc);
             Long id = item.getId();
 
             // when
@@ -205,7 +205,7 @@ class LostItemViewControllerTest extends ControllerTest {
         @Test
         void 단건_조회_PLEDGED면_403_FORBIDDEN를_응답한다() {
             // given
-            LostItem item = givenLostItem(owner, category);
+            LostItem item = givenRegisteredLostItem(category);
             Long id = item.getId();
             ReflectionTestUtils.setField(item, "status", LostItemStatus.PLEDGED);
             lostItemRepository.saveAndFlush(item);
@@ -229,7 +229,7 @@ class LostItemViewControllerTest extends ControllerTest {
         @Test
         void 단건_조회_FOUND면_403_FORBIDDEN를_응답한다() {
             // given
-            LostItem item = givenLostItem(owner, category);
+            LostItem item = givenRegisteredLostItem(category);
             Long id = item.getId();
             ReflectionTestUtils.setField(item, "status", LostItemStatus.FOUND);
             lostItemRepository.saveAndFlush(item);

@@ -59,8 +59,8 @@ class SchoolAreaControllerTest extends ControllerTest {
         void 위도_경도_좌표가_주어지면_해당_좌표가_속한_학교_구역과_200_OK를_응답해야_한다() {
 
             // given
-            Double lat = 37.55121049168251;
-            Double lng = 127.0745588999;
+            Double lat = 37.55087185;
+            Double lng = 127.0745531;
             SchoolArea expectedArea = schoolAreas.get(2);
 
             // when
