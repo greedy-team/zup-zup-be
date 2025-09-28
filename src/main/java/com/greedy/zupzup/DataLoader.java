@@ -16,6 +16,7 @@ import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
+import com.greedy.zupzup.schoolarea.presentation.dto.LatLngResponse;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import jakarta.transaction.Transactional;
 import java.io.InputStream;
@@ -23,10 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
@@ -48,7 +46,7 @@ public class DataLoader implements CommandLineRunner {
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     private final ObjectMapper objectMapper;
 
-    private record SchoolAreaInitDto(String areaName, List<List<Double>> coordinates) {
+    private record SchoolAreaInitDto(String areaName, List<List<Double>> coordinates, LatLngResponse marker) {
     }
 
     @Override
@@ -77,9 +75,12 @@ public class DataLoader implements CommandLineRunner {
                                 .map(c -> new Coordinate(c.get(0), c.get(1)))
                                 .toArray(Coordinate[]::new);
                         Polygon polygon = geometryFactory.createPolygon(coords);
+                        Point marker = geometryFactory.createPoint(new Coordinate(input.marker.lng(), input.marker.lat()));
+
                         return SchoolArea.builder()
                                 .areaName(input.areaName())
                                 .area(polygon)
+                                .marker(marker)
                                 .build();
                     })
                     .collect(Collectors.toList());
