@@ -1,6 +1,7 @@
 package com.greedy.zupzup.schoolarea.presentation;
 
 import com.greedy.zupzup.common.ControllerTest;
+import com.greedy.zupzup.global.config.CacheType;
 import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -24,10 +28,13 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 class SchoolAreaControllerTest extends ControllerTest {
 
     private List<SchoolArea> schoolAreas;
+    private Cache schoolAreaCache;
 
     @BeforeEach
     void setUp() {
         schoolAreas = givenSchoolAreas();
+        schoolAreaCache = cacheManager.getCache(CacheType.ALL_SCHOOL_AREA.getCacheName());
+        schoolAreaCache.clear();
     }
 
     @Nested
@@ -48,6 +55,45 @@ class SchoolAreaControllerTest extends ControllerTest {
 
             // then
             assertThat(response.count()).isEqualTo(schoolAreas.size());
+        }
+
+        @Test
+        void 두_번_이상_모든_학교_구역조회에_성공하면_캐싱된_데이터를_응답해야_한다() {
+
+            String cacheKey = "all";
+
+            assertThat(schoolAreaCache.get(cacheKey)).isNull();
+
+            // given & when
+            AllSchoolAreasResponse firstResponse = RestAssured.given().log().all()
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .when()
+                    .get("/api/school-areas")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .as(AllSchoolAreasResponse.class);
+
+            AllSchoolAreasResponse secondResponse = RestAssured.given().log().all()
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .when()
+                    .get("/api/school-areas")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .as(AllSchoolAreasResponse.class);
+
+            // then
+            com.github.benmanes.caffeine.cache.Cache caffeineCache
+                    = (com.github.benmanes.caffeine.cache.Cache) schoolAreaCache.getNativeCache();
+
+            assertSoftly(softly -> {
+                assertThat(secondResponse.count()).isEqualTo(firstResponse.count());
+                assertThat(secondResponse.schoolAreas()).containsAll(firstResponse.schoolAreas());
+                assertThat(caffeineCache.stats().hitCount()).isEqualTo(1L);
+                assertThat(schoolAreaCache.get(cacheKey)).isNotNull();      // 캐시 객체에서 해당 키가 존재하는지 확인하는 작업도 캐시 hit에 포함됨
+            });
+
         }
     }
 
