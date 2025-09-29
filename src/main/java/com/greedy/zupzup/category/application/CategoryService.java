@@ -38,6 +38,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheType.CacheNames.CATEGORY_DETAILS, key = "#categoryId")
     public CategoryFeaturesResponse getCategoryFeatures(Long categoryId) {
         Category category = categoryRepository.findWithFeaturesById(categoryId)
                 .orElseThrow(() -> new ApplicationException(CategoryException.CATEGORY_NOT_FOUND));
