@@ -11,10 +11,12 @@ import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
 import com.greedy.zupzup.category.presentation.dto.CategoryFeaturesResponse;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
+import com.greedy.zupzup.global.config.CacheType;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class CategoryService {
     private final FeatureOptionRepository featureOptionRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheType.CacheNames.ALL_CATEGORY, key = "'all'")
     public CategoriesResponse getAll() {
         List<CategoryDto> list = categoryRepository.findAllByOrderByIdAsc()
                 .stream()
