@@ -41,58 +41,51 @@ public interface MyPledgedLostItemControllerDocs {
                             examples = @ExampleObject(
                                     value = """
                                             {
-                                                 "content": [
-                                                     {
-                                                         "id": 1,
-                                                         "status": "PLEDGED",
-                                                         "category": {
-                                                             "id": 1,
-                                                             "name": "전자기기",
-                                                             "iconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
-                                                         },
-                                                         "schoolArea": {
-                                                             "id": 1,
-                                                             "name": "대양 AI 센터"
-                                                         },
-                                                         "locationDetail": "AI 센터 B205",
-                                                         "description": "검정색 아이폰 15 프로",
-                                                         "imageUrls": [
-                                                             "https://example.com/default-image.jpg"
-                                                         ],
-                                                         "depositArea": "학술정보원 2층 데스크",
-                                                         "pledgedAt": "2025-09-29",
-                                                         "createdAt": "2025-09-29T21:21:39.470346+09:00",
-                                                         "quizRequired": true,
-                                                         "quizAnswered": false,
-                                                         "pledgedByMe": true
-                                                     }
-                                                 ],
-                                                 "pageable": {
-                                                     "pageNumber": 0,
-                                                     "pageSize": 5,
-                                                     "sort": {
-                                                         "empty": true,
-                                                         "sorted": false,
-                                                         "unsorted": true
-                                                     },
-                                                     "offset": 0,
-                                                     "paged": true,
-                                                     "unpaged": false
-                                                 },
-                                                 "last": true,
-                                                 "totalElements": 1,
-                                                 "totalPages": 1,
-                                                 "size": 5,
-                                                 "number": 0,
-                                                 "sort": {
-                                                     "empty": true,
-                                                     "sorted": false,
-                                                     "unsorted": true
-                                                 },
-                                                 "numberOfElements": 1,
-                                                 "first": true,
-                                                 "empty": false
-                                             }
+                                                   "count": 3,
+                                                   "items": [
+                                                       {
+                                                           "id": 3,
+                                                           "categoryId": 1,
+                                                           "categoryName": "전자기기",
+                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
+                                                           "schoolAreaId": 3,
+                                                           "schoolAreaName": "대양 AI 센터",
+                                                           "foundAreaDetail": "AI 센터 B205",
+                                                           "createdAt": "2025-09-30T11:39:44.355103+09:00",
+                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
+                                                       },
+                                                       {
+                                                           "id": 2,
+                                                           "categoryId": 1,
+                                                           "categoryName": "전자기기",
+                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
+                                                           "schoolAreaId": 2,
+                                                           "schoolAreaName": "대양 AI 센터",
+                                                           "foundAreaDetail": "AI 센터 B205",
+                                                           "createdAt": "2025-09-30T11:39:44.285587+09:00",
+                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
+                                                       },
+                                                       {
+                                                           "id": 1,
+                                                           "categoryId": 1,
+                                                           "categoryName": "전자기기",
+                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
+                                                           "schoolAreaId": 1,
+                                                           "schoolAreaName": "대양 AI 센터",
+                                                           "foundAreaDetail": "AI 센터 B205",
+                                                           "createdAt": "2025-09-30T11:39:44.181142+09:00",
+                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
+                                                       }
+                                                   ],
+                                                   "pageInfo": {
+                                                       "page": 1,
+                                                       "size": 10,
+                                                       "totalElements": 3,
+                                                       "totalPages": 1,
+                                                       "hasPrev": false,
+                                                       "hasNext": false
+                                                   }
+                                               }
                                             """
                             )
                     )
