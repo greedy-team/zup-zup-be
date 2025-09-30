@@ -108,4 +108,37 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
         return findWithCategoryAndAreaById(id)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
+
+    @Query(
+            value = """
+            select
+                li.id              as id,
+                c.id               as categoryId,
+                c.name             as categoryName,
+                c.iconUrl          as categoryIconUrl,
+                sa.id              as schoolAreaId,
+                sa.areaName        as schoolAreaName,
+                li.foundAreaDetail as foundAreaDetail,
+                li.createdAt       as createdAt
+            from LostItem li
+                join li.category  c
+                join li.foundArea sa
+            where li.status = :status
+              and li.id in :ids
+            order by li.createdAt desc
+            """,
+            countQuery = """
+            select count(li)
+            from LostItem li
+            where li.status = :status
+              and li.id in :ids
+            """
+    )
+    Page<LostItemListProjection> findListByIdsAndStatus(
+            @Param("ids") List<Long> ids,
+            @Param("status") LostItemStatus status,
+            Pageable pageable
+    );
+
+
 }

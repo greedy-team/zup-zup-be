@@ -69,6 +69,20 @@ public class LostItemViewService {
                 ));
     }
 
+    /**
+     * 내가 서약한 분실물 조회
+     */
+    @Transactional(readOnly = true)
+    public Page<LostItemListCommand> getLostItemsByIds(List<Long> lostItemIds, int page, int limit) {
+        if (lostItemIds.isEmpty()) {
+            return Page.empty(PageRequest.of(page - 1, limit));
+        }
+        Pageable pageable = PageRequest.of(page - 1, limit);
+
+        return lostItemRepository.findListByIdsAndStatus(lostItemIds, LostItemStatus.PLEDGED, pageable)
+                .map(LostItemListCommand::from);
+    }
+
     private void statusGuardForSimpleView(LostItem item) {
         LostItemStatus status = item.getStatus();
         if (status == LostItemStatus.REGISTERED) {
