@@ -78,10 +78,10 @@ class DefaultQuizGenerationStrategyTest {
 
         // then
         QuizDto brandQuiz = quizzes.stream()
-                .filter(q -> q.question().contains("브랜드"))
+                .filter(quiz -> quiz.question().contains("브랜드"))
                 .findFirst().orElseThrow();
         QuizDto colorQuiz = quizzes.stream()
-                .filter(q -> q.question().contains("색상"))
+                .filter(quiz -> quiz.question().contains("색상"))
                 .findFirst().orElseThrow();
 
         assertThat(brandQuiz.options()).hasSize(QUIZ_OPTIONS_COUNT);
@@ -95,7 +95,7 @@ class DefaultQuizGenerationStrategyTest {
 
         assertThat(brandOptions.get(QUIZ_OPTIONS_COUNT - 1)).isEqualTo(ETC_OPTION_TEXT);
         if (colorOptions.contains(ETC_OPTION_TEXT)) {
-            assertThat(colorOptions.get(QUIZ_OPTIONS_COUNT - 1)).isEqualTo("기타");
+            assertThat(colorOptions.get(QUIZ_OPTIONS_COUNT - 1)).isEqualTo(ETC_OPTION_TEXT);
         }
     }
 }
