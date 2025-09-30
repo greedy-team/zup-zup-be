@@ -43,7 +43,7 @@ class QuizControllerTest extends ControllerTest {
         member = givenMember(TEST_PASSWORD);
         accessToken = givenAccessToken(member);
         Category category = givenElectronicsCategory();
-        lostItem = givenLostItem(member, category);
+        lostItem = givenRegisteredLostItem(category);
     }
 
     @Nested

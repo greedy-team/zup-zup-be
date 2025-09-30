@@ -66,7 +66,7 @@ public class LostItem extends BaseTimeEntity {
         this.foundAreaDetail = foundAreaDetail;
         this.description = description;
         this.depositArea = depositArea;
-        this.status = LostItemStatus.REGISTERED;
+        this.status = LostItemStatus.PENDING;
         this.pledgedAt = null;
         this.category = category;
         this.foundArea = foundArea;

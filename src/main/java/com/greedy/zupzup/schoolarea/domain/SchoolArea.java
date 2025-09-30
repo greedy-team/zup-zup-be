@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
 @Entity
@@ -31,8 +32,7 @@ public class SchoolArea {
     @Column(nullable = false, columnDefinition = "POLYGON SRID 4326")
     private Polygon area;
 
-    public SchoolArea(String areaName, Polygon area) {
-        this.areaName = areaName;
-        this.area = area;
-    }
+    @Column(nullable = false, columnDefinition = "POINT SRID 4326")
+    private Point marker;
+
 }

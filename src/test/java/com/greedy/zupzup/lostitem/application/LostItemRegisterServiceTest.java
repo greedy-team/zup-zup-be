@@ -73,7 +73,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
 
 
     @Test
-    void 분실물_등록에_성공하면_생성된_분실물_객체를_반환해야_한다() {
+    void 분실물_등록에_성공하면_생성된_PENDING_상태의_분실물_객체를_반환해야_한다() {
 
         // given
         LostItemRegisterRequest request = createDummyRequest(VALID_CATEGORY_ID, VALID_FEATURE_ID, VALID_OPTION_ID);
@@ -94,7 +94,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
             softly.assertThat(result.getCategory()).isEqualTo(mockCategory);
             softly.assertThat(result.getFoundArea()).isEqualTo(mockSchoolArea);
             softly.assertThat(result.getDescription()).isEqualTo("핸드폰 액정이 깨져 있어요.");
-            softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+            softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.PENDING);
         });
 
         then(lostItemRepository).should(times(1)).save(any(LostItem.class));
@@ -125,7 +125,7 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
             softly.assertThat(result.getCategory()).isEqualTo(mockETCCategory);
             softly.assertThat(result.getFoundArea()).isEqualTo(mockSchoolArea);
             softly.assertThat(result.getDescription()).isEqualTo("핸드폰 액정이 깨져 있어요.");
-            softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+            softly.assertThat(result.getStatus()).isEqualTo(LostItemStatus.PENDING);
         });
 
         then(lostItemRepository).should(times(1)).save(any(LostItem.class));

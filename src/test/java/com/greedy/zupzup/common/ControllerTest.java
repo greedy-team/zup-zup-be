@@ -13,6 +13,7 @@ import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -143,16 +144,19 @@ public abstract class ControllerTest {
         return categoryRepository.save(CategoryFixture.ETC());
     }
 
-    protected LostItem givenLostItem(Member member, Category category) {
+    protected LostItem givenRegisteredLostItem(Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
-        LostItem lostItem = new LostItem(
-                "AI 센터 B205",
-                "검정색 아이폰 15 프로",
-                "학술정보원 2층 데스크",
-                category,
-                schoolArea
-        );
+        LostItem lostItem = LostItem.builder()
+                .foundAreaDetail("AI 센터 B205")
+                .description("검정색 아이폰 15 프로")
+                .depositArea("학술정보원 2층 데스크")
+                .category(category)
+                .status(LostItemStatus.REGISTERED)
+                .foundArea(schoolArea)
+                .pledgedAt(null)
+                .build();
+
         lostItemRepository.save(lostItem);
         lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
 
@@ -171,34 +175,39 @@ public abstract class ControllerTest {
         return lostItem;
     }
 
-    protected LostItem givenNonQuizLostItem(Member member, Category category) {
+    protected LostItem givenNonQuizLostItem(Category category) {
         SchoolArea schoolArea = schoolAreaRepository.save(AI_CENTER());
 
-        LostItem lostItem = new LostItem(
-                "학생회관 1층",
-                "갈색 곰인형 키링",
-                "학생회관 1층 분실물 보관소",
-                category,
-                schoolArea
-        );
+        LostItem lostItem = LostItem.builder()
+                .foundAreaDetail("학생회관 1층")
+                .description("갈색 곰인형 키링")
+                .depositArea("학생회관 1층 분실물 보관소")
+                .category(category)
+                .status(LostItemStatus.REGISTERED)
+                .foundArea(schoolArea)
+                .pledgedAt(null)
+                .build();
+
         lostItemRepository.save(lostItem);
         lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
 
         return lostItem;
     }
 
-    protected LostItem givenLostItemInArea(Member member, Category category, SchoolArea area) {
-        LostItem lostItem = new LostItem(
-                area.getAreaName() + " 1층",
-                "테스트 분실물",
-                "보관소",
-                category,
-                area
-        );
+    protected LostItem givenRegisteredLostItemInArea(Category category, SchoolArea area) {
+
+        LostItem lostItem = LostItem.builder()
+                .foundAreaDetail(area.getAreaName() + " 1층")
+                .description("테스트 분실물")
+                .depositArea("보관소")
+                .category(category)
+                .status(LostItemStatus.REGISTERED)
+                .foundArea(area)
+                .pledgedAt(null)
+                .build();
+
         lostItemRepository.save(lostItem);
         return lostItem;
     }
 
 }
-
-
