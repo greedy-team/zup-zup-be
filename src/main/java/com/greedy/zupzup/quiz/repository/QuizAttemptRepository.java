@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
 
-    boolean existsByLostItem_IdAndMember_Id(Long lostItemId, Long memberId);
-
     boolean existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(Long lostItemId, Long memberId);
 
     boolean existsByLostItem_IdAndMember_IdAndIsCorrectTrue(Long lostItemId, Long memberId);

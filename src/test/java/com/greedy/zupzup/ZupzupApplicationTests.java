@@ -11,5 +11,4 @@ class ZupzupApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
