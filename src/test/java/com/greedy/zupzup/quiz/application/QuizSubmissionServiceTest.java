@@ -46,8 +46,9 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
     void setUp() {
         member = MEMBER();
         pledgeableLostItem = PLEDGEABLE_ELECTRONIC_LOST_ITEM();
-        ReflectionTestUtils.setField(member, "id", TEST_MEMBER_ID);
-        ReflectionTestUtils.setField(pledgeableLostItem, "id", TEST_LOST_ITEM_ID);
+        setId(member, TEST_MEMBER_ID);
+        setId(pledgeableLostItem, TEST_LOST_ITEM_ID);
+
     }
 
     @Test
