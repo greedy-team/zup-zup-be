@@ -17,7 +17,6 @@ public class PledgeQueryService {
 
     public Page<Long> getPledgedLostItemIds(Long memberId, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
-        return pledgeRepository.findByOwner_IdOrderByCreatedAtDesc(memberId, pageable)
-                .map(p -> p.getLostItem().getId());
+        return pledgeRepository.findLostItemIdsByOwnerId(memberId, pageable);
     }
 }
