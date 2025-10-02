@@ -8,8 +8,8 @@ import com.greedy.zupzup.common.fixture.PledgeFixture;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.pledge.domain.Pledge;
 import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import io.restassured.RestAssured;
@@ -79,13 +79,14 @@ class MyPledgedLostItemControllerTest extends ControllerTest {
             ExtractableResponse<Response> extract =
                     get("/api/lost-items/pledged?page=1&limit=10");
 
-            LostItemListResponse response = extract.as(LostItemListResponse.class);
-
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
-                softly.assertThat(response.items()).hasSize(3);
-                List<Long> ids = response.items().stream().map(r -> r.id()).toList();
+
+                List<Long> ids = extract.jsonPath().getList("items.id", Long.class);
+                softly.assertThat(ids).hasSize(3);
                 softly.assertThat(ids).containsExactlyInAnyOrder(i1.getId(), i2.getId(), i3.getId());
+
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(3);
             });
         }
 
@@ -103,16 +104,17 @@ class MyPledgedLostItemControllerTest extends ControllerTest {
             ExtractableResponse<Response> extract =
                     get("/api/lost-items/pledged?page=1&limit=10");
 
-            LostItemListResponse response = extract.as(LostItemListResponse.class);
-
             // then
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
-                softly.assertThat(response.items()).hasSize(1);
-                softly.assertThat(response.items().get(0).id()).isEqualTo(myItem.getId());
 
-                List<Long> ids = response.items().stream().map(i -> i.id()).toList();
+                List<Long> ids = extract.jsonPath().getList("items.id", Long.class);
+
+                softly.assertThat(ids).hasSize(1);
+                softly.assertThat(ids.get(0)).isEqualTo(myItem.getId());
                 softly.assertThat(ids).doesNotContain(unpledgedItem.getId());
+
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(1);
             });
         }
 
@@ -166,5 +168,105 @@ class MyPledgedLostItemControllerTest extends ControllerTest {
                 softly.assertThat(error.detail()).contains("page는 1 이상이어야 합니다.");
             });
         }
+
+        @Test
+        void 서약한_분실물이_없으면_빈_목록을_응답한다() {
+            // given
+
+            // when
+            ExtractableResponse<Response> extract =
+                    get("/api/lost-items/pledged?page=1&limit=10");
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(0);
+                softly.assertThat(extract.jsonPath().getList("items")).isEmpty();
+            });
+        }
+
+        @Test
+        void 페이징_파라미터가_없으면_기본값으로_조회된다() {
+            Category electronics = givenElectronicsCategory();
+
+            // given
+            LostItem i1 = persistLostItemGraph(electronics);
+            LostItem i2 = persistLostItemGraph(electronics);
+            LostItem i3 = persistLostItemGraph(electronics);
+            savePledge(i1);
+            savePledge(i2);
+            savePledge(i3);
+
+            // when
+            ExtractableResponse<Response> extract =
+                    get("/api/lost-items/pledged");
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(3);
+                softly.assertThat(extract.jsonPath().getList("items")).hasSize(3);
+                softly.assertThat(extract.jsonPath().getInt("pageInfo.size")).isEqualTo(20);
+            });
+        }
+
+        @Test
+        void 페이징_범위를_벗어나면_빈_목록을_응답한다() {
+            Category electronics = givenElectronicsCategory();
+
+            // given
+            LostItem myItem = persistLostItemGraph(electronics);
+            savePledge(myItem);
+
+            // when
+            ExtractableResponse<Response> extract =
+                    get("/api/lost-items/pledged?page=2&limit=10");
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(0);
+                softly.assertThat(extract.jsonPath().getList("items")).isEmpty();
+                softly.assertThat(extract.jsonPath().getInt("pageInfo.page")).isEqualTo(2);
+                softly.assertThat(extract.jsonPath().getLong("pageInfo.totalElements")).isEqualTo(1);
+            });
+        }
+
+        @Test
+        void 서약하지_않은_다른_사용자의_분실물은_조회되지_않는다() {
+            Category electronics = givenElectronicsCategory();
+
+            // given
+            Member otherMember = Member.builder()
+                    .studentId(999999)
+                    .name("OtherUser")
+                    .password("other_pass")
+                    .role(Role.USER)
+                    .build();
+            memberRepository.save(otherMember);
+            LostItem otherPledgedItem = persistLostItemGraph(electronics);
+
+            Pledge otherPledge = PledgeFixture.PLEDGE(otherMember, otherPledgedItem);
+            pledgeRepository.save(otherPledge);
+            ReflectionTestUtils.setField(otherPledgedItem, "status", LostItemStatus.PLEDGED);
+            lostItemRepository.save(otherPledgedItem);
+
+            LostItem myPledgedItem = persistLostItemGraph(electronics);
+            savePledge(myPledgedItem);
+
+            // when
+            ExtractableResponse<Response> extract =
+                    get("/api/lost-items/pledged?page=1&limit=10");
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                softly.assertThat(extract.jsonPath().getLong("count")).isEqualTo(1);
+                List<Long> ids = extract.jsonPath().getList("items.id", Long.class);
+                softly.assertThat(ids).containsExactly(myPledgedItem.getId());
+                softly.assertThat(ids).doesNotContain(otherPledgedItem.getId());
+            });
+        }
+
     }
 }

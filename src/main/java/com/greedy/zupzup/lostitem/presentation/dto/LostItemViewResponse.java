@@ -5,7 +5,6 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 public record LostItemViewResponse(
         Long id,
@@ -17,7 +16,8 @@ public record LostItemViewResponse(
         String foundAreaDetail,
         String createdAt,
         String representativeImageUrl
-) {
+) implements LostItemViewItem {
+
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private static String toKstIso(LocalDateTime ts) {

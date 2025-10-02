@@ -1,12 +1,14 @@
 package com.greedy.zupzup.lostitem.application;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
+import com.greedy.zupzup.lostitem.application.dto.MyPledgedLostItemCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedLostItemViewResponse;
 import com.greedy.zupzup.pledge.application.PledgeQueryService;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +23,19 @@ public class MyPledgedLostItemService {
     public LostItemListResponse getMyPledgedLostItems(Long memberId, int page, int limit) {
         Page<Long> pledgedIds = pledgeQueryService.getPledgedLostItemIds(memberId, page, limit);
 
-        Page<LostItemListCommand> pageResult =
-                lostItemViewService.getLostItemsByIds(pledgedIds.getContent(), page, limit);
+        Page<MyPledgedLostItemCommand> pageResult =
+                lostItemViewService.getPledgedLostItems(pledgedIds.getContent(), page, limit);
 
-        List<Long> ids = pageResult.getContent().stream().map(LostItemListCommand::id).toList();
-        Map<Long, String> repImageMap = lostItemViewService.getRepresentativeImageMapByItemIds(ids);
+        if (pageResult.isEmpty() && pledgedIds.getTotalElements() > 0) {
+            pageResult = new PageImpl<>(
+                    List.of(),
+                    PageRequest.of(pageResult.getNumber(), pageResult.getSize()),
+                    pledgedIds.getTotalElements()
+            );
+        }
 
-        return LostItemListResponse.of(pageResult, repImageMap);
+        Page<MyPledgedLostItemViewResponse> viewResponsePage = pageResult.map(MyPledgedLostItemViewResponse::from);
+
+        return LostItemListResponse.of(viewResponsePage);
     }
 }
