@@ -128,7 +128,7 @@ public interface MyPledgedLostItemControllerDocs {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    ResponseEntity<Page<LostItemDetailViewResponse>> getMyPledgedLostItems(
+    ResponseEntity<Page<LostItemListResponse>> getMyPledgedLostItems(
             @ParameterObject MyPledgedListQuery query
     );
 }
