@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/lost-items")
-public class MyPledgedLostItemController {
+public class MyPledgedLostItemController implements MyPledgedLostItemControllerDocs {
 
     private final MyPledgedLostItemService myPledgedLostItemService;
 

@@ -1,6 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation;
 
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemDetailViewResponse;
+import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListQuery;
 import com.greedy.zupzup.global.exception.ErrorResponse;
@@ -13,8 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "My Pledged LostItem", description = "내가 서약한 분실물 조회 API")
@@ -128,7 +129,8 @@ public interface MyPledgedLostItemControllerDocs {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    ResponseEntity<Page<LostItemListResponse>> getMyPledgedLostItems(
-            @ParameterObject MyPledgedListQuery query
+    ResponseEntity<LostItemListResponse> getMyPledgedLostItems(
+            @MemberAuth LoginMember loginMember,
+            @Valid @ParameterObject MyPledgedListQuery query
     );
 }
