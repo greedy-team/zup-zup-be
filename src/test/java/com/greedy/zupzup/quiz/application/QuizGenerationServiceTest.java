@@ -57,15 +57,16 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     }
 
     @Test
-    void 대상_카테고리면_Default전략에_위임하고_그_결과를_그대로_반환한다() {
+    void 기타_카테고리가_아니면_Default전략에_위임하고_그_결과를_그대로_반환해야_한다() {
         // given
         List<LostItemFeature> features = ELECTRONIC_LOST_ITEM_FEATURES(pledgeableLostItem);
 
         LostItemFeature brandFeature = features.stream()
-                .filter(f -> f.getFeature().getQuizQuestion().contains("브랜드"))
+                .filter(feature -> feature.getFeature().getQuizQuestion().contains("브랜드"))
                 .findFirst().orElseThrow();
+
         LostItemFeature colorFeature = features.stream()
-                .filter(f -> f.getFeature().getQuizQuestion().contains("색상"))
+                .filter(feature -> feature.getFeature().getQuizQuestion().contains("색상"))
                 .findFirst().orElseThrow();
 
         List<OptionDto> brandOptions = brandFeature.getFeatureOptions().stream()
@@ -79,14 +80,14 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
                 .toList();
 
         List<QuizDto> stubbed = List.of(
-             QuizDto.of(brandFeature, brandOptions),
-             QuizDto.of(colorFeature, colorOptions)
+                QuizDto.of(brandFeature, brandOptions),
+                QuizDto.of(colorFeature, colorOptions)
         );
-
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(TEST_LOST_ITEM_ID,
+                TEST_MEMBER_ID))
                 .willReturn(false);
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID))
                 .willReturn(features);
@@ -104,11 +105,12 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
     }
 
     @Test
-    void 기타_카테고리면_레포지토리_조회없이_empty전략에_빈리스트를_위임하고_빈리스트_반환() {
+    void 기타_카테고리면_레포지토리_조회없이_empty전략에_빈리스트를_위임하고_빈리스트_반환해야_한다() {
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(ETC_CATEGORY_LOST_ITEM_ID)).willReturn(nonQuizCategoryLostItem);
-        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID))
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(ETC_CATEGORY_LOST_ITEM_ID,
+                TEST_MEMBER_ID))
                 .willReturn(false);
         given(emptyQuizGenerationStrategy.createQuizzes(List.of())).willReturn(List.of());
 
@@ -145,7 +147,8 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // given
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
         given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pledgeableLostItem);
-        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong())).willReturn(true);
+        given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(),
+                anyLong())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
