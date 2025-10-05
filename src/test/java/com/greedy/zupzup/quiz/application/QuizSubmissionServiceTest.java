@@ -2,6 +2,7 @@ package com.greedy.zupzup.quiz.application;
 
 import static com.greedy.zupzup.common.fixture.LostItemFeatureFixture.ELECTRONIC_LOST_ITEM_FEATURES;
 import static com.greedy.zupzup.common.fixture.LostItemFixture.ALREADY_PLEDGED_LOST_ITEM;
+import static com.greedy.zupzup.common.fixture.LostItemFixture.PENDING_LOST_ITEM;
 import static com.greedy.zupzup.common.fixture.LostItemFixture.PLEDGEABLE_ELECTRONIC_LOST_ITEM;
 import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER;
 import static com.greedy.zupzup.common.fixture.QuizAttemptFixture.INCORRECT_QUIZ_ATTEMPT;
@@ -123,7 +124,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, List.of()))
                 .isInstanceOf(ApplicationException.class)
-                .hasMessage(LostItemException.ALREADY_PLEDGED.getDetail());
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
 
         then(quizAttemptRepository).should(never()).save(any(QuizAttempt.class));
     }
@@ -142,6 +143,22 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
                 .isInstanceOf(ApplicationException.class)
                 .hasMessage(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED.getDetail());
 
+        then(quizAttemptRepository).should(never()).save(any(QuizAttempt.class));
+    }
+
+    @Test
+    void 검토_중인_분실물에_대해_퀴즈를_제출하면_예외가_발생해야_한다() {
+        // given
+        LostItem pendingLostItem = PENDING_LOST_ITEM();
+        given(lostItemRepository.getById(TEST_LOST_ITEM_ID)).willReturn(pendingLostItem);
+        given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
+
+        // when & then
+        assertThatThrownBy(() -> quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, List.of()))
+                .isInstanceOf(ApplicationException.class)
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
+
+        then(quizAttemptRepository).should(never()).findByLostItem_IdAndMember_Id(anyLong(), anyLong());
         then(quizAttemptRepository).should(never()).save(any(QuizAttempt.class));
     }
 }

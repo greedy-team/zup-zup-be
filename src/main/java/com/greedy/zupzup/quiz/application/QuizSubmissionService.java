@@ -52,7 +52,7 @@ public class QuizSubmissionService {
 
     private Optional<QuizAttempt> validateSubmissionPossibility(LostItem lostItem, Member member) {
         if (!lostItem.isPledgeable()) {
-            throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
 
         Optional<QuizAttempt> attemptOpt = quizAttemptRepository.findByLostItem_IdAndMember_Id(lostItem.getId(), member.getId());

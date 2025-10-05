@@ -61,7 +61,7 @@ public class QuizGenerationService {
         LostItem lostItem = lostItemRepository.getWithCategoryById(lostItemId);
 
         if (!lostItem.isPledgeable()) {
-            throw new ApplicationException(LostItemException.ALREADY_PLEDGED);
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
         return lostItem;
     }

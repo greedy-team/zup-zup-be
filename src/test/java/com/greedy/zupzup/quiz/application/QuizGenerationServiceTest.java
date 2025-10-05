@@ -3,6 +3,7 @@ package com.greedy.zupzup.quiz.application;
 import static com.greedy.zupzup.common.fixture.LostItemFeatureFixture.ELECTRONIC_LOST_ITEM_FEATURES;
 import static com.greedy.zupzup.common.fixture.LostItemFixture.ALREADY_PLEDGED_LOST_ITEM;
 import static com.greedy.zupzup.common.fixture.LostItemFixture.NON_QUIZ_CATEGORY_LOST_ITEM;
+import static com.greedy.zupzup.common.fixture.LostItemFixture.PENDING_LOST_ITEM;
 import static com.greedy.zupzup.common.fixture.LostItemFixture.PLEDGEABLE_ELECTRONIC_LOST_ITEM;
 import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER;
 
@@ -134,7 +135,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
                 .isInstanceOf(ApplicationException.class)
-                .hasMessage(LostItemException.ALREADY_PLEDGED.getDetail());
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
 
         then(quizAttemptRepository).should(never()).findByLostItem_IdAndMember_Id(anyLong(), anyLong());
         then(lostItemFeatureRepository).should(never()).findWithFeatureAndOptionsByLostItemId(anyLong());
@@ -154,6 +155,24 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
                 .isInstanceOf(ApplicationException.class)
                 .hasMessage(QuizException.QUIZ_ATTEMPT_LIMIT_EXCEEDED.getDetail());
+        then(lostItemFeatureRepository).should(never()).findWithFeatureAndOptionsByLostItemId(anyLong());
+        then(defaultQuizGenerationStrategy).shouldHaveNoInteractions();
+        then(emptyQuizGenerationStrategy).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void 검토_중인_분실물에_대해_퀴즈_생성을_요청하면_전략_호출없이_예외가_발생해야_한다() {
+        // given
+        LostItem pendingLostItem = PENDING_LOST_ITEM();
+        given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
+        given(lostItemRepository.getWithCategoryById(TEST_LOST_ITEM_ID)).willReturn(pendingLostItem);
+
+        // when & then
+        assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
+                .isInstanceOf(ApplicationException.class)
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
+
+        then(quizAttemptRepository).should(never()).existsByLostItem_IdAndMember_IdAndIsCorrectIsFalse(anyLong(), anyLong());
         then(lostItemFeatureRepository).should(never()).findWithFeatureAndOptionsByLostItemId(anyLong());
         then(defaultQuizGenerationStrategy).shouldHaveNoInteractions();
         then(emptyQuizGenerationStrategy).shouldHaveNoInteractions();
