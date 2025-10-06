@@ -26,5 +26,14 @@ public class MemberFixture {
                 .role(Role.USER)
                 .build();
     }
+
+    public static Member ADMIN_WITH_ENCODED_PASSWORD(String password) {
+        return Member.builder()
+                .name("어드민유저")
+                .studentId(123456)
+                .password(BCrypt.hashpw(password, BCrypt.gensalt()))
+                .role(Role.ADMIN)
+                .build();
+    }
 }
 

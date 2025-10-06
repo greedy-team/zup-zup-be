@@ -9,7 +9,6 @@ import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.category.repository.FeatureRepository;
 import com.greedy.zupzup.common.fixture.CategoryFixture;
 import com.greedy.zupzup.common.fixture.LostItemImageFixture;
-import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -76,6 +76,9 @@ public abstract class ControllerTest {
     @Autowired
     protected JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    protected CacheManager cacheManager;
+
     @LocalServerPort
     protected int port;
 
@@ -90,6 +93,11 @@ public abstract class ControllerTest {
 
     protected Member givenMember(String password) {
         Member member = MEMBER_WITH_ENCODED_PASSWORD(password);
+        return memberRepository.save(member);
+    }
+
+    protected Member givenAdmin(String password) {
+        Member member = ADMIN_WITH_ENCODED_PASSWORD(password);
         return memberRepository.save(member);
     }
 
