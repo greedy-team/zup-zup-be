@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public enum CacheType {
 
-    ALL_SCHOOL_AREA(CacheNames.ALL_SCHOOL_AREA, 3, TimeUnit.DAYS, 1),
-    ALL_CATEGORY(CacheNames.ALL_CATEGORY, 3, TimeUnit.DAYS, 1),
-    CATEGORY_DETAILS(CacheNames.CATEGORY_DETAILS, 3, TimeUnit.DAYS, 20),
+    ALL_SCHOOL_AREA(CacheNames.ALL_SCHOOL_AREA, 30, TimeUnit.DAYS, 1),
+    ALL_CATEGORY(CacheNames.ALL_CATEGORY, 30, TimeUnit.DAYS, 1),
+    CATEGORY_DETAILS(CacheNames.CATEGORY_DETAILS, 30, TimeUnit.DAYS, 20),
     ;
 
     public static final class CacheNames {
