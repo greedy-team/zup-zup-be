@@ -15,9 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -38,7 +36,7 @@ class SchoolAreaControllerTest extends ControllerTest {
     }
 
     @Nested
-    @DisplayName("모든 학교 구역 조회")
+    @DisplayName("모든 학교 구역 조회 API")
     class findAll {
         @Test
         void 모든_학교_구역조회에_성공하면_200_OK를_응답해야_한다() {
@@ -61,8 +59,11 @@ class SchoolAreaControllerTest extends ControllerTest {
         void 두_번_이상_모든_학교_구역조회에_성공하면_캐싱된_데이터를_응답해야_한다() {
 
             String cacheKey = "all";
-
             assertThat(schoolAreaCache.get(cacheKey)).isNull();
+
+            com.github.benmanes.caffeine.cache.Cache caffeineCache
+                    = (com.github.benmanes.caffeine.cache.Cache) schoolAreaCache.getNativeCache();
+            long initialHitCount = caffeineCache.stats().hitCount();
 
             // given & when
             AllSchoolAreasResponse firstResponse = RestAssured.given().log().all()
@@ -84,13 +85,12 @@ class SchoolAreaControllerTest extends ControllerTest {
                     .as(AllSchoolAreasResponse.class);
 
             // then
-            com.github.benmanes.caffeine.cache.Cache caffeineCache
-                    = (com.github.benmanes.caffeine.cache.Cache) schoolAreaCache.getNativeCache();
+            long afterHitCount = caffeineCache.stats().hitCount();
 
             assertSoftly(softly -> {
                 assertThat(secondResponse.count()).isEqualTo(firstResponse.count());
                 assertThat(secondResponse.schoolAreas()).containsAll(firstResponse.schoolAreas());
-                assertThat(caffeineCache.stats().hitCount()).isEqualTo(1L);
+                assertThat(afterHitCount).isEqualTo(initialHitCount + 1L);
                 assertThat(schoolAreaCache.get(cacheKey)).isNotNull();      // 캐시 객체에서 해당 키가 존재하는지 확인하는 작업도 캐시 hit에 포함됨
             });
 
@@ -99,7 +99,7 @@ class SchoolAreaControllerTest extends ControllerTest {
 
 
     @Nested
-    @DisplayName("위도/경도로 학교 구역 조회")
+    @DisplayName("위도/경도로 학교 구역 조회 API")
     class findArea {
         @Test
         void 위도_경도_좌표가_주어지면_해당_좌표가_속한_학교_구역과_200_OK를_응답해야_한다() {

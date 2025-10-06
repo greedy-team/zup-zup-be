@@ -96,6 +96,11 @@ public abstract class ControllerTest {
         return memberRepository.save(member);
     }
 
+    protected Member givenAdmin(String password) {
+        Member member = ADMIN_WITH_ENCODED_PASSWORD(password);
+        return memberRepository.save(member);
+    }
+
     protected List<SchoolArea> givenSchoolAreas() {
         SchoolArea playground = PLAYGROUND();
         SchoolArea aiCenter = AI_CENTER();

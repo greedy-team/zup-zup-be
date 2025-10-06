@@ -74,6 +74,11 @@ class CategoryControllerTest extends ControllerTest {
             String cacheKey = "all";
             assertThat(allCategoryCache.get(cacheKey)).isNull();
 
+            com.github.benmanes.caffeine.cache.Cache caffeineCache
+                    = (com.github.benmanes.caffeine.cache.Cache) allCategoryCache.getNativeCache();
+            long initialHitCount = caffeineCache.stats().hitCount();
+
+
             // when
             CategoriesResponse firstResponse = RestAssured.given().log().all()
                     .when()
@@ -92,13 +97,12 @@ class CategoryControllerTest extends ControllerTest {
                     .as(CategoriesResponse.class);
 
             // then
-            com.github.benmanes.caffeine.cache.Cache caffeineCache
-                    = (com.github.benmanes.caffeine.cache.Cache) allCategoryCache.getNativeCache();
+            long afterHitCount = caffeineCache.stats().hitCount();
 
             assertSoftly(softly -> {
                 assertThat(secondResponse.categories().size()).isEqualTo(firstResponse.categories().size());
                 assertThat(secondResponse.categories()).containsAll(firstResponse.categories());
-                assertThat(caffeineCache.stats().hitCount()).isEqualTo(1L);
+                assertThat(afterHitCount).isEqualTo(initialHitCount + 1L);
                 assertThat(allCategoryCache.get(cacheKey)).isNotNull();
             });
         }
