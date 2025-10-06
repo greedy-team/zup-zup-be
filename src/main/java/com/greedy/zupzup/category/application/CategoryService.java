@@ -16,6 +16,7 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,5 +74,15 @@ public class CategoryService {
                 .toList();
 
         return new CategoryFeaturesResponse(category.getId(), category.getName(), featureDtos);
+    }
+
+    @CacheEvict(
+            cacheNames = {
+                    CacheType.CacheNames.ALL_CATEGORY,
+                    CacheType.CacheNames.CATEGORY_DETAILS
+            },
+            allEntries = true
+    )
+    public void evictAllCategoryCaches() {
     }
 }
