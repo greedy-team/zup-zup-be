@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public record LostItemViewDto(
+public record LostItemViewResponse(
         Long id,
         Long categoryId,
         String categoryName,
@@ -24,8 +24,8 @@ public record LostItemViewDto(
         return ts.atZone(KST).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    public static LostItemViewDto from(LostItemSimpleViewCommand c) {
-        return new LostItemViewDto(
+    public static LostItemViewResponse from(LostItemSimpleViewCommand c) {
+        return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
@@ -33,9 +33,9 @@ public record LostItemViewDto(
         );
     }
 
-    public static LostItemViewDto from(LostItemListCommand c, String representativeImageUrl) {
+    public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
         final String finalImage = pickListImage(c, representativeImageUrl);
-        return new LostItemViewDto(
+        return new LostItemViewResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
