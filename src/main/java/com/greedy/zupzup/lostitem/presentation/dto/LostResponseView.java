@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public record LostItemViewResponse(
+public record LostResponseView(
         Long id,
         Long categoryId,
         String categoryName,
@@ -16,7 +16,7 @@ public record LostItemViewResponse(
         String foundAreaDetail,
         String createdAt,
         String representativeImageUrl
-) implements LostItemViewItem {
+) implements LostItemView {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
@@ -24,8 +24,8 @@ public record LostItemViewResponse(
         return ts.atZone(KST).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    public static LostItemViewResponse from(LostItemSimpleViewCommand c) {
-        return new LostItemViewResponse(
+    public static LostResponseView from(LostItemSimpleViewCommand c) {
+        return new LostResponseView(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
@@ -33,9 +33,9 @@ public record LostItemViewResponse(
         );
     }
 
-    public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
+    public static LostResponseView from(LostItemListCommand c, String representativeImageUrl) {
         final String finalImage = pickListImage(c, representativeImageUrl);
-        return new LostItemViewResponse(
+        return new LostResponseView(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),

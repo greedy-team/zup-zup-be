@@ -1,8 +1,8 @@
 package com.greedy.zupzup.lostitem.presentation;
 
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemListQuery;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.LostResponseView;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -129,7 +129,7 @@ public interface LostItemViewControllerDocs {
                     )
             )
     })
-    ResponseEntity<LostItemListResponse> list(@ParameterObject @Valid LostItemListQuery query);
+    ResponseEntity<LostItemListResponse> list(@ParameterObject @Valid LostItemListRequest query);
 
     @Operation(
             summary = "분실물 단건(간단) 조회",
@@ -144,7 +144,7 @@ public interface LostItemViewControllerDocs {
                     responseCode = "200",
                     description = "단건 조회 성공",
                     content = @Content(
-                            schema = @Schema(implementation = LostItemViewResponse.class),
+                            schema = @Schema(implementation = LostResponseView.class),
                             examples = @ExampleObject(
                                     name = "단건 조회 성공 예시",
                                     value = """
@@ -200,7 +200,7 @@ public interface LostItemViewControllerDocs {
                     )
             )
     })
-    ResponseEntity<LostItemViewResponse> getBasic(
+    ResponseEntity<LostResponseView> getBasic(
             @Parameter(description = "조회할 분실물 ID", required = true, example = "12")
             @PathVariable Long lostItemId
     );

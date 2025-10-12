@@ -8,12 +8,12 @@ import java.util.stream.Collectors;
 
 public record LostItemListResponse(
         long count,
-        List<? extends LostItemViewItem> items,
+        List<? extends LostItemView> items,
         PageInfoResponse pageInfo
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
-        List<LostItemViewResponse> items = page.getContent().stream()
-                .map(c -> LostItemViewResponse.from(c, repImageMap.get(c.id())))
+        List<LostResponseView> items = page.getContent().stream()
+                .map(c -> LostResponseView.from(c, repImageMap.get(c.id())))
                 .toList();
 
         return new LostItemListResponse(
@@ -23,11 +23,11 @@ public record LostItemListResponse(
         );
     }
 
-    public static LostItemListResponse of(Page<MyPledgedLostItemViewResponse> page) {
+    public static LostItemListResponse of(Page<MyPledgedLostResponse> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
 
-        List<? extends LostItemViewItem> items = page.getContent().stream()
-                .map(item -> (LostItemViewItem) item)
+        List<? extends LostItemView> items = page.getContent().stream()
+                .map(item -> (LostItemView) item)
                 .collect(Collectors.toList());
 
         return new LostItemListResponse(

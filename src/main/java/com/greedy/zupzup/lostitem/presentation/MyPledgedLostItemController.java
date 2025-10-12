@@ -4,7 +4,7 @@ import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.MyPledgedLostItemService;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListQuery;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class MyPledgedLostItemController implements MyPledgedLostItemControllerD
     @GetMapping("/pledged")
     public ResponseEntity<LostItemListResponse> getMyPledgedLostItems(
             @MemberAuth LoginMember loginMember,
-            @Valid MyPledgedListQuery query
+            @Valid MyPledgedListRequest query
     ) {
         LostItemListResponse response = myPledgedLostItemService.getMyPledgedLostItems(
                 loginMember.memberId(),

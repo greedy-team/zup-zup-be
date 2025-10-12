@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
-public interface LostItemViewItem {
+public interface LostItemView {
     Long id();
     Long categoryId();
     String categoryName();

@@ -3,7 +3,7 @@ package com.greedy.zupzup.lostitem.presentation;
 import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListQuery;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListRequest;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -131,6 +131,6 @@ public interface MyPledgedLostItemControllerDocs {
     })
     ResponseEntity<LostItemListResponse> getMyPledgedLostItems(
             @MemberAuth LoginMember loginMember,
-            @Valid @ParameterObject MyPledgedListQuery query
+            @Valid @ParameterObject MyPledgedListRequest query
     );
 }

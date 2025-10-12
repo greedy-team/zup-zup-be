@@ -71,22 +71,6 @@ public class LostItemViewService {
                 ));
     }
 
-    /**
-     * 내가 서약한 분실물 조회
-     */
-    @Transactional(readOnly = true)
-    public Page<MyPledgedLostItemCommand> getPledgedLostItems(List<Long> lostItemIds, int page, int limit) {
-        if (lostItemIds.isEmpty()) {
-            return Page.empty(PageRequest.of(page - 1, limit));
-        }
-        Pageable pageable = PageRequest.of(page - 1, limit);
-
-        Page<MyPledgedLostItemProjection> projections =
-                lostItemRepository.findPledgedListWithImageByIdsAndStatus(lostItemIds, LostItemStatus.PLEDGED, pageable);
-
-        return projections.map(MyPledgedLostItemCommand::from);
-    }
-
     private void statusGuardForSimpleView(LostItem item) {
         LostItemStatus status = item.getStatus();
         if (status == LostItemStatus.REGISTERED) {
