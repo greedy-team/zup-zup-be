@@ -14,7 +14,9 @@ public record MyPledgedLostResponse(
         String schoolAreaName,
         String foundAreaDetail,
         String createdAt,
-        String representativeImageUrl
+        String representativeImageUrl,
+        String pledgedAt,
+        String depositArea
 ) implements LostItemView {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
@@ -40,7 +42,7 @@ public record MyPledgedLostResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
-                pickListImage(c)
+                pickListImage(c),toKstIso(c.pledgedAt()),c.depositArea()
         );
     }
 }

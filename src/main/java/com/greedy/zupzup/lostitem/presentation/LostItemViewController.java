@@ -5,7 +5,7 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.LostResponseView;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewDto;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +39,8 @@ public class LostItemViewController implements LostItemViewControllerDocs{
 
     /** 단건 */
     @GetMapping("/{lostItemId}")
-    public ResponseEntity<LostResponseView> getBasic(@PathVariable Long lostItemId) {
+    public ResponseEntity<LostItemViewDto> getBasic(@PathVariable Long lostItemId) {
         LostItemSimpleViewCommand command = lostItemViewService.getSimpleView(lostItemId);
-        return ResponseEntity.ok(LostResponseView.from(command));
+        return ResponseEntity.ok(LostItemViewDto.from(command));
     }
 }

@@ -14,7 +14,7 @@ public record MyPledgedLostItemCommand(
         LocalDateTime createdAt,
         String representativeImageUrl,
         LocalDateTime pledgedAt,
-        String storageLocation
+        String depositArea
 ) {
     public static MyPledgedLostItemCommand from(MyPledgedLostItemProjection projection) {
         return new MyPledgedLostItemCommand(
@@ -28,7 +28,7 @@ public record MyPledgedLostItemCommand(
                 projection.getCreatedAt(),
                 projection.getRepresentativeImageUrl(),
                 projection.getPledgedAt(),
-                projection.getStorageLocation()
+                projection.getDepositArea()
         );
     }
 }

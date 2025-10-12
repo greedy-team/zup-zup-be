@@ -16,7 +16,7 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-import com.greedy.zupzup.lostitem.presentation.dto.LostResponseView;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewDto;
 import com.greedy.zupzup.lostitem.repository.LostItemListProjection;
 import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
@@ -93,7 +93,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
                 result.map(LostItemListCommand::id).getContent()
         );
         String repUrl = repMap.get(11L);
-        LostResponseView view = LostResponseView.from(result.getContent().get(0), repUrl);
+        LostItemViewDto view = LostItemViewDto.from(result.getContent().get(0), repUrl);
 
         // then
         assertSoftly(softly -> {

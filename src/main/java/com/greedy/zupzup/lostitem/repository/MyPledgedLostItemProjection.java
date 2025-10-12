@@ -13,5 +13,5 @@ public interface MyPledgedLostItemProjection {
     LocalDateTime getCreatedAt();
     String getRepresentativeImageUrl();
     LocalDateTime getPledgedAt();
-    String getStorageLocation();
+    String getDepositArea();
 }

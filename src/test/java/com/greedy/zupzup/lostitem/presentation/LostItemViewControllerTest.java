@@ -9,7 +9,7 @@ import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.LostResponseView;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewDto;
 import com.greedy.zupzup.member.domain.Member;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
@@ -151,7 +151,7 @@ class LostItemViewControllerTest extends ControllerTest {
                     .then().log().all()
                     .extract();
 
-            LostResponseView response = extract.as(LostResponseView.class);
+            LostItemViewDto response = extract.as(LostItemViewDto.class);
 
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
@@ -191,7 +191,7 @@ class LostItemViewControllerTest extends ControllerTest {
                     .then().log().all()
                     .extract();
 
-            LostResponseView response = extract.as(LostResponseView.class);
+            LostItemViewDto response = extract.as(LostItemViewDto.class);
 
             // then
             String expected = "https://example.com/default-image.jpg";

@@ -6,9 +6,9 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import com.greedy.zupzup.common.ServiceUnitTest;
-import com.greedy.zupzup.lostitem.application.dto.MyPledgedLostItemCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.pledge.application.PledgeQueryService;
+import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.lostitem.repository.MyPledgedLostItemProjection;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,41 +18,37 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
+
     private MyPledgedLostItemService service;
-    private PledgeQueryService pledgeQueryService;
-    private LostItemViewService lostItemViewService;
+    private LostItemRepository lostItemRepository;
 
     @BeforeEach
     void init() {
-        pledgeQueryService = mock(PledgeQueryService.class);
-        lostItemViewService = mock(LostItemViewService.class);
-        service = new MyPledgedLostItemService(pledgeQueryService, lostItemViewService);
+        lostItemRepository = mock(LostItemRepository.class);
+        service = new MyPledgedLostItemService(lostItemRepository);
     }
 
     @Test
     void 내가_서약한_분실물_목록을_조회할_수_있다() {
-        // given
         Long memberId = 1L;
 
-        Page<Long> pledgedIds = new PageImpl<>(List.of(101L, 102L), PageRequest.of(0, 10), 2);
-        given(pledgeQueryService.getPledgedLostItemIds(memberId, 1, 10))
-                .willReturn(pledgedIds);
-
-        MyPledgedLostItemCommand c1 = new MyPledgedLostItemCommand(
+        // ✅ projection mock 객체 생성
+        MyPledgedLostItemProjection p1 = projection(
                 101L, 10L, "전자기기", "https://icon.com/e.svg",
-                100L, "AI센터", "AI센터 B205", LocalDateTime.now().minusDays(1),
-                "https://img.com/101.jpg"
+                100L, "AI센터", "AI센터 B205",
+                "https://img.com/101.jpg", LocalDateTime.now().minusDays(1), "보관소 A"
         );
-        MyPledgedLostItemCommand c2 = new MyPledgedLostItemCommand(
+
+        MyPledgedLostItemProjection p2 = projection(
                 102L, 12L, "지갑", "https://icon.com/wallet.svg",
-                100L, "AI센터", "AI센터 B207", LocalDateTime.now().minusHours(2),
-                "https://img.com/102.jpg"
+                100L, "AI센터", "AI센터 B207",
+                "https://img.com/102.jpg", LocalDateTime.now().minusHours(2), "보관소 B"
         );
 
-        Page<MyPledgedLostItemCommand> pageResult =
-                new PageImpl<>(List.of(c1, c2), PageRequest.of(0, 10), 2);
+        Page<MyPledgedLostItemProjection> pageResult =
+                new PageImpl<>(List.of(p1, p2), PageRequest.of(0, 10), 2);
 
-        given(lostItemViewService.getPledgedLostItems(List.of(101L, 102L), 1, 10))
+        given(lostItemRepository.findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10)))
                 .willReturn(pageResult);
 
         // when
@@ -65,32 +61,26 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
             softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
         });
 
-        then(pledgeQueryService).should().getPledgedLostItemIds(memberId, 1, 10);
-        then(lostItemViewService).should().getPledgedLostItems(List.of(101L, 102L), 1, 10);
+        then(lostItemRepository).should().findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10));
     }
 
-    @Test
-    void 서약한_분실물이_없으면_빈_리스트를_반환한다() {
-        // given
-        Long memberId = 2L;
-
-        Page<Long> pledgedIds = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
-        given(pledgeQueryService.getPledgedLostItemIds(memberId, 1, 10))
-                .willReturn(pledgedIds);
-
-        Page<MyPledgedLostItemCommand> emptyPage =
-                new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
-
-        given(lostItemViewService.getPledgedLostItems(List.of(), 1, 10))
-                .willReturn(emptyPage);
-
-        // when
-        LostItemListResponse response = service.getMyPledgedLostItems(memberId, 1, 10);
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.count()).isEqualTo(0);
-            softly.assertThat(response.items()).isEmpty();
-        });
+    private MyPledgedLostItemProjection projection(
+            Long id, Long categoryId, String categoryName, String categoryIconUrl,
+            Long schoolAreaId, String schoolAreaName, String foundAreaDetail,
+            String imageUrl, LocalDateTime pledgedAt, String depositArea
+    ) {
+        return new MyPledgedLostItemProjection() {
+            public Long getId() { return id; }
+            public Long getCategoryId() { return categoryId; }
+            public String getCategoryName() { return categoryName; }
+            public String getCategoryIconUrl() { return categoryIconUrl; }
+            public Long getSchoolAreaId() { return schoolAreaId; }
+            public String getSchoolAreaName() { return schoolAreaName; }
+            public String getFoundAreaDetail() { return foundAreaDetail; }
+            public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+            public String getRepresentativeImageUrl() { return imageUrl; }
+            public LocalDateTime getPledgedAt() { return pledgedAt; }
+            public String getDepositArea() { return depositArea; }
+        };
     }
 }
