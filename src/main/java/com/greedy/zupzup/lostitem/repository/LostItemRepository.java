@@ -121,7 +121,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                     li.createdAt         as createdAt,
                     img.imageKey         as representativeImageUrl,
                     p.createdAt          as pledgedAt,
-                    li.depositArea       as storageLocation
+                    li.depositArea       as depositArea
                 from Pledge p
                 join p.lostItem li
                 join li.category c
