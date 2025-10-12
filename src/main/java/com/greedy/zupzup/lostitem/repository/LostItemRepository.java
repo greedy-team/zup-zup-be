@@ -109,68 +109,31 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
 
-    @Query(
-            value = """
-            select
-                li.id              as id,
-                c.id               as categoryId,
-                c.name             as categoryName,
-                c.iconUrl          as categoryIconUrl,
-                sa.id              as schoolAreaId,
-                sa.areaName        as schoolAreaName,
-                li.foundAreaDetail as foundAreaDetail,
-                li.createdAt       as createdAt
-            from LostItem li
-                join li.category  c
+    @Query("""
+                select
+                    li.id                as id,
+                    c.id                 as categoryId,
+                    c.name               as categoryName,
+                    c.iconUrl            as categoryIconUrl,
+                    sa.id                as schoolAreaId,
+                    sa.areaName          as schoolAreaName,
+                    li.foundAreaDetail   as foundAreaDetail,
+                    li.createdAt         as createdAt,
+                    img.imageKey         as representativeImageUrl,
+                    p.createdAt          as pledgedAt,
+                    li.depositArea       as storageLocation
+                from Pledge p
+                join p.lostItem li
+                join li.category c
                 join li.foundArea sa
-            where li.status = :status
-              and li.id in :ids
-            order by li.createdAt desc
-            """,
-            countQuery = """
-            select count(li)
-            from LostItem li
-            where li.status = :status
-              and li.id in :ids
-            """
-    )
-    Page<LostItemListProjection> findListByIdsAndStatus(
-            @Param("ids") List<Long> ids,
-            @Param("status") LostItemStatus status,
+                left join li.images img on img.imageOrder = 1
+                where p.owner.id = :memberId
+                order by p.createdAt desc
+            """)
+    Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
+            @Param("memberId") Long memberId,
             Pageable pageable
     );
 
-    @Query(
-            value = """
-            select
-                li.id              as id,
-                c.id               as categoryId,
-                c.name             as categoryName,
-                c.iconUrl          as categoryIconUrl,
-                sa.id              as schoolAreaId,
-                sa.areaName        as schoolAreaName,
-                li.foundAreaDetail as foundAreaDetail,
-                li.createdAt       as createdAt,
-                img.imageKey       as representativeImageUrl
-            from LostItem li
-                join li.category  c
-                join li.foundArea sa
-                left join li.images img on img.imageOrder = 1
-            where li.status = :status
-              and li.id in :ids
-            order by li.createdAt desc
-            """,
-            countQuery = """
-            select count(li)
-            from LostItem li
-            where li.status = :status
-              and li.id in :ids
-            """
-    )
-    Page<MyPledgedLostItemProjection> findPledgedListWithImageByIdsAndStatus(
-            @Param("ids") List<Long> ids,
-            @Param("status") LostItemStatus status,
-            Pageable pageable
-    );
 
 }

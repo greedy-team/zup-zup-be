@@ -12,7 +12,9 @@ public record MyPledgedLostItemCommand(
         String schoolAreaName,
         String foundAreaDetail,
         LocalDateTime createdAt,
-        String representativeImageUrl
+        String representativeImageUrl,
+        LocalDateTime pledgedAt,
+        String storageLocation
 ) {
     public static MyPledgedLostItemCommand from(MyPledgedLostItemProjection projection) {
         return new MyPledgedLostItemCommand(
@@ -24,7 +26,9 @@ public record MyPledgedLostItemCommand(
                 projection.getSchoolAreaName(),
                 projection.getFoundAreaDetail(),
                 projection.getCreatedAt(),
-                projection.getRepresentativeImageUrl()
+                projection.getRepresentativeImageUrl(),
+                projection.getPledgedAt(),
+                projection.getStorageLocation()
         );
     }
 }
