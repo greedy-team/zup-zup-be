@@ -23,7 +23,7 @@ public record LostItemListResponse(
         );
     }
 
-    public static LostItemListResponse of(Page<MyPledgedLostResponse> page) {
+    public static LostItemListResponse of(Page<MyPledgedListResponse> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
 
         List<? extends LostItemView> items = page.getContent().stream()

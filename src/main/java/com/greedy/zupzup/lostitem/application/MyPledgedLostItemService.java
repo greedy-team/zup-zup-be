@@ -2,7 +2,7 @@ package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.lostitem.application.dto.MyPledgedLostItemCommand;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedLostResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListResponse;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +22,6 @@ public class MyPledgedLostItemService {
                 lostItemRepository.findPledgedLostItemsByMemberId(memberId, PageRequest.of(page - 1, limit))
                         .map(MyPledgedLostItemCommand::from);
 
-        return LostItemListResponse.of(pledgedItems.map(MyPledgedLostResponse::from));
+        return LostItemListResponse.of(pledgedItems.map(MyPledgedListResponse::from));
     }
 }

@@ -42,51 +42,31 @@ public interface MyPledgedLostItemControllerDocs {
                             examples = @ExampleObject(
                                     value = """
                                             {
-                                                   "count": 3,
-                                                   "items": [
-                                                       {
-                                                           "id": 3,
-                                                           "categoryId": 1,
-                                                           "categoryName": "전자기기",
-                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
-                                                           "schoolAreaId": 3,
-                                                           "schoolAreaName": "대양 AI 센터",
-                                                           "foundAreaDetail": "AI 센터 B205",
-                                                           "createdAt": "2025-09-30T11:39:44.355103+09:00",
-                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
-                                                       },
-                                                       {
-                                                           "id": 2,
-                                                           "categoryId": 1,
-                                                           "categoryName": "전자기기",
-                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
-                                                           "schoolAreaId": 2,
-                                                           "schoolAreaName": "대양 AI 센터",
-                                                           "foundAreaDetail": "AI 센터 B205",
-                                                           "createdAt": "2025-09-30T11:39:44.285587+09:00",
-                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
-                                                       },
-                                                       {
-                                                           "id": 1,
-                                                           "categoryId": 1,
-                                                           "categoryName": "전자기기",
-                                                           "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
-                                                           "schoolAreaId": 1,
-                                                           "schoolAreaName": "대양 AI 센터",
-                                                           "foundAreaDetail": "AI 센터 B205",
-                                                           "createdAt": "2025-09-30T11:39:44.181142+09:00",
-                                                           "representativeImageUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png"
-                                                       }
-                                                   ],
-                                                   "pageInfo": {
-                                                       "page": 1,
-                                                       "size": 10,
-                                                       "totalElements": 3,
-                                                       "totalPages": 1,
-                                                       "hasPrev": false,
-                                                       "hasNext": false
-                                                   }
-                                               }
+                                                "count": 1,
+                                                "items": [
+                                                    {
+                                                        "id": 1,
+                                                        "categoryId": 1,
+                                                        "categoryName": "전자기기",
+                                                        "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
+                                                        "schoolAreaId": 1,
+                                                        "schoolAreaName": "대양 AI 센터",
+                                                        "foundAreaDetail": "AI 센터 B205",
+                                                        "createdAt": "2025-10-12T14:22:52.646532+09:00",
+                                                        "representativeImageUrl": "https://example.com/default-image.jpg",
+                                                        "pledgedAt": "2025-10-12T14:22:52.726507+09:00",
+                                                        "depositArea": null
+                                                    }
+                                                ],
+                                                "pageInfo": {
+                                                    "page": 1,
+                                                    "size": 10,
+                                                    "totalElements": 1,
+                                                    "totalPages": 1,
+                                                    "hasPrev": false,
+                                                    "hasNext": false
+                                                }
+                                            }
                                             """
                             )
                     )

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public record MyPledgedLostResponse(
+public record MyPledgedListResponse(
         Long id,
         Long categoryId,
         String categoryName,
@@ -37,8 +37,8 @@ public record MyPledgedLostResponse(
         return s != null && !s.isBlank();
     }
 
-    public static MyPledgedLostResponse from(MyPledgedLostItemCommand c) {
-        return new MyPledgedLostResponse(
+    public static MyPledgedListResponse from(MyPledgedLostItemCommand c) {
+        return new MyPledgedListResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),

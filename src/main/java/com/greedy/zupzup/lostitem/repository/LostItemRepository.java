@@ -126,7 +126,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 join p.lostItem li
                 join li.category c
                 join li.foundArea sa
-                left join li.images img on img.imageOrder = 1
+                left join li.images img on img.imageOrder = 0
                 where p.owner.id = :memberId
                 order by p.createdAt desc
             """)
