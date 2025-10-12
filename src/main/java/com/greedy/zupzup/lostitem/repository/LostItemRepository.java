@@ -134,6 +134,4 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             @Param("memberId") Long memberId,
             Pageable pageable
     );
-
-
 }

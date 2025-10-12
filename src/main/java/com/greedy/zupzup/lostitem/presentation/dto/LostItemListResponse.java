@@ -12,8 +12,8 @@ public record LostItemListResponse(
         PageInfoResponse pageInfo
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
-        List<LostResponseView> items = page.getContent().stream()
-                .map(c -> LostResponseView.from(c, repImageMap.get(c.id())))
+        List<LostItemViewDto> items = page.getContent().stream()
+                .map(c -> LostItemViewDto.from(c, repImageMap.get(c.id())))
                 .toList();
 
         return new LostItemListResponse(
