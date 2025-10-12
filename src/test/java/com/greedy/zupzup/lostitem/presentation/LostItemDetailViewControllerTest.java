@@ -9,10 +9,8 @@ import com.greedy.zupzup.common.fixture.PledgeFixture;
 import com.greedy.zupzup.common.fixture.QuizAttemptFixture;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.pledge.domain.Pledge;
-import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -21,15 +19,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class LostItemDetailViewControllerTest extends ControllerTest {
 
     private static final String ACCESS_COOKIE = "access_token";
-
-    @Autowired
-    PledgeRepository pledgeRepository;
 
     private Member member;
     private String accessToken;
