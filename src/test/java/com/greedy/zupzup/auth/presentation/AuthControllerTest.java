@@ -2,7 +2,6 @@ package com.greedy.zupzup.auth.presentation;
 
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.auth.exception.AuthException;
-import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.auth.presentation.dto.*;
 import com.greedy.zupzup.common.ControllerTest;
 import com.greedy.zupzup.global.exception.ApplicationException;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
 
@@ -28,10 +26,6 @@ class AuthControllerTest extends ControllerTest {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
     private static final String SEJONG_VERIFICATION_SESSION_COOKIE_NAME = "JSESSIONID";
-
-
-    @MockitoBean
-    private SejongAuthenticator sejongAuthenticator;
 
     @Nested
     @DisplayName("세종대학교 인증 API")

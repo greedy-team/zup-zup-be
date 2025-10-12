@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
@@ -8,7 +9,6 @@ import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.category.repository.FeatureRepository;
 import com.greedy.zupzup.common.fixture.CategoryFixture;
-import com.greedy.zupzup.common.fixture.LostItemImageFixture;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
@@ -18,6 +18,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.repository.MemberRepository;
+import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import static com.greedy.zupzup.common.fixture.FeatureFixture.*;
 import static com.greedy.zupzup.common.fixture.FeatureOptionFixture.*;
+import static com.greedy.zupzup.common.fixture.LostItemImageFixture.*;
 import static com.greedy.zupzup.common.fixture.MemberFixture.*;
 import static com.greedy.zupzup.common.fixture.SchoolAreaFixture.*;
 
@@ -45,6 +47,9 @@ public abstract class ControllerTest {
 
     @MockitoBean
     protected S3ImageFileManager imageFileManager;
+
+    @MockitoBean
+    protected SejongAuthenticator sejongAuthenticator;
 
     @Autowired
     protected LostItemRepository lostItemRepository;
@@ -72,6 +77,9 @@ public abstract class ControllerTest {
 
     @Autowired
     protected QuizAttemptRepository quizAttemptRepository;
+
+    @Autowired
+    protected PledgeRepository pledgeRepository;
 
     @Autowired
     protected JwtTokenProvider jwtTokenProvider;
@@ -166,7 +174,7 @@ public abstract class ControllerTest {
                 .build();
 
         lostItemRepository.save(lostItem);
-        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+        lostItemImageRepository.save(DEFAULT_IMAGE(lostItem));
 
         // 1. 브랜드 특징 및 정답 설정
         Feature brandFeature = category.getFeatures().stream()
@@ -197,7 +205,7 @@ public abstract class ControllerTest {
                 .build();
 
         lostItemRepository.save(lostItem);
-        lostItemImageRepository.save(LostItemImageFixture.DEFAULT_IMAGE(lostItem));
+        lostItemImageRepository.save(DEFAULT_IMAGE(lostItem));
 
         return lostItem;
     }
