@@ -1,5 +1,6 @@
 package com.greedy.zupzup.global.config;
 
+import com.greedy.zupzup.admin.presentation.interceptor.AdminInterceptor;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMemberArgumentResolver;
 import com.greedy.zupzup.auth.presentation.interceptor.AuthInterceptor;
 import com.greedy.zupzup.global.presentation.interceptor.LogInterceptor;
@@ -16,9 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final AuthInterceptor authInterceptor;
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
     private final LogInterceptor logInterceptor;
+    private final AdminInterceptor adminInterceptor;
+    private final AuthInterceptor authInterceptor;
 
     private static final String[] ALLOWED_ORIGINS = {
             "https://api.sejong-zupzup.kr", // 메인 API 서버
@@ -29,6 +31,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(logInterceptor)
+                .addPathPatterns("/api/**")
+                .order(1);
+
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/api/admin/**")
+                .order(2);
+
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
@@ -37,10 +48,10 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/lost-items",
                         "/api/lost-items/*",
                         "/api/school-areas/**",
-                        "/api/categories/**"
-                );
-        registry.addInterceptor(logInterceptor)
-                .addPathPatterns("/api/**");
+                        "/api/categories/**",
+                        "/api/admin/**"
+                )
+                .order(3);
     }
 
     @Override

@@ -11,10 +11,13 @@ import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
 import com.greedy.zupzup.category.presentation.dto.CategoryFeaturesResponse;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
+import com.greedy.zupzup.global.config.CacheType;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class CategoryService {
     private final FeatureOptionRepository featureOptionRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheType.CacheNames.ALL_CATEGORY, key = "'all'")
     public CategoriesResponse getAll() {
         List<CategoryDto> list = categoryRepository.findAllByOrderByIdAsc()
                 .stream()
@@ -35,6 +39,7 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheType.CacheNames.CATEGORY_DETAILS, key = "#categoryId")
     public CategoryFeaturesResponse getCategoryFeatures(Long categoryId) {
         Category category = categoryRepository.findWithFeaturesById(categoryId)
                 .orElseThrow(() -> new ApplicationException(CategoryException.CATEGORY_NOT_FOUND));
@@ -69,5 +74,15 @@ public class CategoryService {
                 .toList();
 
         return new CategoryFeaturesResponse(category.getId(), category.getName(), featureDtos);
+    }
+
+    @CacheEvict(
+            cacheNames = {
+                    CacheType.CacheNames.ALL_CATEGORY,
+                    CacheType.CacheNames.CATEGORY_DETAILS
+            },
+            allEntries = true
+    )
+    public void evictAllCategoryCaches() {
     }
 }
