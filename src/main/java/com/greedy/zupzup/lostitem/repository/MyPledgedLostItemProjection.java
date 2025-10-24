@@ -6,7 +6,6 @@ public interface MyPledgedLostItemProjection {
     Long getId();
     Long getCategoryId();
     String getCategoryName();
-    String getCategoryIconUrl();
     Long getSchoolAreaId();
     String getSchoolAreaName();
     String getFoundAreaDetail();

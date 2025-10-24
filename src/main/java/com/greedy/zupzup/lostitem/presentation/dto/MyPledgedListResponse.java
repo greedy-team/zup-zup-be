@@ -8,8 +8,8 @@ import java.time.format.DateTimeFormatter;
 public record MyPledgedListResponse(
         Long id,
         Long categoryId,
-        String categoryName,
         String categoryIconUrl,
+        String categoryName,
         Long schoolAreaId,
         String schoolAreaName,
         String foundAreaDetail,
@@ -26,11 +26,7 @@ public record MyPledgedListResponse(
     }
 
     private static String pickListImage(MyPledgedLostItemCommand c) {
-        final String repUrl = c.representativeImageUrl();
-        if (hasText(repUrl)) {
-            return repUrl;
-        }
-        return c.categoryIconUrl();
+        return c.representativeImageUrl();
     }
 
     private static boolean hasText(String s) {
@@ -39,7 +35,7 @@ public record MyPledgedListResponse(
 
     public static MyPledgedListResponse from(MyPledgedLostItemCommand c) {
         return new MyPledgedListResponse(
-                c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
+                c.id(), c.categoryId(), c.categoryName(), null,
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
                 pickListImage(c),toKstIso(c.pledgedAt()),c.depositArea()

@@ -34,13 +34,13 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
 
         // ✅ projection mock 객체 생성
         MyPledgedLostItemProjection p1 = projection(
-                101L, 10L, "전자기기", "https://icon.com/e.svg",
+                101L, 10L, "전자기기",
                 100L, "AI센터", "AI센터 B205",
                 "https://img.com/101.jpg", LocalDateTime.now().minusDays(1), "보관소 A"
         );
 
         MyPledgedLostItemProjection p2 = projection(
-                102L, 12L, "지갑", "https://icon.com/wallet.svg",
+                102L, 12L, "지갑",
                 100L, "AI센터", "AI센터 B207",
                 "https://img.com/102.jpg", LocalDateTime.now().minusHours(2), "보관소 B"
         );
@@ -65,22 +65,50 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
     }
 
     private MyPledgedLostItemProjection projection(
-            Long id, Long categoryId, String categoryName, String categoryIconUrl,
+            Long id, Long categoryId, String categoryName,
             Long schoolAreaId, String schoolAreaName, String foundAreaDetail,
             String imageUrl, LocalDateTime pledgedAt, String depositArea
     ) {
         return new MyPledgedLostItemProjection() {
-            public Long getId() { return id; }
-            public Long getCategoryId() { return categoryId; }
-            public String getCategoryName() { return categoryName; }
-            public String getCategoryIconUrl() { return categoryIconUrl; }
-            public Long getSchoolAreaId() { return schoolAreaId; }
-            public String getSchoolAreaName() { return schoolAreaName; }
-            public String getFoundAreaDetail() { return foundAreaDetail; }
-            public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
-            public String getRepresentativeImageUrl() { return imageUrl; }
-            public LocalDateTime getPledgedAt() { return pledgedAt; }
-            public String getDepositArea() { return depositArea; }
+            public Long getId() {
+                return id;
+            }
+
+            public Long getCategoryId() {
+                return categoryId;
+            }
+
+            public String getCategoryName() {
+                return categoryName;
+            }
+
+            public Long getSchoolAreaId() {
+                return schoolAreaId;
+            }
+
+            public String getSchoolAreaName() {
+                return schoolAreaName;
+            }
+
+            public String getFoundAreaDetail() {
+                return foundAreaDetail;
+            }
+
+            public LocalDateTime getCreatedAt() {
+                return LocalDateTime.now();
+            }
+
+            public String getRepresentativeImageUrl() {
+                return imageUrl;
+            }
+
+            public LocalDateTime getPledgedAt() {
+                return pledgedAt;
+            }
+
+            public String getDepositArea() {
+                return depositArea;
+            }
         };
     }
 }

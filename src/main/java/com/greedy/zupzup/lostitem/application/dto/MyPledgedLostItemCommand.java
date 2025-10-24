@@ -21,7 +21,7 @@ public record MyPledgedLostItemCommand(
                 projection.getId(),
                 projection.getCategoryId(),
                 projection.getCategoryName(),
-                projection.getCategoryIconUrl(),
+                null,
                 projection.getSchoolAreaId(),
                 projection.getSchoolAreaName(),
                 projection.getFoundAreaDetail(),
