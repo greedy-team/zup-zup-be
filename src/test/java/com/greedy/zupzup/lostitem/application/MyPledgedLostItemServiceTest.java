@@ -3,11 +3,8 @@ package com.greedy.zupzup.lostitem.application;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-
 import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.lostitem.repository.MyPledgedLostItemProjection;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,11 +17,9 @@ import org.springframework.data.domain.PageRequest;
 public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
 
     private MyPledgedLostItemService service;
-    private LostItemRepository lostItemRepository;
 
     @BeforeEach
     void init() {
-        lostItemRepository = mock(LostItemRepository.class);
         service = new MyPledgedLostItemService(lostItemRepository);
     }
 
@@ -32,7 +27,6 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
     void 내가_서약한_분실물_목록을_조회할_수_있다() {
         Long memberId = 1L;
 
-        // ✅ projection mock 객체 생성
         MyPledgedLostItemProjection p1 = projection(
                 101L, 10L, "전자기기",
                 100L, "AI센터", "AI센터 B205",
@@ -61,8 +55,7 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
             softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
         });
 
-        then(lostItemRepository).should().findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10));
-    }
+        then(lostItemRepository).should().findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10));    }
 
     private MyPledgedLostItemProjection projection(
             Long id, Long categoryId, String categoryName,
