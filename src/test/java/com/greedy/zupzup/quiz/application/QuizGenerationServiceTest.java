@@ -135,7 +135,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID))
                 .isInstanceOf(ApplicationException.class)
-                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN_PLEDGED.getDetail());
 
         then(quizAttemptRepository).should(never()).findByLostItem_IdAndMember_Id(anyLong(), anyLong());
         then(lostItemFeatureRepository).should(never()).findWithFeatureAndOptionsByLostItemId(anyLong());

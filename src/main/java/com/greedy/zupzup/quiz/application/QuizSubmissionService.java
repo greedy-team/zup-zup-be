@@ -3,6 +3,7 @@ package com.greedy.zupzup.quiz.application;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -51,7 +52,14 @@ public class QuizSubmissionService {
     }
 
     private Optional<QuizAttempt> validateSubmissionPossibility(LostItem lostItem, Member member) {
-        if (!lostItem.isPledgeable()) {
+        LostItemStatus status = lostItem.getStatus();
+        if (status != LostItemStatus.REGISTERED) {
+            if (status == LostItemStatus.PLEDGED) {
+                throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN_PLEDGED);
+            }
+            if (status == LostItemStatus.FOUND) {
+                throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN_FOUND);
+            }
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
 

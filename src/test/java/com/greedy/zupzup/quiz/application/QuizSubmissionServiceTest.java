@@ -124,7 +124,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, List.of()))
                 .isInstanceOf(ApplicationException.class)
-                .hasMessage(LostItemException.ACCESS_FORBIDDEN.getDetail());
+                .hasMessage(LostItemException.ACCESS_FORBIDDEN_PLEDGED.getDetail());
 
         then(quizAttemptRepository).should(never()).save(any(QuizAttempt.class));
     }
