@@ -65,4 +65,26 @@ public class SchoolAreaFixture {
                 .marker(marker)
                 .build();
     }
+
+    public static SchoolArea STUDENT_HALL() {
+        Polygon studentHall = geometryFactory.createPolygon(new Coordinate[]{
+                new Coordinate(127.07434357008461, 37.54974685181508),
+                new Coordinate(127.07442274054304, 37.54970175202579),
+                new Coordinate(127.07499979862166, 37.54962029705736),
+                new Coordinate(127.0752944317778, 37.55002330628934),
+                new Coordinate(127.07563949643331, 37.54993523841736),
+                new Coordinate(127.07512939513583, 37.54907961564461),
+                new Coordinate(127.07447326792452, 37.54930302839556),
+                new Coordinate(127.07441678447164, 37.54940217382835),
+                new Coordinate(127.07434357008461, 37.54974685181508)
+        });
+        Point marker = geometryFactory.createPoint(
+                new Coordinate(127.07504531450479, 37.54959835)
+        );
+        return SchoolArea.builder()
+                .areaName("학생회관")
+                .area(studentHall)
+                .marker(marker)
+                .build();
+    }
 }
