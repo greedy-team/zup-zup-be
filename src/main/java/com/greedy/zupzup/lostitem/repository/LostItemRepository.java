@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
@@ -108,4 +109,12 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
         return findWithCategoryAndAreaById(id)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
+
+    @Modifying
+    @Query("UPDATE LostItem li SET li.status = :targetStatus WHERE li.id IN :ids AND li.status = :expectedStatus")
+    int updateStatusBulkByIds(
+            @Param("ids") List<Long> ids,
+            @Param("targetStatus") LostItemStatus targetStatus,
+            @Param("expectedStatus") LostItemStatus expectedStatus
+    );
 }
