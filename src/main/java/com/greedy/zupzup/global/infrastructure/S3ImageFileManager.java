@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -54,6 +55,32 @@ public class S3ImageFileManager {
         }
 
         return imageURLPrefix + "/" + s3ObjectKey;
+    }
+
+    public void delete(String imageKey) {
+        try {
+            String s3ObjectKey = extractS3ObjectKey(imageKey);
+
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(s3ObjectKey)
+                    .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+
+        } catch (S3Exception e) {
+            System.err.println("S3 Delete Failed for key: " + imageKey + ". Error: " + e.getMessage());
+            if (!e.awsErrorDetails().errorCode().equals("NoSuchKey")) {
+                throw new InfrastructureException(CommonException.IMAGE_DELETE_FAILED);
+            }
+        }
+    }
+
+    private String extractS3ObjectKey(String imageURL) {
+        if (imageURL.startsWith(imageURLPrefix)) {
+            return imageURL.substring(imageURLPrefix.length() + 1);
+        }
+        return imageURL;
     }
 
     private PutObjectRequest buildPutObjectRequest(MultipartFile multipartFile, String s3ObjectKey) {

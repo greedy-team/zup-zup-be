@@ -117,4 +117,8 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             @Param("targetStatus") LostItemStatus targetStatus,
             @Param("expectedStatus") LostItemStatus expectedStatus
     );
+
+    @Modifying
+    @Query("DELETE FROM LostItem li WHERE li.id IN :ids")
+    int deleteBulkByIds(@Param("ids") List<Long> ids);
 }

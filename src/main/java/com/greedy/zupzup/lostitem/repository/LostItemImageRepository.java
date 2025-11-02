@@ -4,6 +4,7 @@ import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -23,4 +24,11 @@ public interface LostItemImageRepository extends JpaRepository<LostItemImage, Lo
                  order by i.imageOrder asc
             """)
     List<String> findImageUrlsByLostItemId(@Param("lostItemId") Long lostItemId);
+
+    @Query("SELECT i.imageKey FROM LostItemImage i WHERE i.lostItem.id IN :lostItemIds")
+    List<String> findImageKeysByLostItemIds(@Param("lostItemIds") List<Long> lostItemIds);
+
+    @Modifying
+    @Query("DELETE FROM LostItemImage i WHERE i.lostItem.id IN :lostItemIds")
+    void deleteByLostItemIds(@Param("lostItemIds") List<Long> lostItemIds);
 }

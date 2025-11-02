@@ -3,6 +3,8 @@ package com.greedy.zupzup.admin.lostitem.presentation;
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
 import com.greedy.zupzup.auth.presentation.annotation.AdminAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginAdmin;
 import jakarta.validation.Valid;
@@ -26,6 +28,15 @@ public class AdminLostItemController {
             @Valid @RequestBody ApproveLostItemsRequest request
     ) {
         ApproveLostItemsResponse result = adminLostItemService.approveBulk(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/reject")
+    public ResponseEntity<RejectLostItemsResponse> rejectBulk(
+            @AdminAuth LoginAdmin admin,
+            @Valid @RequestBody RejectLostItemsRequest request
+    ) {
+        RejectLostItemsResponse result = adminLostItemService.rejectBulk(request);
         return ResponseEntity.ok(result);
     }
 }
