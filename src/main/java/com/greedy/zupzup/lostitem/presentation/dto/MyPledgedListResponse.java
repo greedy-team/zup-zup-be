@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 public record MyPledgedListResponse(
         Long id,
         Long categoryId,
-        String categoryIconUrl,
         String categoryName,
         Long schoolAreaId,
         String schoolAreaName,
@@ -17,7 +16,7 @@ public record MyPledgedListResponse(
         String representativeImageUrl,
         String pledgedAt,
         String depositArea
-) implements LostItemView {
+) {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
@@ -29,16 +28,18 @@ public record MyPledgedListResponse(
         return c.representativeImageUrl();
     }
 
-    private static boolean hasText(String s) {
-        return s != null && !s.isBlank();
-    }
-
     public static MyPledgedListResponse from(MyPledgedLostItemCommand c) {
         return new MyPledgedListResponse(
-                c.id(), c.categoryId(), c.categoryName(), null,
-                c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
+                c.id(),
+                c.categoryId(),
+                c.categoryName(),
+                c.schoolAreaId(),
+                c.schoolAreaName(),
+                c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
-                pickListImage(c),toKstIso(c.pledgedAt()),c.depositArea()
+                pickListImage(c),
+                toKstIso(c.pledgedAt()),
+                c.depositArea()
         );
     }
 }

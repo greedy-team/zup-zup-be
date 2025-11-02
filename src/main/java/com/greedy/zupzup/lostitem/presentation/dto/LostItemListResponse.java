@@ -4,11 +4,10 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
-import java.util.stream.Collectors;
 
 public record LostItemListResponse(
         long count,
-        List<? extends LostItemView> items,
+        List<?> items,
         PageInfoResponse pageInfo
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
@@ -26,9 +25,7 @@ public record LostItemListResponse(
     public static LostItemListResponse of(Page<MyPledgedListResponse> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
 
-        List<? extends LostItemView> items = page.getContent().stream()
-                .map(item -> (LostItemView) item)
-                .collect(Collectors.toList());
+        List<MyPledgedListResponse> items = page.getContent();
 
         return new LostItemListResponse(
                 page.getNumberOfElements(),

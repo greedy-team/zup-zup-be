@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListResponse;
 import com.greedy.zupzup.lostitem.repository.MyPledgedLostItemProjection;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,10 +53,13 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
         assertSoftly(softly -> {
             softly.assertThat(response.count()).isEqualTo(2);
             softly.assertThat(response.items()).hasSize(2);
-            softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
+
+            MyPledgedListResponse firstItem = (MyPledgedListResponse) response.items().get(0);
+            softly.assertThat(firstItem.representativeImageUrl()).isNotBlank();
         });
 
-        then(lostItemRepository).should().findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10));    }
+        then(lostItemRepository).should().findPledgedLostItemsByMemberId(memberId, PageRequest.of(0, 10));
+    }
 
     private MyPledgedLostItemProjection projection(
             Long id, Long categoryId, String categoryName,
@@ -63,45 +67,16 @@ public class MyPledgedLostItemServiceTest extends ServiceUnitTest {
             String imageUrl, LocalDateTime pledgedAt, String depositArea
     ) {
         return new MyPledgedLostItemProjection() {
-            public Long getId() {
-                return id;
-            }
-
-            public Long getCategoryId() {
-                return categoryId;
-            }
-
-            public String getCategoryName() {
-                return categoryName;
-            }
-
-            public Long getSchoolAreaId() {
-                return schoolAreaId;
-            }
-
-            public String getSchoolAreaName() {
-                return schoolAreaName;
-            }
-
-            public String getFoundAreaDetail() {
-                return foundAreaDetail;
-            }
-
-            public LocalDateTime getCreatedAt() {
-                return LocalDateTime.now();
-            }
-
-            public String getRepresentativeImageUrl() {
-                return imageUrl;
-            }
-
-            public LocalDateTime getPledgedAt() {
-                return pledgedAt;
-            }
-
-            public String getDepositArea() {
-                return depositArea;
-            }
+            public Long getId() { return id; }
+            public Long getCategoryId() { return categoryId; }
+            public String getCategoryName() { return categoryName; }
+            public Long getSchoolAreaId() { return schoolAreaId; }
+            public String getSchoolAreaName() { return schoolAreaName; }
+            public String getFoundAreaDetail() { return foundAreaDetail; }
+            public LocalDateTime getCreatedAt() { return LocalDateTime.now(); }
+            public String getRepresentativeImageUrl() { return imageUrl; }
+            public LocalDateTime getPledgedAt() { return pledgedAt; }
+            public String getDepositArea() { return depositArea; }
         };
     }
 }
