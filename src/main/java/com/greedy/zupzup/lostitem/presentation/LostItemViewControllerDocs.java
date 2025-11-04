@@ -260,7 +260,33 @@ public interface LostItemViewControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청(파라미터 범위/타입 오류)",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "limit 초과(>50) 예시",
+                                            value = """
+                                                    {
+                                                      "title": "유효하지 않은 입력값",
+                                                      "status": 400,
+                                                      "detail": "limit: limit는 50 이하이어야 합니다.",
+                                                      "instance": "/api/lost-items/pledged"
+                                                                                                                                                                              }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "파라미터 타입 불일치 예시",
+                                            value = """
+                                                    {
+                                                      "title": "쿼리 파라미터 타입 불일치",
+                                                      "status": 400,
+                                                      "detail": "쿼리 파라미터 'page'는 'Integer' 타입이어야 합니다.",
+                                                      "instance": "/api/lost-items/pledged"
+                                                                                                                                                                         }
+                                                    """
+                                    )
+                            }
+                    )
             ),
             @ApiResponse(
                     responseCode = "401",
