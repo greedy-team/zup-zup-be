@@ -235,14 +235,13 @@ public interface LostItemViewControllerDocs {
                                                         "id": 1,
                                                         "categoryId": 1,
                                                         "categoryName": "전자기기",
-                                                        "categoryIconUrl": "https://cdn-icons-png.flaticon.com/128/519/519184.png",
                                                         "schoolAreaId": 1,
                                                         "schoolAreaName": "대양 AI 센터",
                                                         "foundAreaDetail": "AI 센터 B205",
                                                         "createdAt": "2025-10-12T14:22:52.646532+09:00",
                                                         "representativeImageUrl": "https://example.com/default-image.jpg",
                                                         "pledgedAt": "2025-10-12T14:22:52.726507+09:00",
-                                                        "depositArea": null
+                                                        "depositArea": "학술정보원 2층 보관함 3번"
                                                     }
                                                 ],
                                                 "pageInfo": {
@@ -261,35 +260,8 @@ public interface LostItemViewControllerDocs {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청(파라미터 범위/타입 오류)",
-                    content = @Content(
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "limit 초과(>50) 예시",
-                                            value = """
-                                                    {
-                                                      "title": "유효하지 않은 입력값",
-                                                      "status": 400,
-                                                      "detail": "limit: limit는 50 이하이어야 합니다.",
-                                                      "instance": "/api/lost-items/pledged"
-                                                                                                                                                                              }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "파라미터 타입 불일치 예시",
-                                            value = """
-                                                    {
-                                                      "title": "쿼리 파라미터 타입 불일치",
-                                                      "status": 400,
-                                                      "detail": "쿼리 파라미터 'page'는 'Integer' 타입이어야 합니다.",
-                                                      "instance": "/api/lost-items/pledged"
-                                                                                                                                                                         }
-                                                    """
-                                    )
-                            }
-                    )
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             ),
-
             @ApiResponse(
                     responseCode = "401",
                     description = "로그인 필요",
