@@ -8,7 +8,8 @@ import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.repository.PledgeRepository;
-import com.greedy.zupzup.quiz.domain.QuizAttempt;
+import com.greedy.zupzup.quiz.application.strategy.DefaultQuizGenerationStrategy;
+import com.greedy.zupzup.quiz.application.strategy.EmptyQuizGenerationStrategy;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +49,13 @@ public abstract class ServiceUnitTest {
 
     @Mock
     protected PledgeRepository pledgeRepository;
-  
+
+    @Mock
+    protected DefaultQuizGenerationStrategy defaultQuizGenerationStrategy;
+
+    @Mock
+    protected EmptyQuizGenerationStrategy emptyQuizGenerationStrategy;
+
     protected static void setId(Object target, Long id) {
         ReflectionTestUtils.setField(target, "id", id);
     }

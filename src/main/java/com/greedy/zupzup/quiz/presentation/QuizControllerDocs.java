@@ -205,6 +205,32 @@ public interface QuizControllerDocs {
                             )
                     )
             ),
+            @ApiResponse(responseCode = "403", description = "이미 서약 진행 중인 분실물의 퀴즈를 조회하려는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "서약 진행 중 상태 예시", value = """
+                {
+                  "title": "접근이 제한되었습니다.",
+                  "status": 403,
+                  "detail": "이미 서약 진행 중인 분실물로, 퀴즈를 조회할 수 없습니다.",
+                  "instance": "/api/lost-items/101/quizzes"
+                }
+                """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "403", description = "이미 회수 완료된 분실물의 퀴즈를 조회하려는 경우",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "회수 완료 상태 예시", value = """
+                {
+                  "title": "접근이 제한되었습니다.",
+                  "status": 403,
+                  "detail": "이미 주인이 찾아간 분실물로, 퀴즈를 조회할 수 없습니다.",
+                  "instance": "/api/lost-items/101/quizzes"
+                }
+                """
+                            )
+                    )
+            ),
             @ApiResponse(responseCode = "404", description = "요청한 ID에 해당하는 분실물이 존재하지 않는 경우",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                             examples = @ExampleObject(name = "분실물 없음 예시", value = """
@@ -212,19 +238,6 @@ public interface QuizControllerDocs {
                                       "title": "분실물 없음",
                                       "status": 404,
                                       "detail": "해당 ID의 분실물을 찾을 수 없습니다.",
-                                      "instance": "/api/lost-items/101/quizzes"
-                                    }
-                                    """
-                            )
-                    )
-            ),
-            @ApiResponse(responseCode = "409", description = "이미 주인이 확인되었거나 처리할 수 없는 상태의 분실물 퀴즈를 조회하려는 경우",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(name = "서약 불가 상태 예시", value = """
-                                    {
-                                      "title": "서약 불가 상태",
-                                      "status": 409,
-                                      "detail": "이미 서약되었거나 처리할 수 없는 상태의 분실물입니다.",
                                       "instance": "/api/lost-items/101/quizzes"
                                     }
                                     """

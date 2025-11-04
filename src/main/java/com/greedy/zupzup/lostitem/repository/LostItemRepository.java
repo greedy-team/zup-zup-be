@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
@@ -110,15 +109,28 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
 
-    @Modifying
-    @Query("UPDATE LostItem li SET li.status = :targetStatus WHERE li.id IN :ids AND li.status = :expectedStatus")
-    int updateStatusBulkByIds(
-            @Param("ids") List<Long> ids,
-            @Param("targetStatus") LostItemStatus targetStatus,
-            @Param("expectedStatus") LostItemStatus expectedStatus
+    @Query("""
+                select
+                    li.id                as id,
+                    c.id                 as categoryId,
+                    c.name               as categoryName,
+                    sa.id                as schoolAreaId,
+                    sa.areaName          as schoolAreaName,
+                    li.foundAreaDetail   as foundAreaDetail,
+                    li.createdAt         as createdAt,
+                    img.imageKey         as representativeImageUrl,
+                    p.createdAt          as pledgedAt,
+                    li.depositArea       as depositArea
+                from Pledge p
+                join p.lostItem li
+                join li.category c
+                join li.foundArea sa
+                left join li.images img on img.imageOrder = 0
+                where p.owner.id = :memberId
+                order by p.createdAt desc
+            """)
+    Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
+            @Param("memberId") Long memberId,
+            Pageable pageable
     );
-
-    @Modifying
-    @Query("DELETE FROM LostItem li WHERE li.id IN :ids")
-    int deleteBulkByIds(@Param("ids") List<Long> ids);
 }

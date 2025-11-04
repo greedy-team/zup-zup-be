@@ -54,4 +54,18 @@ public class LostItemFixture {
 
         return lostItem;
     }
+
+    // 검토 중인 분실물 (전자기기)
+    public static LostItem PENDING_LOST_ITEM() {
+        LostItem lostItem = LostItem.builder()
+                .category(ELECTRONIC())
+                .foundArea(AI_CENTER())
+                .status(LostItemStatus.PENDING)
+                .build();
+
+        List<LostItemImage> images = List.of(DEFAULT_IMAGE(lostItem));
+        ReflectionTestUtils.setField(lostItem, "images", images);
+
+        return lostItem;
+    }
 }

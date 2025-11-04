@@ -3,7 +3,7 @@ package com.greedy.zupzup.lostitem.presentation.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-public record LostItemListQuery(
+public record LostItemListRequest(
         Long categoryId,
         Long schoolAreaId,
         @Min(value = MIN_PAGE, message = "page는 1 이상이어야 합니다.") Integer page,
