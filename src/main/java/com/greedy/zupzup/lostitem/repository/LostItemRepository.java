@@ -108,4 +108,29 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
         return findWithCategoryAndAreaById(id)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
+
+    @Query("""
+                select
+                    li.id                as id,
+                    c.id                 as categoryId,
+                    c.name               as categoryName,
+                    sa.id                as schoolAreaId,
+                    sa.areaName          as schoolAreaName,
+                    li.foundAreaDetail   as foundAreaDetail,
+                    li.createdAt         as createdAt,
+                    img.imageKey         as representativeImageUrl,
+                    p.createdAt          as pledgedAt,
+                    li.depositArea       as depositArea
+                from Pledge p
+                join p.lostItem li
+                join li.category c
+                join li.foundArea sa
+                left join li.images img on img.imageOrder = 0
+                where p.owner.id = :memberId
+                order by p.createdAt desc
+            """)
+    Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
+            @Param("memberId") Long memberId,
+            Pageable pageable
+    );
 }

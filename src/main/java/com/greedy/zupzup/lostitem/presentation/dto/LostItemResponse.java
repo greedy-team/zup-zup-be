@@ -5,9 +5,8 @@ import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
-public record LostItemViewResponse(
+public record LostItemResponse(
         Long id,
         Long categoryId,
         String categoryName,
@@ -17,15 +16,16 @@ public record LostItemViewResponse(
         String foundAreaDetail,
         String createdAt,
         String representativeImageUrl
-) {
+) implements LostItemView {
+
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private static String toKstIso(LocalDateTime ts) {
         return ts.atZone(KST).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    public static LostItemViewResponse from(LostItemSimpleViewCommand c) {
-        return new LostItemViewResponse(
+    public static LostItemResponse from(LostItemSimpleViewCommand c) {
+        return new LostItemResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),
@@ -33,9 +33,9 @@ public record LostItemViewResponse(
         );
     }
 
-    public static LostItemViewResponse from(LostItemListCommand c, String representativeImageUrl) {
+    public static LostItemResponse from(LostItemListCommand c, String representativeImageUrl) {
         final String finalImage = pickListImage(c, representativeImageUrl);
-        return new LostItemViewResponse(
+        return new LostItemResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
                 toKstIso(c.createdAt()),

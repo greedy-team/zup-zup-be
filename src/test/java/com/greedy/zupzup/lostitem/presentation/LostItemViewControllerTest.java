@@ -9,11 +9,12 @@ import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemResponse;
 import com.greedy.zupzup.member.domain.Member;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.util.Map;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,11 +53,13 @@ class LostItemViewControllerTest extends ControllerTest {
 
             LostItemListResponse response = extract.as(LostItemListResponse.class);
 
+            String representativeImageUrl = extract.jsonPath().getString("items[0].representativeImageUrl");
+
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.count()).isPositive();
                 softly.assertThat(response.items()).isNotEmpty();
-                softly.assertThat(response.items().get(0).representativeImageUrl()).isNotBlank();
+                softly.assertThat(representativeImageUrl).isNotBlank();
             });
         }
 
@@ -83,14 +86,16 @@ class LostItemViewControllerTest extends ControllerTest {
 
             // then
             String expected = "https://example.com/default-image.jpg";
-            var target = response.items().stream()
-                    .filter(v -> v.id().equals(id))
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> target = (Map<String, Object>) response.items().stream()
+                    .filter(v -> ((Map<String, Object>) v).get("id").equals(id.intValue()))
                     .findFirst()
                     .orElseThrow();
 
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
-                softly.assertThat(target.representativeImageUrl()).isEqualTo(expected);
+                softly.assertThat(target.get("representativeImageUrl")).isEqualTo(expected);
             });
         }
 
@@ -117,8 +122,11 @@ class LostItemViewControllerTest extends ControllerTest {
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.items()).isNotEmpty();
+
                 boolean allMatch = response.items().stream()
-                        .allMatch(i -> i.categoryId().equals(wallet.getId()));
+                        .map(item -> (Map<?, ?>) item)
+                        .allMatch(i -> i.get("categoryId").equals(wallet.getId().intValue()));
+
                 softly.assertThat(allMatch).isTrue();
                 softly.assertThat(response.count()).isEqualTo(3);
                 softly.assertThat(response.items().size()).isEqualTo(3);
@@ -151,7 +159,7 @@ class LostItemViewControllerTest extends ControllerTest {
                     .then().log().all()
                     .extract();
 
-            LostItemViewResponse response = extract.as(LostItemViewResponse.class);
+            LostItemResponse response = extract.as(LostItemResponse.class);
 
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
@@ -191,7 +199,7 @@ class LostItemViewControllerTest extends ControllerTest {
                     .then().log().all()
                     .extract();
 
-            LostItemViewResponse response = extract.as(LostItemViewResponse.class);
+            LostItemResponse response = extract.as(LostItemResponse.class);
 
             // then
             String expected = "https://example.com/default-image.jpg";

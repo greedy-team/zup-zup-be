@@ -1,9 +1,12 @@
 package com.greedy.zupzup.lostitem.presentation;
 
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemListQuery;
+import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemViewResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemResponse;
 import com.greedy.zupzup.global.exception.ErrorResponse;
+import com.greedy.zupzup.lostitem.presentation.dto.MyPledgedListRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -129,7 +132,7 @@ public interface LostItemViewControllerDocs {
                     )
             )
     })
-    ResponseEntity<LostItemListResponse> list(@ParameterObject @Valid LostItemListQuery query);
+    ResponseEntity<LostItemListResponse> list(@ParameterObject @Valid LostItemListRequest query);
 
     @Operation(
             summary = "분실물 단건(간단) 조회",
@@ -144,7 +147,7 @@ public interface LostItemViewControllerDocs {
                     responseCode = "200",
                     description = "단건 조회 성공",
                     content = @Content(
-                            schema = @Schema(implementation = LostItemViewResponse.class),
+                            schema = @Schema(implementation = LostItemResponse.class),
                             examples = @ExampleObject(
                                     name = "단건 조회 성공 예시",
                                     value = """
@@ -200,8 +203,99 @@ public interface LostItemViewControllerDocs {
                     )
             )
     })
-    ResponseEntity<LostItemViewResponse> getBasic(
+    ResponseEntity<LostItemResponse> getBasic(
             @Parameter(description = "조회할 분실물 ID", required = true, example = "12")
             @PathVariable Long lostItemId
+    );
+
+    @Operation(
+            summary = "내 서약 분실물 목록 조회",
+            description = """
+                    로그인한 사용자가 직접 서약한 분실물 목록을 최신순으로 조회합니다.
+                    - 로그인 필수
+                    - page는 1부터 시작, limit는 1~50 사이
+                    """
+    )
+    @Parameters({
+            @Parameter(name = "page", description = "페이지 번호 (기본 1)", example = "1"),
+            @Parameter(name = "limit", description = "페이지 크기 (기본 20, 최대 50)", example = "10")
+    })
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(
+                            schema = @Schema(implementation = LostItemListResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "count": 1,
+                                                "items": [
+                                                    {
+                                                        "id": 1,
+                                                        "categoryId": 1,
+                                                        "categoryName": "전자기기",
+                                                        "schoolAreaId": 1,
+                                                        "schoolAreaName": "대양 AI 센터",
+                                                        "foundAreaDetail": "AI 센터 B205",
+                                                        "createdAt": "2025-10-12T14:22:52.646532+09:00",
+                                                        "representativeImageUrl": "https://example.com/default-image.jpg",
+                                                        "pledgedAt": "2025-10-12T14:22:52.726507+09:00",
+                                                        "depositArea": "학술정보원 2층 보관함 3번"
+                                                    }
+                                                ],
+                                                "pageInfo": {
+                                                    "page": 1,
+                                                    "size": 10,
+                                                    "totalElements": 1,
+                                                    "totalPages": 1,
+                                                    "hasPrev": false,
+                                                    "hasNext": false
+                                                }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청(파라미터 범위/타입 오류)",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "limit 초과(>50) 예시",
+                                            value = """
+                                                    {
+                                                      "title": "유효하지 않은 입력값",
+                                                      "status": 400,
+                                                      "detail": "limit: limit는 50 이하이어야 합니다.",
+                                                      "instance": "/api/lost-items/pledged"
+                                                                                                                                                                              }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "파라미터 타입 불일치 예시",
+                                            value = """
+                                                    {
+                                                      "title": "쿼리 파라미터 타입 불일치",
+                                                      "status": 400,
+                                                      "detail": "쿼리 파라미터 'page'는 'Integer' 타입이어야 합니다.",
+                                                      "instance": "/api/lost-items/pledged"
+                                                                                                                                                                         }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "로그인 필요",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    ResponseEntity<LostItemListResponse> getMyPledgedLostItems(
+            @MemberAuth LoginMember loginMember,
+            @Valid @ParameterObject MyPledgedListRequest query
     );
 }

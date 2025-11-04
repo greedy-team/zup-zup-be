@@ -6,19 +6,31 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 
 public record LostItemListResponse(
-        int count,
-        List<LostItemViewResponse> items,
+        long count,
+        List<?> items,
         PageInfoResponse pageInfo
 ) {
     public static LostItemListResponse of(Page<LostItemListCommand> page, Map<Long, String> repImageMap) {
-        List<LostItemViewResponse> items = page.getContent().stream()
-                .map(c -> LostItemViewResponse.from(c, repImageMap.get(c.id())))
+        List<LostItemResponse> items = page.getContent().stream()
+                .map(c -> LostItemResponse.from(c, repImageMap.get(c.id())))
                 .toList();
 
         return new LostItemListResponse(
                 page.getNumberOfElements(),
                 items,
                 PageInfoResponse.from(page)
+        );
+    }
+
+    public static LostItemListResponse of(Page<MyPledgedListResponse> page) {
+        PageInfoResponse pageInfo = PageInfoResponse.from(page);
+
+        List<MyPledgedListResponse> items = page.getContent();
+
+        return new LostItemListResponse(
+                page.getNumberOfElements(),
+                items,
+                pageInfo
         );
     }
 }
