@@ -10,7 +10,6 @@ services:
       - ./.env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     restart: always
     volumes:
       - /home/ubuntu/zupzup/logs:/app/logs
@@ -24,7 +23,6 @@ services:
       - ./.env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     restart: always
     volumes:
       - /home/ubuntu/zupzup/logs:/app/logs
