@@ -136,26 +136,4 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             @Param("memberId") Long memberId,
             Pageable pageable
     );
-
-    @Modifying
-    @Query("UPDATE LostItem li SET li.status = :targetStatus WHERE li.id IN :ids AND li.status = :expectedStatus")
-    int updateStatusBulkByIds(
-            @Param("ids") List<Long> ids,
-            @Param("targetStatus") LostItemStatus targetStatus,
-            @Param("expectedStatus") LostItemStatus expectedStatus
-    );
-
-    @Modifying
-    @Query("DELETE FROM LostItem li WHERE li.id IN :ids")
-    int deleteBulkByIds(@Param("ids") List<Long> ids);
-
-    @Query("""
-    select li
-    from LostItem li
-        join fetch li.category c
-        join fetch li.foundArea sa
-    where li.status = :status
-    order by li.createdAt desc
-    """)
-    List<LostItem> findPendingItems(@Param("status") LostItemStatus status, Pageable pageable);
 }

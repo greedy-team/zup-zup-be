@@ -11,6 +11,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -35,20 +36,20 @@ import org.springframework.data.domain.Pageable;
 public class AdminLostItemServiceTest {
 
     private AdminLostItemService service;
-    private LostItemRepository lostItemRepository;
+    private AdminLostItemRepository adminLostItemRepository;
     private LostItemImageRepository lostItemImageRepository;
     private LostItemFeatureRepository lostItemFeatureRepository;
     private S3ImageFileManager fileManager;
 
     @BeforeEach
     void init() {
-        lostItemRepository = mock(LostItemRepository.class);
+        adminLostItemRepository = mock(AdminLostItemRepository.class);
         lostItemImageRepository = mock(LostItemImageRepository.class);
         lostItemFeatureRepository = mock(LostItemFeatureRepository.class);
         fileManager = mock(S3ImageFileManager.class);
 
         service = new AdminLostItemService(
-                lostItemRepository,
+                adminLostItemRepository,
                 lostItemImageRepository,
                 fileManager,
                 lostItemFeatureRepository
@@ -84,7 +85,7 @@ public class AdminLostItemServiceTest {
         List<Long> ids = List.of(1L, 2L);
         ApproveLostItemsRequest req = new ApproveLostItemsRequest(ids);
 
-        given(lostItemRepository.updateStatusBulkByIds(ids, LostItemStatus.REGISTERED, LostItemStatus.PENDING))
+        given(adminLostItemRepository.updateStatusBulkByIds(ids, LostItemStatus.REGISTERED, LostItemStatus.PENDING))
                 .willReturn(2);
 
         ApproveLostItemsResponse res = service.approveBulk(req);
@@ -102,7 +103,7 @@ public class AdminLostItemServiceTest {
 
         given(lostItemImageRepository.findImageKeysByLostItemIds(ids))
                 .willReturn(List.of("k1", "k2"));
-        given(lostItemRepository.deleteBulkByIds(ids)).willReturn(2);
+        given(adminLostItemRepository.deleteBulkByIds(ids)).willReturn(2);
 
         RejectLostItemsResponse res = service.rejectBulk(req);
 
@@ -122,7 +123,7 @@ public class AdminLostItemServiceTest {
         LostItem i1 = stubItem(1L, "아이폰", "학생회관", "도서관3층", 10L, "전자제품", 1L, "AI센터");
         LostItem i2 = stubItem(2L, "지갑", "경비실", "운동장", 11L, "지갑", 2L, "정문");
 
-        given(lostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable))
+        given(adminLostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable))
                 .willReturn(List.of(i1, i2));
 
         LostItemImage img1 = mock(LostItemImage.class);

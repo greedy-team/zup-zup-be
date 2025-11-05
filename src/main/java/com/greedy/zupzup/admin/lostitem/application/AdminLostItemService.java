@@ -6,6 +6,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -14,7 +15,6 @@ import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
-import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminLostItemService {
 
-    private final LostItemRepository lostItemRepository;
+    private final AdminLostItemRepository adminLostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
     private final S3ImageFileManager s3ImageFileManager;
     private final LostItemFeatureRepository lostItemFeatureRepository;
@@ -38,7 +38,7 @@ public class AdminLostItemService {
     public ApproveLostItemsResponse approveBulk(ApproveLostItemsRequest request) {
         List<Long> lostItemIds = request.lostItemIds();
 
-        int successCount = lostItemRepository.updateStatusBulkByIds(
+        int successCount = adminLostItemRepository.updateStatusBulkByIds(
                 lostItemIds,
                 LostItemStatus.REGISTERED,
                 LostItemStatus.PENDING
@@ -58,7 +58,7 @@ public class AdminLostItemService {
 
         lostItemImageRepository.deleteByLostItemIds(lostItemIds);
 
-        int deletedCount = lostItemRepository.deleteBulkByIds(lostItemIds);
+        int deletedCount = adminLostItemRepository.deleteBulkByIds(lostItemIds);
 
         return RejectLostItemsResponse.of(deletedCount, lostItemIds.size());
     }
@@ -67,7 +67,7 @@ public class AdminLostItemService {
     public AdminPendingLostItemListResponse getPendingLostItems(Integer page, Integer limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
 
-        List<LostItem> items = lostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable);
+        List<LostItem> items = adminLostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable);
 
         List<Long> ids = items.stream().map(LostItem::getId).toList();
 
