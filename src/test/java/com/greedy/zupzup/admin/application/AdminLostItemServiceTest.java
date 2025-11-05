@@ -1,90 +1,163 @@
 package com.greedy.zupzup.admin.application;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.then;
 
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
-import com.greedy.zupzup.common.ServiceUnitTest;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemFeature;
+import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
+import com.greedy.zupzup.schoolarea.domain.SchoolArea;
+
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
+import com.greedy.zupzup.category.domain.FeatureOption;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-public class AdminLostItemServiceTest extends ServiceUnitTest {
+public class AdminLostItemServiceTest {
 
     private AdminLostItemService service;
-
-    private LostItemFeatureRepository lostItemFeatureRepository;
-    private LostItemImageRepository lostItemImageRepository;
-    private S3ImageFileManager s3ImageFileManager;
     private LostItemRepository lostItemRepository;
+    private LostItemImageRepository lostItemImageRepository;
+    private LostItemFeatureRepository lostItemFeatureRepository;
+    private S3ImageFileManager fileManager;
 
     @BeforeEach
     void init() {
-        lostItemFeatureRepository = mock(LostItemFeatureRepository.class);
-        lostItemImageRepository = mock(LostItemImageRepository.class);
-        s3ImageFileManager = mock(S3ImageFileManager.class);
         lostItemRepository = mock(LostItemRepository.class);
+        lostItemImageRepository = mock(LostItemImageRepository.class);
+        lostItemFeatureRepository = mock(LostItemFeatureRepository.class);
+        fileManager = mock(S3ImageFileManager.class);
 
-        service = new AdminLostItemService(lostItemRepository, lostItemImageRepository, s3ImageFileManager, lostItemFeatureRepository);
+        service = new AdminLostItemService(
+                lostItemRepository,
+                lostItemImageRepository,
+                fileManager,
+                lostItemFeatureRepository
+        );
     }
 
-    private final List<Long> testIds = List.of(1L, 2L);
+    private LostItem stubItem(
+            Long id, String desc, String deposit, String foundDetail,
+            Long categoryId, String categoryName, Long schoolAreaId, String schoolAreaName) {
 
-    @Test
-    void 일괄_승인_시_PENDING_상태를_REGISTERED로_변경한다() {
-        // given
-        ApproveLostItemsRequest request = new ApproveLostItemsRequest(testIds);
-        given(lostItemRepository.updateStatusBulkByIds(
-                eq(testIds), eq(LostItemStatus.REGISTERED), eq(LostItemStatus.PENDING)
-        )).willReturn(2);
+        Category category = mock(Category.class);
+        given(category.getId()).willReturn(categoryId);
+        given(category.getName()).willReturn(categoryName);
 
-        // when
-        ApproveLostItemsResponse response = service.approveBulk(request);
+        SchoolArea area = mock(SchoolArea.class);
+        given(area.getId()).willReturn(schoolAreaId);
+        given(area.getAreaName()).willReturn(schoolAreaName);
 
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.successfulCount()).isEqualTo(2);
-            softly.assertThat(response.totalRequestedCount()).isEqualTo(2);
-        });
-        then(lostItemRepository).should().updateStatusBulkByIds(eq(testIds), eq(LostItemStatus.REGISTERED), eq(LostItemStatus.PENDING));
+        LostItem item = mock(LostItem.class);
+        given(item.getId()).willReturn(id);
+        given(item.getDescription()).willReturn(desc);
+        given(item.getDepositArea()).willReturn(deposit);
+        given(item.getFoundAreaDetail()).willReturn(foundDetail);
+        given(item.getCategory()).willReturn(category);
+        given(item.getFoundArea()).willReturn(area);
+        given(item.getCreatedAt()).willReturn(LocalDateTime.now());
+
+        return item;
     }
 
     @Test
-    void 일괄_삭제시_DB에서_데이터를_삭제한다() {
-        // given
-        RejectLostItemsRequest request = new RejectLostItemsRequest(testIds);
-        List<String> mockImageKeys = List.of("key1", "key2");
+    void 일괄_승인시_PENDING_REGISTERED로_변경() {
+        List<Long> ids = List.of(1L, 2L);
+        ApproveLostItemsRequest req = new ApproveLostItemsRequest(ids);
 
-        given(lostItemImageRepository.findImageKeysByLostItemIds(eq(testIds))).willReturn(mockImageKeys);
-        given(lostItemRepository.deleteBulkByIds(eq(testIds))).willReturn(2);
+        given(lostItemRepository.updateStatusBulkByIds(ids, LostItemStatus.REGISTERED, LostItemStatus.PENDING))
+                .willReturn(2);
 
-        // when
-        RejectLostItemsResponse response = service.rejectBulk(request);
+        ApproveLostItemsResponse res = service.approveBulk(req);
 
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.successfulCount()).isEqualTo(2);
-            softly.assertThat(response.totalRequestedCount()).isEqualTo(2);
+        assertSoftly(s -> {
+            s.assertThat(res.successfulCount()).isEqualTo(2);
+            s.assertThat(res.totalRequestedCount()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 일괄_삭제시_이미지삭제_및_DB삭제() {
+        List<Long> ids = List.of(1L, 2L);
+        RejectLostItemsRequest req = new RejectLostItemsRequest(ids);
+
+        given(lostItemImageRepository.findImageKeysByLostItemIds(ids))
+                .willReturn(List.of("k1", "k2"));
+        given(lostItemRepository.deleteBulkByIds(ids)).willReturn(2);
+
+        RejectLostItemsResponse res = service.rejectBulk(req);
+
+        assertSoftly(s -> {
+            s.assertThat(res.successfulCount()).isEqualTo(2);
         });
 
-        then(s3ImageFileManager).should().delete("key1");
-        then(s3ImageFileManager).should().delete("key2");
+        then(fileManager).should().delete("k1");
+        then(fileManager).should().delete("k2");
+    }
 
-        then(lostItemFeatureRepository).should().deleteByLostItemIds(eq(testIds));
-        then(lostItemImageRepository).should().deleteByLostItemIds(eq(testIds));
+    @Test
+    void 보류중_분실물_목록_조회() {
+        int page = 1, limit = 10;
+        Pageable pageable = PageRequest.of(page - 1, limit);
 
-        then(lostItemRepository).should().deleteBulkByIds(eq(testIds));
+        LostItem i1 = stubItem(1L, "아이폰", "학생회관", "도서관3층", 10L, "전자제품", 1L, "AI센터");
+        LostItem i2 = stubItem(2L, "지갑", "경비실", "운동장", 11L, "지갑", 2L, "정문");
+
+        given(lostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable))
+                .willReturn(List.of(i1, i2));
+
+        LostItemImage img1 = mock(LostItemImage.class);
+        given(img1.getLostItem()).willReturn(i1);
+        given(img1.getImageKey()).willReturn("img1");
+
+        LostItemImage img2 = mock(LostItemImage.class);
+        given(img2.getLostItem()).willReturn(i2);
+        given(img2.getImageKey()).willReturn("img2");
+
+        given(lostItemImageRepository.findImagesForItems(List.of(1L, 2L)))
+                .willReturn(List.of(img1, img2));
+
+        // features
+        FeatureOption fopt = mock(FeatureOption.class);
+        given(fopt.getId()).willReturn(100L);
+        given(fopt.getOptionValue()).willReturn("삼성");
+
+        LostItemFeature lf = mock(LostItemFeature.class);
+        given(lf.getLostItem()).willReturn(i1);
+        given(lf.getSelectedOption()).willReturn(fopt);
+
+        given(lostItemFeatureRepository.findFeaturesForLostItems(List.of(1L, 2L)))
+                .willReturn(List.of(lf));
+
+        AdminPendingLostItemListResponse res = service.getPendingLostItems(page, limit);
+
+        assertSoftly(s -> {
+            s.assertThat(res.count()).isEqualTo(2);
+            s.assertThat(res.items()).hasSize(2);
+            s.assertThat(res.items().get(0).id()).isEqualTo(1L);
+            s.assertThat(res.items().get(0).imageKeys()).contains("img1");
+
+            FeatureOptionDto dto = res.items().get(0).featureOptions().get(0);
+            s.assertThat(dto.optionValue()).isEqualTo("삼성");
+        });
     }
 }

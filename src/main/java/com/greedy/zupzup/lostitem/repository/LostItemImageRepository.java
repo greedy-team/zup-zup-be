@@ -31,4 +31,13 @@ public interface LostItemImageRepository extends JpaRepository<LostItemImage, Lo
     @Modifying
     @Query("DELETE FROM LostItemImage i WHERE i.lostItem.id IN :lostItemIds")
     void deleteByLostItemIds(@Param("lostItemIds") List<Long> lostItemIds);
+
+    @Query("""
+                select i
+                from LostItemImage i
+                where i.lostItem.id in :lostItemIds
+                order by i.imageOrder asc
+            """)
+    List<LostItemImage> findImagesForItems(@Param("lostItemIds") List<Long> lostItemIds);
+
 }

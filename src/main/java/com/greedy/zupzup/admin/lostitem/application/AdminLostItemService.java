@@ -6,10 +6,11 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemSimpleProjection;
 import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
+import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,39 +67,49 @@ public class AdminLostItemService {
     public AdminPendingLostItemListResponse getPendingLostItems(Integer page, Integer limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
 
-        Page<AdminLostItemSimpleProjection> projectionPage = lostItemRepository.findPendingList(
-                LostItemStatus.PENDING, pageable
-        );
+        List<LostItem> items = lostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable);
 
-        List<Long> lostItemIds = projectionPage.getContent().stream()
-                .map(AdminLostItemSimpleProjection::getId)
-                .toList();
+        List<Long> ids = items.stream().map(LostItem::getId).toList();
 
-        List<LostItemFeature> features = lostItemFeatureRepository.findFeaturesForLostItems(lostItemIds);
+        List<LostItemImage> images = lostItemImageRepository.findImagesForItems(ids);
+        Map<Long, List<String>> imgMap = images.stream()
+                .collect(Collectors.groupingBy(
+                        img -> img.getLostItem().getId(),
+                        Collectors.mapping(LostItemImage::getImageKey, Collectors.toList())
+                ));
 
+        List<LostItemFeature> features = lostItemFeatureRepository.findFeaturesForLostItems(ids);
         Map<Long, List<FeatureOptionDto>> featuresMap = features.stream()
                 .collect(Collectors.groupingBy(
-                        lif -> lif.getLostItem().getId(),
+                        lf -> lf.getLostItem().getId(),
                         Collectors.mapping(
-                                lif -> new FeatureOptionDto(lif.getFeature().getId(), lif.getSelectedOption().getOptionValue()),
+                                lf -> FeatureOptionDto.of(lf.getSelectedOption()),
                                 Collectors.toList()
                         )
                 ));
 
-        Page<AdminLostItemSimpleCommand> commandPage = projectionPage.map(p -> {
-            List<String> imageKeys = (p.getImageKeysString() == null || p.getImageKeysString().isEmpty())
-                    ? Collections.emptyList()
-                    : List.of(p.getImageKeysString().split(","));
+        List<AdminLostItemSimpleCommand> commands = items.stream()
+                .map(item -> new AdminLostItemSimpleCommand(
+                        item.getId(),
+                        item.getCategory().getId(),
+                        item.getCategory().getName(),
+                        item.getFoundArea().getId(),
+                        item.getFoundArea().getAreaName(),
+                        item.getFoundAreaDetail(),
+                        item.getCreatedAt().toString(),
+                        item.getDescription(),
+                        item.getDepositArea(),
+                        imgMap.getOrDefault(item.getId(), Collections.emptyList()),
+                        featuresMap.getOrDefault(item.getId(), Collections.emptyList())
+                ))
+                .toList();
 
-            List<FeatureOptionDto> featureOptions = featuresMap.getOrDefault(p.getId(), Collections.emptyList());
-
-            return new AdminLostItemSimpleCommand(
-                    p.getId(), p.getCategoryId(), p.getCategoryName(), p.getSchoolAreaId(), p.getSchoolAreaName(),
-                    p.getFoundAreaDetail(), p.getCreatedAt().toString(), p.getDescription(), p.getDepositArea(),
-                    imageKeys, featureOptions
-            );
-        });
-
-        return AdminPendingLostItemListResponse.of(commandPage);
+        return AdminPendingLostItemListResponse.of(
+                commands,
+                page,
+                limit,
+                commands.size()
+        );
     }
+
 }

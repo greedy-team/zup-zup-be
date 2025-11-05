@@ -1,9 +1,9 @@
 package com.greedy.zupzup.lostitem.repository;
 
-import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemSimpleProjection;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import java.util.List;
@@ -117,7 +117,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                     li.id                as id,
                     c.id                 as categoryId,
                     c.name               as categoryName,
-                    sa.id                as schoolAreaId,
+                sa.id                as schoolAreaId,
                     sa.areaName          as schoolAreaName,
                     li.foundAreaDetail   as foundAreaDetail,
                     li.createdAt         as createdAt,
@@ -149,31 +149,13 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
     @Query("DELETE FROM LostItem li WHERE li.id IN :ids")
     int deleteBulkByIds(@Param("ids") List<Long> ids);
 
-    @Query(value = """
-            SELECT li.id AS id,
-                   c.id AS categoryId, 
-                   c.name AS categoryName, 
-                   sa.id AS schoolAreaId, 
-                   sa.areaName AS schoolAreaName, 
-                   li.foundAreaDetail AS foundAreaDetail, 
-                   li.description AS description, 
-                   li.depositArea AS depositArea, 
-                   li.createdAt AS createdAt,
-                   (SELECT GROUP_CONCAT(img.imageKey) FROM LostItemImage img WHERE img.lostItem.id = li.id) AS imageKeysString 
-            FROM LostItem li
-            JOIN li.category c
-            JOIN li.foundArea sa
-            WHERE li.status = :status
-            ORDER BY li.createdAt DESC
-            """,
-            countQuery = """
-                    SELECT COUNT(li)
-                    FROM LostItem li
-                    WHERE li.status = :status
-                    """
-    )
-    Page<AdminLostItemSimpleProjection> findPendingList(
-            @Param("status") LostItemStatus status,
-            Pageable pageable
-    );
+    @Query("""
+    select li
+    from LostItem li
+        join fetch li.category c
+        join fetch li.foundArea sa
+    where li.status = :status
+    order by li.createdAt desc
+    """)
+    List<LostItem> findPendingItems(@Param("status") LostItemStatus status, Pageable pageable);
 }

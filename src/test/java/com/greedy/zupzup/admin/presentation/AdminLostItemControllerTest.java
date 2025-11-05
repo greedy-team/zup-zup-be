@@ -11,6 +11,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
+import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.List;
@@ -38,13 +39,6 @@ class AdminLostItemControllerTest extends ControllerTest {
 
         category = givenElectronicsCategory();
     }
-
-    private LostItem givenPendingLostItem(Category category) {
-        LostItem item = givenRegisteredLostItem(category);
-        ReflectionTestUtils.setField(item, "status", LostItemStatus.PENDING);
-        return lostItemRepository.save(item);
-    }
-
 
     @Nested
     @DisplayName("관리자 분실물 일괄 처리 API")
@@ -171,5 +165,72 @@ class AdminLostItemControllerTest extends ControllerTest {
 
             Mockito.verify(imageFileManager, Mockito.times(1)).delete(Mockito.anyString());
         }
+    }
+
+    @Nested
+    @DisplayName("관리자 분실물 목록 조회 API")
+    class AdminListApi {
+
+        @Test
+        void 보류_상태_분실물이_조회된다() {
+            // given
+            LostItem i1 = givenPendingLostItemWithFeatures(category);
+            givenLostItemImages(i1.getId(), List.of("imgA", "imgB", "imgC"));
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .queryParam("page", 1)
+                    .queryParam("limit", 10)
+                    .when().get("/api/admin/lost-items/pending")
+                    .then().log().all()
+                    .extract();
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+
+                List<String> keys = extract.jsonPath()
+                        .getList("items.find{it.id == " + i1.getId() + "}.imageKeys");
+                softly.assertThat(keys).containsExactlyInAnyOrder("imgA", "imgB", "imgC");
+
+                List<String> features = extract.jsonPath()
+                        .getList("items.find{it.id == " + i1.getId() + "}.featureOptions.optionValue");
+                softly.assertThat(features).contains("삼성", "블랙");
+            });
+        }
+
+
+        @Test
+        void 여러개의_보류_분실물이_조회된다() {
+            // given
+            List<LostItem> items = givenMultiplePendingLostItemsWithImages(category, 3);
+
+            // when
+            ExtractableResponse<Response> extract = io.restassured.RestAssured.given().log().all()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .queryParam("page", 1)
+                    .queryParam("limit", 10)
+                    .when().get("/api/admin/lost-items/pending")
+                    .then().log().all()
+                    .extract();
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+
+                List<Long> returnedIds = extract.jsonPath().getList("items.id", Long.class);
+                softly.assertThat(returnedIds).containsAll(items.stream().map(LostItem::getId).toList());
+
+                for (LostItem item : items) {
+
+                    List<String> keys = extract.jsonPath()
+                            .getList("items.find{it.id == " + item.getId() + "}.imageKeys");
+                    softly.assertThat(keys)
+                            .containsExactlyInAnyOrder("img1_" + item.getId(), "img2_" + item.getId());
+                }
+            });
+        }
+
     }
 }

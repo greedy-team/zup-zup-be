@@ -23,6 +23,7 @@ import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
 import io.restassured.RestAssured;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -226,4 +227,60 @@ public abstract class ControllerTest {
         return lostItem;
     }
 
+
+    public void givenLostItemImages(Long lostItemId, List<String> imageKeys) {
+        for (int i = 0; i < imageKeys.size(); i++) {
+            givenLostItemImage(lostItemId, imageKeys.get(i), "url_" + i, i == 0);
+        }
+    }
+
+    protected LostItem givenPendingLostItem(Category category) {
+        SchoolArea area = schoolAreaRepository.save(AI_CENTER());
+
+        LostItem lostItem = LostItem.builder()
+                .category(category)
+                .foundArea(area)
+                .foundAreaDetail("상세위치")
+                .depositArea("보관장소")
+                .description("test item")
+                .status(LostItemStatus.PENDING)
+                .build();
+
+        return lostItemRepository.save(lostItem);
+    }
+
+
+    protected void givenLostItemImage(Long lostItemId, String imageKey, String imageUrl, boolean isRepresentative) {
+        LostItem lostItemRef = lostItemRepository.getById(lostItemId);
+
+        lostItemImageRepository.save(
+                SPECIFIC_IMAGE(lostItemRef, imageKey, imageUrl, isRepresentative)
+        );
+    }
+
+    protected List<LostItem> givenMultiplePendingLostItemsWithImages(Category category, int count) {
+        List<LostItem> items = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            LostItem item = givenPendingLostItem(category);
+            givenLostItemImages(item.getId(), List.of("img1_" + item.getId(), "img2_" + item.getId()));
+            items.add(item);
+        }
+        return items;
+    }
+
+    protected LostItem givenPendingLostItemWithFeatures(Category category) {
+        LostItem item = givenPendingLostItem(category);
+
+        Feature brandFeature = category.getFeatures().stream()
+                .filter(f -> f.getName().equals("브랜드")).findFirst().orElseThrow();
+        FeatureOption brand = brandFeature.getOptions().get(0);
+        lostItemFeatureRepository.save(new LostItemFeature(item, brandFeature, brand));
+
+        Feature colorFeature = category.getFeatures().stream()
+                .filter(f -> f.getName().equals("색상")).findFirst().orElseThrow();
+        FeatureOption color = colorFeature.getOptions().get(0);
+        lostItemFeatureRepository.save(new LostItemFeature(item, colorFeature, color));
+
+        return item;
+    }
 }

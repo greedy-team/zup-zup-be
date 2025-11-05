@@ -12,4 +12,12 @@ public class LostItemImageFixture {
                 .lostItem(lostItem)
                 .build();
     }
+
+    public static LostItemImage SPECIFIC_IMAGE(LostItem lostItem, String imageKey, String imageUrl, boolean isRepresentative) {
+        return LostItemImage.builder()
+                .imageKey(imageKey)
+                .imageOrder(isRepresentative ? 0 : 1)
+                .lostItem(lostItem)
+                .build();
+    }
 }

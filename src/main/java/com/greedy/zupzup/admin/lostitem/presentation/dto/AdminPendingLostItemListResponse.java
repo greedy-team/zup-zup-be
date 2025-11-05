@@ -20,4 +20,27 @@ public record AdminPendingLostItemListResponse(
                 PageInfoResponse.from(pageResult)
         );
     }
+
+    public static AdminPendingLostItemListResponse of(
+            List<AdminLostItemSimpleCommand> commands,
+            int page,
+            int limit,
+            long totalCount
+    ) {
+        PageInfoResponse pageInfo = new PageInfoResponse(
+                page,
+                limit,
+                totalCount,
+                (int) Math.ceil((double) totalCount / limit),
+                page > 1,
+                ((long) page * limit) < totalCount
+        );
+
+        return new AdminPendingLostItemListResponse(
+                commands.size(),
+                commands,
+                pageInfo
+        );
+    }
+
 }
