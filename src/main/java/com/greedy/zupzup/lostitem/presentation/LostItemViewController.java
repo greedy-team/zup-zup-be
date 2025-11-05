@@ -4,8 +4,8 @@ import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.LostItemViewService;
 import com.greedy.zupzup.lostitem.application.MyPledgedLostItemService;
-import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
-import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemResponse;
@@ -32,11 +32,11 @@ public class LostItemViewController implements LostItemViewControllerDocs{
     /** 목록 */
     @GetMapping
     public ResponseEntity<LostItemListResponse> list(@Valid LostItemListRequest query) {
-        Page<LostItemListCommand> page = lostItemViewService.getLostItems(
+        Page<LostItemListResult> page = lostItemViewService.getLostItems(
                 query.categoryId(), query.schoolAreaId(), query.safePage(), query.safeLimit()
         );
 
-        List<Long> ids = page.getContent().stream().map(LostItemListCommand::id).toList();
+        List<Long> ids = page.getContent().stream().map(LostItemListResult::id).toList();
         Map<Long, String> repImageMap = lostItemViewService.getRepresentativeImageMapByItemIds(ids);
 
         return ResponseEntity.ok(LostItemListResponse.of(page, repImageMap));
@@ -45,7 +45,7 @@ public class LostItemViewController implements LostItemViewControllerDocs{
     /** 단건 */
     @GetMapping("/{lostItemId}")
     public ResponseEntity<LostItemResponse> getBasic(@PathVariable Long lostItemId) {
-        LostItemSimpleViewCommand command = lostItemViewService.getSimpleView(lostItemId);
+        LostItemSimpleViewResult command = lostItemViewService.getSimpleView(lostItemId);
         return ResponseEntity.ok(LostItemResponse.from(command));
     }
 
@@ -62,4 +62,8 @@ public class LostItemViewController implements LostItemViewControllerDocs{
         );
         return ResponseEntity.ok(response);
     }
+
+
+
+
 }

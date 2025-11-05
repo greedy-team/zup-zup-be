@@ -1,16 +1,13 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
-import com.greedy.zupzup.lostitem.application.dto.MyPledgedLostItemCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
-import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
-import com.greedy.zupzup.lostitem.repository.MyPledgedLostItemProjection;
-import com.greedy.zupzup.lostitem.repository.LostItemRepository;
-import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
+import com.greedy.zupzup.lostitem.repository.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,18 +30,18 @@ public class LostItemViewService {
      * 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<LostItemListCommand> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
+    public Page<LostItemListResult> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
         return lostItemRepository
                 .findList(categoryId, schoolAreaId, LostItemStatus.REGISTERED, pageable)
-                .map(LostItemListCommand::from);
+                .map(LostItemListResult::from);
     }
 
     /**
      * 단건 조회
      */
     @Transactional(readOnly = true)
-    public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
+    public LostItemSimpleViewResult getSimpleView(Long lostItemId) {
         LostItem item = lostItemRepository.getWithCategoryById(lostItemId);
 
         statusGuardForSimpleView(item);
@@ -52,12 +49,12 @@ public class LostItemViewService {
         boolean isEtc = item.isEtcCategory();
 
         if (!isEtc) {
-            return LostItemSimpleViewCommand.of(item, Objects.requireNonNull(item.getCategory()).getIconUrl());
+            return LostItemSimpleViewResult.of(item, Objects.requireNonNull(item.getCategory()).getIconUrl());
         }
 
         String rep = getRepresentativeImageMapByItemIds(List.of(lostItemId))
                 .getOrDefault(lostItemId, "");
-        return LostItemSimpleViewCommand.of(item, rep);
+        return LostItemSimpleViewResult.of(item, rep);
     }
 
     /**
@@ -85,5 +82,6 @@ public class LostItemViewService {
 
         throw new ApplicationException(code);
     }
+
 
 }
