@@ -3,7 +3,7 @@ name: zupzup CI/CD with GitHub Actions
 on:
   push:
     branches:
-      - hyerimh/chore-46-server-migration
+      - main
 
 jobs:
   deploy:
