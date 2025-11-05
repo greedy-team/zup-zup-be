@@ -109,7 +109,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
 
-    @Query("""
+    @Query(value = """
                 select
                     li.id                as id,
                     c.id                 as categoryId,
@@ -128,7 +128,13 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 left join li.images img on img.imageOrder = 0
                 where p.owner.id = :memberId
                 order by p.createdAt desc
-            """)
+            """,
+            countQuery = """
+                select count(p)
+                from Pledge p
+                where p.owner.id = :memberId
+            """
+    )
     Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
             @Param("memberId") Long memberId,
             Pageable pageable
