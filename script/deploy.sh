@@ -43,13 +43,13 @@ echo "> 현재 환경: '$CURRENT_ENV', 타겟 환경: '$TARGET_ENV'" >> $DEPLOY_
 # 새로운 버전의 애플리케이션을 실행
 echo "> 새로운 '$TARGET_ENV'($APP_NAME) 애플리케이션 실행 (Port: $TARGET_PORT)" >> $DEPLOY_LOG
 echo "  → Docker Hub에서 최신 이미지를 pull" >> $DEPLOY_LOG
-sudo docker-compose -f $DOCKER_COMPOSE_FILE pull "web-$TARGET_ENV"
+docker compose -f $DOCKER_COMPOSE_FILE pull "web-$TARGET_ENV"
 echo "  → '$TARGET_ENV' 컨테이너를 실행" >> $DEPLOY_LOG
-sudo docker-compose -f $DOCKER_COMPOSE_FILE stop "web-$TARGET_ENV" || true
-sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV" || true
+docker compose -f $DOCKER_COMPOSE_FILE stop "web-$TARGET_ENV" || true
+docker compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV" || true
 
 # 깨끗한 상태에서 컨테이너를 새로 생성
-sudo docker-compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
+docker compose -f $DOCKER_COMPOSE_FILE up -d --no-deps "web-$TARGET_ENV"
 
 # 새 애플리케이션이 완전히 실행될 때까지 Health Check를 수행
 echo "> '$TARGET_ENV' 컨테이너 Health Check" >> $DEPLOY_LOG
@@ -68,11 +68,11 @@ for i in {1..12}; do
 
     # 기존에 실행되던 구버전 애플리케이션을 종료
     echo "> 기존 '$CURRENT_ENV' 애플리케이션을 종료" >> $DEPLOY_LOG
-    containerId=$(sudo docker ps -q --filter "name=web-$CURRENT_ENV")
+    containerId=$(docker ps -q --filter "name=web-$CURRENT_ENV")
     if [ -n "$containerId" ]; then
         echo "  → 기존 컨테이너 ID: $containerId" >> $DEPLOY_LOG
-        sudo docker kill $containerId
-        sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
+        docker kill $containerId
+        docker compose -f $DOCKER_COMPOSE_FILE rm -f "web-$CURRENT_ENV"
         echo "   → 종료 완료" >> $DEPLOY_LOG
     else
         echo "  → 종료할 기존 '$CURRENT_ENV' 컨테이너가 없습니다." >> $DEPLOY_LOG
@@ -80,7 +80,7 @@ for i in {1..12}; do
 
     # 사용하지 않는 댕글링 이미지만 정리
     echo "> 사용하지 않는 도커 이미지 정리" >> $DEPLOY_LOG
-    sudo docker image prune -f
+    docker image prune -f
 
     # 보안을 위해 환경변수 파일을 삭제
     rm -f .env
@@ -95,14 +95,14 @@ done
 # Health Check가 최종적으로 실패한 경우, 롤백을 시작
 echo "  → $APP_NAME 애플리케이션 실행 실패" >> $DEPLOY_LOG
 echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 출력" >> $DEPLOY_LOG
-sudo docker logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
+docker compose logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
 echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
-containerId=$(sudo docker ps -a -q --filter "name=web-$TARGET_ENV")
+containerId=$(docker ps -a -q --filter "name=web-$TARGET_ENV")
 if [ -n "$containerId" ]; then
     echo "  → 롤백할 컨테이너 ID: $containerId" >> $DEPLOY_LOG
-    sudo docker kill $containerId || true
-    sudo docker-compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
+    docker kill $containerId || true
+    docker compose -f $DOCKER_COMPOSE_FILE rm -f "web-$TARGET_ENV"
 else
     echo "  → 롤백할 '$TARGET_ENV' 컨테이너를 찾을 수 없습니다." >> $DEPLOY_LOG
 fi
