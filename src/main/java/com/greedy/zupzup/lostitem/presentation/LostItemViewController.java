@@ -32,9 +32,7 @@ public class LostItemViewController implements LostItemViewControllerDocs{
     /** 목록 */
     @GetMapping
     public ResponseEntity<LostItemListResponse> list(@Valid LostItemListRequest query) {
-        Page<LostItemListResult> page = lostItemViewService.getLostItems(
-                query.categoryId(), query.schoolAreaId(), query.safePage(), query.safeLimit()
-        );
+        Page<LostItemListResult> page = lostItemViewService.getLostItems(query.toCommand());
 
         List<Long> ids = page.getContent().stream().map(LostItemListResult::id).toList();
         Map<Long, String> repImageMap = lostItemViewService.getRepresentativeImageMapByItemIds(ids);
@@ -62,8 +60,6 @@ public class LostItemViewController implements LostItemViewControllerDocs{
         );
         return ResponseEntity.ok(response);
     }
-
-
 
 
 }

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.common.ServiceUnitTest;
+import com.greedy.zupzup.lostitem.application.dto.GetItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -59,7 +60,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
         )).willReturn(page);
 
         // when
-        Page<LostItemListResult> result = service.getLostItems(categoryId, areaId, 1, 10);
+        Page<LostItemListResult> result = service.getLostItems(GetItemListCommand.of(categoryId, areaId, 1, 10));
 
         // then
         assertSoftly(softly -> {
@@ -87,7 +88,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
                 .willReturn(List.of(new RepImg(11L, firstImageUrl)));
 
         // when
-        Page<LostItemListResult> result = service.getLostItems(null, null, 1, 10);
+        Page<LostItemListResult> result = service.getLostItems(GetItemListCommand.of(null, null, 1, 10));
 
         Map<Long, String> repMap = service.getRepresentativeImageMapByItemIds(
                 result.map(LostItemListResult::id).getContent()
@@ -116,7 +117,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
         )).willReturn(empty);
 
         // when
-        Page<LostItemListResult> result = service.getLostItems(categoryId, areaId, 2, 5);
+        Page<LostItemListResult> result = service.getLostItems(GetItemListCommand.of(categoryId, areaId, 2, 5));
 
         // then
         assertSoftly(softly -> {

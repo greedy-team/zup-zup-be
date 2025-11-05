@@ -1,6 +1,7 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.application.dto.GetItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
@@ -14,8 +15,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +29,9 @@ public class LostItemViewService {
      * 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<LostItemListResult> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
+    public Page<LostItemListResult> getLostItems(GetItemListCommand command) {
         return lostItemRepository
-                .findList(categoryId, schoolAreaId, LostItemStatus.REGISTERED, pageable)
+                .findList(command.categoryId(), command.schoolAreaId(), LostItemStatus.REGISTERED, command.pageable())
                 .map(LostItemListResult::from);
     }
 
