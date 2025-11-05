@@ -20,7 +20,6 @@ import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
-import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 
 import java.time.LocalDateTime;
@@ -81,7 +80,7 @@ public class AdminLostItemServiceTest {
     }
 
     @Test
-    void 일괄_승인시_PENDING_REGISTERED로_변경() {
+    void 일괄_승인시_PENDING_REGISTERED로_변경한다() {
         List<Long> ids = List.of(1L, 2L);
         ApproveLostItemsRequest req = new ApproveLostItemsRequest(ids);
 
@@ -97,7 +96,7 @@ public class AdminLostItemServiceTest {
     }
 
     @Test
-    void 일괄_삭제시_이미지삭제_및_DB삭제() {
+    void 일괄_삭제시_이미지삭제_및_DB삭제한다() {
         List<Long> ids = List.of(1L, 2L);
         RejectLostItemsRequest req = new RejectLostItemsRequest(ids);
 
@@ -116,7 +115,7 @@ public class AdminLostItemServiceTest {
     }
 
     @Test
-    void 보류중_분실물_목록_조회() {
+    void 보류중_분실물_목록을_조회한다() {
         int page = 1, limit = 10;
         Pageable pageable = PageRequest.of(page - 1, limit);
 
@@ -155,7 +154,7 @@ public class AdminLostItemServiceTest {
             s.assertThat(res.count()).isEqualTo(2);
             s.assertThat(res.items()).hasSize(2);
             s.assertThat(res.items().get(0).id()).isEqualTo(1L);
-            s.assertThat(res.items().get(0).imageKeys()).contains("img1");
+            s.assertThat(res.items().get(0).imageUrl()).contains("img1");
 
             FeatureOptionDto dto = res.items().get(0).featureOptions().get(0);
             s.assertThat(dto.optionValue()).isEqualTo("삼성");

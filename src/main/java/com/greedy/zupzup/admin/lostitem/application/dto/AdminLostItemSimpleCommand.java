@@ -13,7 +13,7 @@ public record AdminLostItemSimpleCommand(
         String createdAt,
         String description,
         String depositArea,
-        List<String> imageKeys,
+        List<String> imageUrl,
         List<FeatureOptionDto> featureOptions
 ) {
     public static AdminLostItemSimpleCommand from(AdminLostItemSimpleCommand c, List<FeatureOptionDto> featureOptions) {
@@ -28,7 +28,7 @@ public record AdminLostItemSimpleCommand(
                 c.createdAt(),
                 c.description(),
                 c.depositArea(),
-                c.imageKeys,
+                c.imageUrl,
                 featureOptions
         );
     }

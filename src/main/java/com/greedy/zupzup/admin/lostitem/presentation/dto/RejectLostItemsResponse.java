@@ -9,7 +9,7 @@ public record RejectLostItemsResponse(
         return new RejectLostItemsResponse(
                 success,
                 total,
-                String.format("%d건의 분실물이 영구 삭제되었습니다.", success)
+                String.format("%d건의 분실물이 삭제되었습니다.", success)
         );
     }
 }

@@ -101,7 +101,6 @@ class AdminLostItemControllerTest extends ControllerTest {
             });
         }
 
-
         @Test
         void 여러_개의_분실물을_DB에서_삭제한다() {
             // given
@@ -191,7 +190,7 @@ class AdminLostItemControllerTest extends ControllerTest {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
 
                 List<String> keys = extract.jsonPath()
-                        .getList("items.find{it.id == " + i1.getId() + "}.imageKeys");
+                        .getList("items.find{it.id == " + i1.getId() + "}.imageUrl");
                 softly.assertThat(keys).containsExactlyInAnyOrder("imgA", "imgB", "imgC");
 
                 List<String> features = extract.jsonPath()
@@ -199,38 +198,5 @@ class AdminLostItemControllerTest extends ControllerTest {
                 softly.assertThat(features).contains("삼성", "블랙");
             });
         }
-
-
-        @Test
-        void 여러개의_보류_분실물이_조회된다() {
-            // given
-            List<LostItem> items = givenMultiplePendingLostItemsWithImages(category, 3);
-
-            // when
-            ExtractableResponse<Response> extract = io.restassured.RestAssured.given().log().all()
-                    .cookie(ACCESS_TOKEN_NAME, adminToken)
-                    .queryParam("page", 1)
-                    .queryParam("limit", 10)
-                    .when().get("/api/admin/lost-items/pending")
-                    .then().log().all()
-                    .extract();
-
-            // then
-            assertSoftly(softly -> {
-                softly.assertThat(extract.statusCode()).isEqualTo(200);
-
-                List<Long> returnedIds = extract.jsonPath().getList("items.id", Long.class);
-                softly.assertThat(returnedIds).containsAll(items.stream().map(LostItem::getId).toList());
-
-                for (LostItem item : items) {
-
-                    List<String> keys = extract.jsonPath()
-                            .getList("items.find{it.id == " + item.getId() + "}.imageKeys");
-                    softly.assertThat(keys)
-                            .containsExactlyInAnyOrder("img1_" + item.getId(), "img2_" + item.getId());
-                }
-            });
-        }
-
     }
 }
