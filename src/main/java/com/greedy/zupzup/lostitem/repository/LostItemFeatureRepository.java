@@ -22,4 +22,13 @@ public interface LostItemFeatureRepository extends JpaRepository<LostItemFeature
     @Modifying
     @Query("DELETE FROM LostItemFeature lif WHERE lif.lostItem.id IN :lostItemIds")
     void deleteByLostItemIds(@Param("lostItemIds") List<Long> lostItemIds);
+
+    @Query("""
+    select lif from LostItemFeature lif
+    join fetch lif.lostItem li
+    join fetch lif.feature f
+    join fetch lif.selectedOption fo
+    where lif.lostItem.id in :lostItemIds
+    """)
+    List<LostItemFeature> findFeaturesForLostItems(@Param("lostItemIds") List<Long> lostItemIds);
 }
