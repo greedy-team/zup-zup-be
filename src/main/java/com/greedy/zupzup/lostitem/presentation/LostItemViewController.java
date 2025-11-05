@@ -4,6 +4,8 @@ import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.LostItemViewService;
 import com.greedy.zupzup.lostitem.application.MyPledgedLostItemService;
+import com.greedy.zupzup.lostitem.application.dto.FoundItemListResult;
+import com.greedy.zupzup.lostitem.application.dto.GetItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
@@ -61,5 +63,12 @@ public class LostItemViewController implements LostItemViewControllerDocs{
         return ResponseEntity.ok(response);
     }
 
+    /** 찾아진 분실물 목록 조회 */
+    @GetMapping("/found")
+    public ResponseEntity<LostItemListResponse> getFoundItems(@Valid LostItemListRequest query) {
+        GetItemListCommand command = query.toCommand();
+        Page<FoundItemListResult> foundItems = lostItemViewService.getFoundItems(command);
+        return ResponseEntity.ok(LostItemListResponse.from(foundItems));
+    }
 
 }

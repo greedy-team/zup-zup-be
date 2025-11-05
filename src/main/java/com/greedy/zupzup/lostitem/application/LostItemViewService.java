@@ -1,6 +1,7 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.application.dto.FoundItemListResult;
 import com.greedy.zupzup.lostitem.application.dto.GetItemListCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -81,5 +82,14 @@ public class LostItemViewService {
         throw new ApplicationException(code);
     }
 
+
+    /**
+     * 찾아진 분실물 조회
+     */
+    @Transactional(readOnly = true)
+    public Page<FoundItemListResult> getFoundItems(GetItemListCommand command) {
+        return lostItemRepository.findFoundItems(command.categoryId(), command.schoolAreaId(), command.pageable())
+                .map(FoundItemListResult::from);
+    }
 
 }

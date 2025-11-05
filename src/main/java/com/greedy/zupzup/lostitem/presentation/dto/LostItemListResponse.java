@@ -1,5 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
+import com.greedy.zupzup.lostitem.application.dto.FoundItemListResult;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +25,18 @@ public record LostItemListResponse(
 
     public static LostItemListResponse of(Page<MyPledgedListResponse> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
-
         List<MyPledgedListResponse> items = page.getContent();
+
+        return new LostItemListResponse(
+                page.getNumberOfElements(),
+                items,
+                pageInfo
+        );
+    }
+
+    public static LostItemListResponse from(Page<FoundItemListResult> page) {
+        PageInfoResponse pageInfo = PageInfoResponse.from(page);
+        List<FoundItemListResult> items = page.getContent();
 
         return new LostItemListResponse(
                 page.getNumberOfElements(),

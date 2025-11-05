@@ -2,6 +2,7 @@ package com.greedy.zupzup.lostitem.application.dto;
 
 import com.greedy.zupzup.lostitem.repository.FoundItemProjection;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record FoundItemListResult(
@@ -14,7 +15,7 @@ public record FoundItemListResult(
         String representativeImageUrl,
         String description,
         LocalDateTime createdAt,
-        LocalDateTime pledgedAt
+        LocalDate pledgedAt
 ) {
     public static FoundItemListResult from(FoundItemProjection projection) {
         return new FoundItemListResult(
