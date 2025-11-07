@@ -1,6 +1,5 @@
 package com.greedy.zupzup.admin.lostitem.application.dto;
 
-import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
 import java.util.List;
 
 public record AdminLostItemSimpleCommand(
@@ -14,9 +13,9 @@ public record AdminLostItemSimpleCommand(
         String description,
         String depositArea,
         List<String> imageUrl,
-        List<FeatureOptionDto> featureOptions
+        List<AdminFeatureOptionDto> featureOptions
 ) {
-    public static AdminLostItemSimpleCommand from(AdminLostItemSimpleCommand c, List<FeatureOptionDto> featureOptions) {
+    public static AdminLostItemSimpleCommand from(AdminLostItemSimpleCommand c, List<AdminFeatureOptionDto> featureOptions) {
 
         return new AdminLostItemSimpleCommand(
                 c.id(),

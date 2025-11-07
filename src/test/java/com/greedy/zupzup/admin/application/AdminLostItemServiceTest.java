@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.BDDMockito.then;
 
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
+import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
@@ -13,6 +14,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.category.domain.Category;
+import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
@@ -136,10 +138,13 @@ public class AdminLostItemServiceTest {
         given(lostItemImageRepository.findImagesForItems(List.of(1L, 2L)))
                 .willReturn(List.of(img1, img2));
 
-        // features
+        Feature feature = mock(Feature.class);
+        given(feature.getQuizQuestion()).willReturn("제조사는 무엇인가요?");
+
         FeatureOption fopt = mock(FeatureOption.class);
         given(fopt.getId()).willReturn(100L);
         given(fopt.getOptionValue()).willReturn("삼성");
+        given(fopt.getFeature()).willReturn(feature);
 
         LostItemFeature lf = mock(LostItemFeature.class);
         given(lf.getLostItem()).willReturn(i1);
@@ -156,8 +161,9 @@ public class AdminLostItemServiceTest {
             s.assertThat(res.items().get(0).id()).isEqualTo(1L);
             s.assertThat(res.items().get(0).imageUrl()).contains("img1");
 
-            FeatureOptionDto dto = res.items().get(0).featureOptions().get(0);
+            AdminFeatureOptionDto dto = res.items().get(0).featureOptions().get(0);
             s.assertThat(dto.optionValue()).isEqualTo("삼성");
+            s.assertThat(dto.quizQuestion()).isEqualTo("제조사는 무엇인가요?");
         });
     }
 }

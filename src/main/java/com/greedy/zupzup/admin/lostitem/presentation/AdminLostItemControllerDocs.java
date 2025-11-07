@@ -131,44 +131,46 @@ public interface AdminLostItemControllerDocs {
                             examples = @ExampleObject(
                                     value = """
                                             {
-                                                      "count": 1,
-                                                      "items": [
-                                                          {
-                                                              "id": 1,
-                                                              "categoryId": 1,
-                                                              "categoryName": "전자기기",
-                                                              "schoolAreaId": 1,
-                                                              "schoolAreaName": "대양 AI 센터",
-                                                              "foundAreaDetail": "상세위치",
-                                                              "createdAt": "2025-11-05T22:08:07.926273",
-                                                              "description": "test item",
-                                                              "depositArea": "보관장소",
-                                                              "imageKeys": [
-                                                                  "imgA",
-                                                                  "imgB"
-                                                              ],
-                                                              "featureOptions": [
-                                                                  {
-                                                                      "id": 1,
-                                                                      "optionValue": "삼성"
-                                                                  },
-                                                                  {
-                                                                      "id": 5,
-                                                                      "optionValue": "블랙"
-                                                                  }
-                                                              ]
-                                                          }
-                                                      ],
-                                                      "pageInfo": {
-                                                          "page": 1,
-                                                          "size": 10,
-                                                          "totalElements": 1,
-                                                          "totalPages": 1,
-                                                          "hasPrev": false,
-                                                          "hasNext": false
-                                                      }
-                                            
-                                            }
+                                                 "count": 1,
+                                                 "items": [
+                                                     {
+                                                         "id": 1,
+                                                         "categoryId": 1,
+                                                         "categoryName": "전자기기",
+                                                         "schoolAreaId": 1,
+                                                         "schoolAreaName": "대양 AI 센터",
+                                                         "foundAreaDetail": "상세위치",
+                                                         "createdAt": "2025-11-07T10:41:44.025705",
+                                                         "description": "test item",
+                                                         "depositArea": "보관장소",
+                                                         "imageUrl": [
+                                                             "imgA",
+                                                             "imgB",
+                                                             "imgC"
+                                                         ],
+                                                         "featureOptions": [
+                                                             {
+                                                                 "id": 1,
+                                                                 "optionValue": "삼성",
+                                                                 "quizQuestion": "어떤 브랜드의 제품인가요?"
+                                                             },
+                                                             {
+                                                                 "id": 5,
+                                                                 "optionValue": "블랙",
+                                                                 "quizQuestion": "제품의 색상은 무엇인가요?"
+                                                             }
+                                                         ]
+                                                     }
+                                                 ],
+                                                 "pageInfo": {
+                                                     "page": 1,
+                                                     "size": 10,
+                                                     "totalElements": 1,
+                                                     "totalPages": 1,
+                                                     "hasPrev": false,
+                                                     "hasNext": false
+                                                 }
+                                             }
                                             """
                             )
                     )

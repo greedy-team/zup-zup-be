@@ -189,13 +189,17 @@ class AdminLostItemControllerTest extends ControllerTest {
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
 
-                List<String> keys = extract.jsonPath()
+                List<String> urls = extract.jsonPath()
                         .getList("items.find{it.id == " + i1.getId() + "}.imageUrl");
-                softly.assertThat(keys).containsExactlyInAnyOrder("imgA", "imgB", "imgC");
+                softly.assertThat(urls).containsExactlyInAnyOrder("imgA", "imgB", "imgC");
 
                 List<String> features = extract.jsonPath()
                         .getList("items.find{it.id == " + i1.getId() + "}.featureOptions.optionValue");
                 softly.assertThat(features).contains("삼성", "블랙");
+
+                List<String> quizQuestions = extract.jsonPath()
+                        .getList("items.find{it.id == " + i1.getId() + "}.featureOptions.quizQuestion");
+                softly.assertThat(quizQuestions).contains("어떤 브랜드의 제품인가요?", "제품의 색상은 무엇인가요?");
             });
         }
     }

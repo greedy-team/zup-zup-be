@@ -1,5 +1,6 @@
 package com.greedy.zupzup.admin.lostitem.application;
 
+import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemSimpleCommand;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
@@ -7,10 +8,8 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRespons
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
-import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
-import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
@@ -78,12 +77,11 @@ public class AdminLostItemService {
                         Collectors.mapping(LostItemImage::getImageKey, Collectors.toList())
                 ));
 
-        List<LostItemFeature> features = lostItemFeatureRepository.findFeaturesForLostItems(ids);
-        Map<Long, List<FeatureOptionDto>> featuresMap = features.stream()
+        Map<Long, List<AdminFeatureOptionDto>> featuresMap = lostItemFeatureRepository.findFeaturesForLostItems(ids).stream()
                 .collect(Collectors.groupingBy(
                         lf -> lf.getLostItem().getId(),
                         Collectors.mapping(
-                                lf -> FeatureOptionDto.of(lf.getSelectedOption()),
+                                lf -> AdminFeatureOptionDto.of(lf.getSelectedOption()),
                                 Collectors.toList()
                         )
                 ));
