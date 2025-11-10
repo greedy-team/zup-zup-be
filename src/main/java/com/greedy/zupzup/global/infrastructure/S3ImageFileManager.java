@@ -3,12 +3,14 @@ package com.greedy.zupzup.global.infrastructure;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.exception.CommonException;
 import com.greedy.zupzup.global.exception.InfrastructureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -17,6 +19,7 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class S3ImageFileManager {
 
@@ -53,7 +56,37 @@ public class S3ImageFileManager {
             throw new InfrastructureException(CommonException.IMAGE_UPLOAD_FAILED);
         }
 
-        return imageURLPrefix + "/" + s3ObjectKey;
+        return imageURLPrefix + PATH_DELIMITER + s3ObjectKey;
+    }
+
+    public void delete(String imageKey) {
+        try {
+            String s3ObjectKey = extractS3ObjectKey(imageKey);
+
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(s3ObjectKey)
+                    .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+
+        } catch (S3Exception e) {
+            log.error("S3 delete failed for key: {} | code: {} | message: {}",
+                    imageKey,
+                    e.awsErrorDetails().errorCode(),
+                    e.getMessage(),
+                    e);
+            if (!e.awsErrorDetails().errorCode().equals("NoSuchKey")) {
+                throw new InfrastructureException(CommonException.IMAGE_DELETE_FAILED);
+            }
+        }
+    }
+
+    private String extractS3ObjectKey(String imageURL) {
+        if (imageURL.startsWith(imageURLPrefix)) {
+            return imageURL.substring(imageURLPrefix.length() + 1);
+        }
+        return imageURL;
     }
 
     private PutObjectRequest buildPutObjectRequest(MultipartFile multipartFile, String s3ObjectKey) {

@@ -1,13 +1,16 @@
 package com.greedy.zupzup.lostitem.repository;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
@@ -114,7 +117,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                     li.id                as id,
                     c.id                 as categoryId,
                     c.name               as categoryName,
-                    sa.id                as schoolAreaId,
+                sa.id                as schoolAreaId,
                     sa.areaName          as schoolAreaName,
                     li.foundAreaDetail   as foundAreaDetail,
                     li.createdAt         as createdAt,

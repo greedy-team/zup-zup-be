@@ -1,7 +1,7 @@
 package com.greedy.zupzup.admin.presentation;
 
 
-import com.greedy.zupzup.admin.presentation.exception.AdminException;
+import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;
 import com.greedy.zupzup.common.ControllerTest;
@@ -172,9 +172,9 @@ class AdminCacheControllerTest extends ControllerTest {
 
             // then
             assertSoftly(softly -> {
-                softly.assertThat(response.status()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getHttpStatus().value());
-                softly.assertThat(response.title()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getTitle());
-                softly.assertThat(response.detail()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getDetail());
+                softly.assertThat(response.status()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getHttpStatus().value());
+                softly.assertThat(response.title()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getTitle());
+                softly.assertThat(response.detail()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getDetail());
                 softly.assertThat(response.instance()).isEqualTo("/api/admin/cache/school-areas/refresh");
             });
         }
@@ -195,9 +195,9 @@ class AdminCacheControllerTest extends ControllerTest {
 
             // then
             assertSoftly(softly -> {
-                softly.assertThat(response.status()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getHttpStatus().value());
-                softly.assertThat(response.title()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getTitle());
-                softly.assertThat(response.detail()).isEqualTo(AdminException.FORBIDDEN_ADMIN_ACCESS.getDetail());
+                softly.assertThat(response.status()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getHttpStatus().value());
+                softly.assertThat(response.title()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getTitle());
+                softly.assertThat(response.detail()).isEqualTo(AuthException.FORBIDDEN_ADMIN_ONLY.getDetail());
                 softly.assertThat(response.instance()).isEqualTo("/api/admin/cache/categories/refresh");
             });
         }
