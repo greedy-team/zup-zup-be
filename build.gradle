@@ -67,6 +67,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.rest-assured:rest-assured:5.4.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // 모니터링
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
