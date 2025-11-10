@@ -1,6 +1,5 @@
 package com.greedy.zupzup.auth.interceptor;
 
-import com.greedy.zupzup.admin.presentation.exception.AdminException;
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;

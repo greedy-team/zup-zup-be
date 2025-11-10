@@ -56,7 +56,7 @@ public class S3ImageFileManager {
             throw new InfrastructureException(CommonException.IMAGE_UPLOAD_FAILED);
         }
 
-        return imageURLPrefix + "/" + s3ObjectKey;
+        return imageURLPrefix + PATH_DELIMITER + s3ObjectKey;
     }
 
     public void delete(String imageKey) {
