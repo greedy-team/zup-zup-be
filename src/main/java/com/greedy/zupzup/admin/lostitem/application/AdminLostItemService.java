@@ -64,20 +64,40 @@ public class AdminLostItemService {
 
     @Transactional(readOnly = true)
     public AdminPendingLostItemListResponse getPendingLostItems(Integer page, Integer limit) {
+
         Pageable pageable = PageRequest.of(page - 1, limit);
 
-        List<LostItem> items = adminLostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable);
+        List<LostItem> items = findPendingItems(pageable);
+        List<Long> ids = extractIds(items);
 
-        List<Long> ids = items.stream().map(LostItem::getId).toList();
+        Map<Long, List<String>> imageMap = loadImageMap(ids);
+        Map<Long, List<AdminFeatureOptionDto>> featureMap = loadFeatureMap(ids);
 
-        List<LostItemImage> images = lostItemImageRepository.findImagesForItems(ids);
-        Map<Long, List<String>> imgMap = images.stream()
+        List<AdminLostItemSimpleCommand> commands = buildCommands(items, imageMap, featureMap);
+
+        return AdminPendingLostItemListResponse.of(commands, page, limit, commands.size());
+    }
+
+    private List<LostItem> findPendingItems(Pageable pageable) {
+        return adminLostItemRepository.findPendingItems(LostItemStatus.PENDING, pageable);
+    }
+
+    private List<Long> extractIds(List<LostItem> items) {
+        return items.stream()
+                .map(LostItem::getId)
+                .toList();
+    }
+
+    private Map<Long, List<String>> loadImageMap(List<Long> ids) {
+        return lostItemImageRepository.findImagesForItems(ids).stream()
                 .collect(Collectors.groupingBy(
                         img -> img.getLostItem().getId(),
                         Collectors.mapping(LostItemImage::getImageKey, Collectors.toList())
                 ));
+    }
 
-        Map<Long, List<AdminFeatureOptionDto>> featuresMap = lostItemFeatureRepository.findFeaturesForLostItems(ids).stream()
+    private Map<Long, List<AdminFeatureOptionDto>> loadFeatureMap(List<Long> ids) {
+        return lostItemFeatureRepository.findFeaturesForLostItems(ids).stream()
                 .collect(Collectors.groupingBy(
                         lf -> lf.getLostItem().getId(),
                         Collectors.mapping(
@@ -85,8 +105,14 @@ public class AdminLostItemService {
                                 Collectors.toList()
                         )
                 ));
+    }
 
-        List<AdminLostItemSimpleCommand> commands = items.stream()
+    private List<AdminLostItemSimpleCommand> buildCommands(
+            List<LostItem> items,
+            Map<Long, List<String>> imageMap,
+            Map<Long, List<AdminFeatureOptionDto>> featureMap
+    ) {
+        return items.stream()
                 .map(item -> new AdminLostItemSimpleCommand(
                         item.getId(),
                         item.getCategory().getId(),
@@ -97,17 +123,9 @@ public class AdminLostItemService {
                         item.getCreatedAt().toString(),
                         item.getDescription(),
                         item.getDepositArea(),
-                        imgMap.getOrDefault(item.getId(), Collections.emptyList()),
-                        featuresMap.getOrDefault(item.getId(), Collections.emptyList())
+                        imageMap.getOrDefault(item.getId(), Collections.emptyList()),
+                        featureMap.getOrDefault(item.getId(), Collections.emptyList())
                 ))
                 .toList();
-
-        return AdminPendingLostItemListResponse.of(
-                commands,
-                page,
-                limit,
-                commands.size()
-        );
     }
-
 }
