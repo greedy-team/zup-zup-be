@@ -1,7 +1,6 @@
 package com.greedy.zupzup.admin.presentation;
 
 
-import com.greedy.zupzup.admin.presentation.exception.AdminException;
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.presentation.dto.CategoriesResponse;

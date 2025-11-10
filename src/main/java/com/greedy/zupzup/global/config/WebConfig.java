@@ -1,6 +1,6 @@
 package com.greedy.zupzup.global.config;
 
-import com.greedy.zupzup.admin.presentation.interceptor.AdminInterceptor;
+import com.greedy.zupzup.auth.interceptor.AdminInterceptor;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMemberArgumentResolver;
 import com.greedy.zupzup.auth.presentation.interceptor.AuthInterceptor;
 import com.greedy.zupzup.global.presentation.interceptor.LogInterceptor;
