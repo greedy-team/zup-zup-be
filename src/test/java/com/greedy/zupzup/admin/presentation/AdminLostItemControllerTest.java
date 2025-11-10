@@ -4,13 +4,11 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.common.ControllerTest;
-import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.member.domain.Role;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class AdminLostItemControllerTest extends ControllerTest {
 
@@ -31,12 +28,8 @@ class AdminLostItemControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUpAdmin() {
-        Member adminBase = MemberFixture.MEMBER_WITH_ENCODED_PASSWORD("admin_pw");
-        ReflectionTestUtils.setField(adminBase, "studentId", 800000);
-        ReflectionTestUtils.setField(adminBase, "role", Role.ADMIN);
-        adminMember = memberRepository.save(adminBase);
-        adminToken = jwtTokenProvider.createAccessToken(adminMember);
-
+        adminMember = givenAdmin("admin_pw");
+        adminToken = givenAccessToken(adminMember);
         category = givenElectronicsCategory();
     }
 
@@ -47,7 +40,7 @@ class AdminLostItemControllerTest extends ControllerTest {
         private final String ADMIN_API_BASE = "/api/admin/lost-items";
 
         @Test
-        void 여러_개의_보류_분실물의_상태를_REGISTERED로_바꾼다() {
+        void 여러_개의_보류_분실물의_상태를_REGISTERED로_바꾸고_200_OK를_반환한다() {
             // given
             LostItem i1 = givenPendingLostItem(category);
             LostItem i2 = givenPendingLostItem(category);
@@ -75,7 +68,7 @@ class AdminLostItemControllerTest extends ControllerTest {
         }
 
         @Test
-        void 한_개_보류_분실물의_상태를_REGISTERED로_바꾼다() {
+        void 한_개_보류_분실물의_상태를_REGISTERED로_바꾸고_200_OK를_반환한다() {
             // given
             LostItem i1 = givenPendingLostItem(category);
             List<Long> idsToApprove = List.of(i1.getId());
@@ -102,7 +95,7 @@ class AdminLostItemControllerTest extends ControllerTest {
         }
 
         @Test
-        void 여러_개의_분실물을_DB에서_삭제한다() {
+        void 여러_개의_분실물을_DB에서_삭제하고_200_OK를_반환한다() {
             // given
             LostItem i1 = givenRegisteredLostItem(category);
             LostItem i2 = givenRegisteredLostItem(category);
@@ -135,7 +128,7 @@ class AdminLostItemControllerTest extends ControllerTest {
         }
 
         @Test
-        void 한_개의_분실물을_DB에서_삭제한다() {
+        void 한_개의_분실물을_DB에서_삭제하고_200_OK를_반환한다() {
             // given
             LostItem i1 = givenRegisteredLostItem(category);
             List<Long> idsToDelete = List.of(i1.getId());
@@ -171,7 +164,7 @@ class AdminLostItemControllerTest extends ControllerTest {
     class AdminListApi {
 
         @Test
-        void 보류_상태_분실물이_조회된다() {
+        void 보류_상태_분실물이_조회하고_200_OK를_반환한다() {
             // given
             LostItem i1 = givenPendingLostItemWithFeatures(category);
             givenLostItemImages(i1.getId(), List.of("imgA", "imgB", "imgC"));
