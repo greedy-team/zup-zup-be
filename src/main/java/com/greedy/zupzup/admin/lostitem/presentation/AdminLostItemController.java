@@ -6,11 +6,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.auth.presentation.annotation.AdminAuth;
-import com.greedy.zupzup.auth.presentation.argumentresolver.LoginAdmin;
-import com.greedy.zupzup.lostitem.application.LostItemViewService;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemListResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,30 +25,24 @@ public class AdminLostItemController {
 
     @PostMapping("/approve")
     public ResponseEntity<ApproveLostItemsResponse> approveBulk(
-            @AdminAuth LoginAdmin admin,
-            @Valid @RequestBody ApproveLostItemsRequest request
-    ) {
+            @Valid @RequestBody ApproveLostItemsRequest request) {
         ApproveLostItemsResponse result = adminLostItemService.approveBulk(request);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/reject")
     public ResponseEntity<RejectLostItemsResponse> rejectBulk(
-            @AdminAuth LoginAdmin admin,
-            @Valid @RequestBody RejectLostItemsRequest request
-    ) {
+            @Valid @RequestBody RejectLostItemsRequest request) {
         RejectLostItemsResponse result = adminLostItemService.rejectBulk(request);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/pending")
     public ResponseEntity<AdminPendingLostItemListResponse> listPending(
-            @AdminAuth LoginAdmin admin,
-            @Valid LostItemListRequest query
-    ) {
-        AdminPendingLostItemListResponse response = adminLostItemService.getPendingLostItems(
-                query.safePage(), query.safeLimit()
-        );
+            @Valid LostItemListRequest query) {
+        AdminPendingLostItemListResponse response =
+                adminLostItemService.getPendingLostItems(query.safePage(), query.safeLimit());
+
         return ResponseEntity.ok(response);
     }
 }

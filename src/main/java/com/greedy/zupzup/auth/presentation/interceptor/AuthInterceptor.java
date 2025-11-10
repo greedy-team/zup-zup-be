@@ -1,7 +1,8 @@
 package com.greedy.zupzup.auth.presentation.interceptor;
 
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
-import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
+import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,8 +26,13 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String accessToken = CookieUtil.extractToken(request.getCookies());
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
-        LoginMember loginMember = new LoginMember(loginMemberId);
-        request.setAttribute("loginMember", loginMember);
-        return loginMemberId != null;
+
+        if (loginMemberId == null) {
+            throw new ApplicationException(AuthException.MEMBER_NOT_FOUND);
+        }
+
+        request.setAttribute("loginMemberId", loginMemberId);
+
+        return true;
     }
 }

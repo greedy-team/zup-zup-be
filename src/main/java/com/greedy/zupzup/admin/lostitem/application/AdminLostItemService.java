@@ -1,7 +1,7 @@
 package com.greedy.zupzup.admin.lostitem.application;
 
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
-import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemSimpleCommand;
+import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemResult;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
@@ -73,7 +73,7 @@ public class AdminLostItemService {
         Map<Long, List<String>> imageMap = loadImageMap(ids);
         Map<Long, List<AdminFeatureOptionDto>> featureMap = loadFeatureMap(ids);
 
-        List<AdminLostItemSimpleCommand> commands = buildCommands(items, imageMap, featureMap);
+        List<AdminLostItemResult> commands = buildCommands(items, imageMap, featureMap);
 
         return AdminPendingLostItemListResponse.of(commands, page, limit, commands.size());
     }
@@ -107,13 +107,13 @@ public class AdminLostItemService {
                 ));
     }
 
-    private List<AdminLostItemSimpleCommand> buildCommands(
+    private List<AdminLostItemResult> buildCommands(
             List<LostItem> items,
             Map<Long, List<String>> imageMap,
             Map<Long, List<AdminFeatureOptionDto>> featureMap
     ) {
         return items.stream()
-                .map(item -> new AdminLostItemSimpleCommand(
+                .map(item -> new AdminLostItemResult(
                         item.getId(),
                         item.getCategory().getId(),
                         item.getCategory().getName(),

@@ -2,7 +2,7 @@ package com.greedy.zupzup.admin.lostitem.application.dto;
 
 import java.util.List;
 
-public record AdminLostItemSimpleCommand(
+public record AdminLostItemResult(
         Long id,
         Long categoryId,
         String categoryName,
@@ -15,9 +15,9 @@ public record AdminLostItemSimpleCommand(
         List<String> imageUrl,
         List<AdminFeatureOptionDto> featureOptions
 ) {
-    public static AdminLostItemSimpleCommand from(AdminLostItemSimpleCommand c, List<AdminFeatureOptionDto> featureOptions) {
+    public static AdminLostItemResult from(AdminLostItemResult c, List<AdminFeatureOptionDto> featureOptions) {
 
-        return new AdminLostItemSimpleCommand(
+        return new AdminLostItemResult(
                 c.id(),
                 c.categoryId(),
                 c.categoryName(),

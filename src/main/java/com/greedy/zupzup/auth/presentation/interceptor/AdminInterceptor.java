@@ -1,4 +1,4 @@
-package com.greedy.zupzup.auth.interceptor;
+package com.greedy.zupzup.auth.presentation.interceptor;
 
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;

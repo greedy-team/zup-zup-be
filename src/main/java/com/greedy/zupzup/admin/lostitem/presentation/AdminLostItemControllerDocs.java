@@ -6,8 +6,6 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.auth.presentation.annotation.AdminAuth;
-import com.greedy.zupzup.auth.presentation.argumentresolver.LoginAdmin;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +52,6 @@ public interface AdminLostItemControllerDocs {
             )
     })
     ResponseEntity<ApproveLostItemsResponse> approveBulk(
-            @AdminAuth LoginAdmin admin,
             @Valid @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "승인할 분실물 ID 목록",
                     content = @Content(schema = @Schema(implementation = ApproveLostItemsRequest.class),
@@ -101,7 +98,6 @@ public interface AdminLostItemControllerDocs {
             )
     })
     ResponseEntity<RejectLostItemsResponse> rejectBulk(
-            @AdminAuth LoginAdmin admin,
             @Valid @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "삭제할 분실물 ID 목록",
                     content = @Content(schema = @Schema(implementation = RejectLostItemsRequest.class),
@@ -182,7 +178,6 @@ public interface AdminLostItemControllerDocs {
             )
     })
     ResponseEntity<AdminPendingLostItemListResponse> listPending(
-            @AdminAuth LoginAdmin admin,
             @ParameterObject @Valid LostItemListRequest query
     );
 }
