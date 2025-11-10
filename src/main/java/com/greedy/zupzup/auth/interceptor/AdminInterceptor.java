@@ -1,6 +1,7 @@
-package com.greedy.zupzup.admin.presentation.interceptor;
+package com.greedy.zupzup.auth.interceptor;
 
 import com.greedy.zupzup.admin.presentation.exception.AdminException;
+import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.global.exception.ApplicationException;
@@ -35,7 +36,7 @@ public class AdminInterceptor implements HandlerInterceptor {
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
 
         if (!memberRepository.existsByIdAndRole(loginMemberId, Role.ADMIN)) {
-            throw new ApplicationException(AdminException.FORBIDDEN_ADMIN_ACCESS);
+            throw new ApplicationException(AuthException.FORBIDDEN_ADMIN_ONLY);
         }
 
         LoginMember loginMember = new LoginMember(loginMemberId);
