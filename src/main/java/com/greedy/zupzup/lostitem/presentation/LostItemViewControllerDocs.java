@@ -306,7 +306,7 @@ public interface LostItemViewControllerDocs {
                     카테고리/구역 필터와 페이징으로 분실물 목록을 조회합니다.
                     - 로그인 불필요
                     - FOUND 상태의 분실물 조회
-                    - 분실물 등록일을 기준으로 최신순 조회 - 수정할까용?
+                    - 최근 FOUND 상태로 변한 일자를 기준으로 정렬
                     """
     )
     @Parameters({
@@ -333,23 +333,23 @@ public interface LostItemViewControllerDocs {
                                                   "categoryName": "핸드폰",
                                                   "schoolAreaId": 1,
                                                   "schoolAreaName": "집현관",
-                                                  "foundAreaDetail": "under the desk 3",
-                                                  "representativeImageUrl": "https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/lost-item-images/b8d53a58-3d56-4465-9b73-a49a12f94644.png",
-                                                  "description": "zupzup asd",
-                                                  "createdAt": "2025-11-05T14:55:22.623492",
-                                                  "pledgedAt": "2025-11-05"
+                                                  "foundAreaDetail": "string",
+                                                  "representativeImageUrl": "이미지미지미지미지",
+                                                  "description": "string",
+                                                  "createdAt": "2025-11-11T21:09:09.529911",
+                                                  "foundAt": "2025-11-11T00:00:00"
                                                 },
                                                 {
-                                                  "id": 3,
+                                                  "id": 5,
                                                   "categoryId": 1,
                                                   "categoryName": "핸드폰",
                                                   "schoolAreaId": 1,
                                                   "schoolAreaName": "집현관",
-                                                  "foundAreaDetail": "under the desk",
-                                                  "representativeImageUrl": "https://zupzup-static-files.s3.ap-northeast-2.amazonaws.com/lost-item-images/cc625b5f-3935-40a7-b5aa-b71b569f77fe.png",
-                                                  "description": "zupzup people",
-                                                  "createdAt": "2025-11-05T14:43:39.250068",
-                                                  "pledgedAt": "2025-11-05"
+                                                  "foundAreaDetail": "string",
+                                                  "representativeImageUrl": "이미지미지미지미지",
+                                                  "description": "string",
+                                                  "createdAt": "2025-11-11T21:10:06.100865",
+                                                  "foundAt": "2025-11-11T00:00:00"
                                                 }
                                               ],
                                               "pageInfo": {
