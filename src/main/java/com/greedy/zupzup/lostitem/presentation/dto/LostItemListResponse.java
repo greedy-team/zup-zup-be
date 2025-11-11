@@ -11,7 +11,7 @@ public record LostItemListResponse(
         List<?> items,
         PageInfoResponse pageInfo
 ) {
-    public static LostItemListResponse of(Page<LostItemListResult> page, Map<Long, String> repImageMap) {
+    public static LostItemListResponse lostItems(Page<LostItemListResult> page, Map<Long, String> repImageMap) {
         List<LostItemResponse> items = page.getContent().stream()
                 .map(c -> LostItemResponse.from(c, repImageMap.get(c.id())))
                 .toList();
@@ -23,7 +23,7 @@ public record LostItemListResponse(
         );
     }
 
-    public static LostItemListResponse of(Page<MyPledgedListResponse> page) {
+    public static LostItemListResponse myPledgeItems(Page<MyPledgedListResponse> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
         List<MyPledgedListResponse> items = page.getContent();
 
@@ -34,7 +34,7 @@ public record LostItemListResponse(
         );
     }
 
-    public static LostItemListResponse from(Page<FoundItemListResult> page) {
+    public static LostItemListResponse foundItems(Page<FoundItemListResult> page) {
         PageInfoResponse pageInfo = PageInfoResponse.from(page);
         List<FoundItemListResult> items = page.getContent();
 

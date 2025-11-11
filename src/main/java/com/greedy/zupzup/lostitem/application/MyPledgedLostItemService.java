@@ -22,6 +22,6 @@ public class MyPledgedLostItemService {
                 lostItemRepository.findPledgedLostItemsByMemberId(memberId, PageRequest.of(page - 1, limit))
                         .map(MyPledgedLostItemCommand::from);
 
-        return LostItemListResponse.of(pledgedItems.map(MyPledgedListResponse::from));
+        return LostItemListResponse.myPledgeItems(pledgedItems.map(MyPledgedListResponse::from));
     }
 }
