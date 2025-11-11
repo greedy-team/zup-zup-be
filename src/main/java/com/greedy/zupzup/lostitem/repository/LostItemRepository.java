@@ -152,15 +152,15 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                         img.imageKey       as representativeImageUrl,
                         li.description     as description,
                         li.createdAt       as createdAt,
-                        li.pledgedAt       as pledgedAt
-                    from LostItem li
+                        li.foundAt          as foundAt
+                        from LostItem li
                         join li.category  c
                         join li.foundArea sa
                         left join li.images img on img.imageOrder = 0
                     where li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.FOUND
                       and (:categoryId   is null or c.id  = :categoryId)
                       and (:schoolAreaId is null or sa.id = :schoolAreaId)
-                    order by li.createdAt desc
+                    order by li.foundAt desc
                     """,
             countQuery = """
                     select count(li)

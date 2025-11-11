@@ -1,6 +1,5 @@
 package com.greedy.zupzup.lostitem.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface FoundItemProjection {
@@ -13,5 +12,5 @@ public interface FoundItemProjection {
     String getRepresentativeImageUrl();
     String getDescription();
     LocalDateTime getCreatedAt();
-    LocalDate getPledgedAt();
+    LocalDateTime getFoundAt();
 }
