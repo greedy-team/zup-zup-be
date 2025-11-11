@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewResult;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -19,7 +19,7 @@ public record LostItemImageResponse(
 ) {
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-    public static LostItemImageResponse from(LostItemDetailViewCommand command) {
+    public static LostItemImageResponse from(LostItemDetailViewResult command) {
         return new LostItemImageResponse(
                 command.id(),
                 command.categoryId(),

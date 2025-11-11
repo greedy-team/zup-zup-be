@@ -54,7 +54,6 @@ public interface LostItemDetailViewControllerDocs {
                                                       "https://example.com/default-image.jpg"
                                                   ],
                                                   "depositArea": "학술정보원 2층 데스크",
-                                                  "pledgedAt": "2025-08-30",
                                                   "createdAt": "2025-08-30T14:39:10.216778+09:00",
                                                   "quizRequired": true,
                                                   "quizAnswered": true,

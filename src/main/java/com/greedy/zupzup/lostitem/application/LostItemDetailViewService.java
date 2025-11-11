@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
@@ -29,7 +29,7 @@ public class LostItemDetailViewService {
      * 상세 정보 조회
      */
     @Transactional(readOnly = true)
-    public LostItemDetailViewCommand getDetail(Long lostItemId, Long memberId) {
+    public LostItemDetailViewResult getDetail(Long lostItemId, Long memberId) {
 
         Member member = memberRepository.getById(memberId);
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
@@ -54,14 +54,14 @@ public class LostItemDetailViewService {
 
         List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
 
-        return LostItemDetailViewCommand.of(item, imageUrls, depositArea, quizRequired, quizPassed, pledgedByMe);
+        return LostItemDetailViewResult.of(item, imageUrls, depositArea, quizRequired, quizPassed, pledgedByMe);
     }
 
     /**
      * 서약 전 사진과 상세 정보 공개
      */
     @Transactional(readOnly = true)
-    public LostItemDetailViewCommand getImagesAfterQuiz(Long lostItemId, Long memberId) {
+    public LostItemDetailViewResult getImagesAfterQuiz(Long lostItemId, Long memberId) {
         Member member = memberRepository.getById(memberId);
         LostItem item = lostItemRepository.getWithCategoryAndAreaById(lostItemId);
 
@@ -80,7 +80,7 @@ public class LostItemDetailViewService {
         }
 
         List<String> imageUrls = imageRepository.findImageUrlsByLostItemId(item.getId());
-        return LostItemDetailViewCommand.of(
+        return LostItemDetailViewResult.of(
                 item, imageUrls, item.getDepositArea(), quizRequired, quizPassed, false
         );
     }

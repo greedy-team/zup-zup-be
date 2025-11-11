@@ -9,7 +9,7 @@ import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.common.fixture.LostItemFixture;
 import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.member.domain.Member;
@@ -74,7 +74,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
             given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(true);
 
-            LostItemDetailViewCommand result = service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID);
+            LostItemDetailViewResult result = service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.quizRequired()).isTrue();
@@ -102,7 +102,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
         void 비퀴즈_카테고리는_바로_200_OK를_응답합니다() {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(기타카테고리_서약미완료);
 
-            LostItemDetailViewCommand result = service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID);
+            LostItemDetailViewResult result = service.getImagesAfterQuiz(ITEM_ID, MEMBER_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.quizRequired()).isFalse();
@@ -160,7 +160,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
             given(quizAttemptRepository.existsByLostItem_IdAndMember_IdAndIsCorrectTrue(ITEM_ID, MEMBER_ID))
                     .willReturn(true);
 
-            LostItemDetailViewCommand result = service.getDetail(ITEM_ID, MEMBER_ID);
+            LostItemDetailViewResult result = service.getDetail(ITEM_ID, MEMBER_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.depositArea()).isEqualTo("학술정보원 2층 데스크");
@@ -188,7 +188,7 @@ class LostItemDetailViewServiceTest extends ServiceUnitTest {
             given(lostItemRepository.getWithCategoryAndAreaById(ITEM_ID)).willReturn(기타카테고리_서약미완료);
             given(pledgeRepository.existsByLostItem_IdAndOwner_Id(ITEM_ID, MEMBER_ID)).willReturn(true);
 
-            LostItemDetailViewCommand result = service.getDetail(ITEM_ID, MEMBER_ID);
+            LostItemDetailViewResult result = service.getDetail(ITEM_ID, MEMBER_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.depositArea()).isEqualTo("학생회관 1층 보관소");
