@@ -14,6 +14,8 @@ import com.greedy.zupzup.member.domain.Member;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -258,4 +260,56 @@ class LostItemViewControllerTest extends ControllerTest {
             });
         }
     }
+
+    @Nested
+    @DisplayName("찾아진 분실물 목록 조회 API")
+    class foundLostItem {
+
+        @Test
+        void FOUND_상태의_분실물이_모두_조회_되어야_한다() {
+            // given
+            LostItem nonQuizLostItem = givenNonQuizLostItem(category);
+            anyItem.found();
+            nonQuizLostItem.found();
+            lostItemRepository.saveAll(List.of(anyItem, nonQuizLostItem));
+
+            // when
+            LostItemListResponse response = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/found")
+                    .then().log().all()
+                    .extract()
+                    .as(LostItemListResponse.class);
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(response.count()).isEqualTo(2);
+            });
+        }
+
+        @Test
+        void FOUND_상태가_아닌_분실물은_조회되면_안_된다() {
+            // given
+            LostItem registeredStatusItem = givenNonQuizLostItem(category);
+            anyItem.found();
+            lostItemRepository.save(anyItem);
+
+            // when
+            LostItemListResponse response = RestAssured.given().log().all()
+                    .when()
+                    .get("/api/lost-items/found")
+                    .then().log().all()
+                    .extract()
+                    .as(LostItemListResponse.class);
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(response.count()).isEqualTo(1);
+                softly.assertThat(response.items())
+                        .extracting("id")
+                        .doesNotContain(registeredStatusItem.getId());
+            });
+        }
+    }
+
 }
