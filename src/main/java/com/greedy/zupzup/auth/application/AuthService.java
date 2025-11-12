@@ -8,6 +8,7 @@ import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.auth.infrastructure.PasswordEncoder;
 import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.member.application.MemberService;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
@@ -23,6 +24,7 @@ public class AuthService {
     private final SejongAuthenticator sejongAuthenticator;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberService memberService;
 
 
     public SejongAuthInfo verifyStudent(PortalLoginCommand command) {
@@ -75,20 +77,11 @@ public class AuthService {
 
 
     /**
-     * 포털 인증만으로 로그인 (데모데이 용) - 정식 출시 전에는 삭제하고, 인증+가입 절차만 열어두기
+     * 포털 인증만으로 로그인 Tx 분리
      */
-    @Transactional
     public Member authenticateSejongAndLogin(PortalLoginCommand command) {
         SejongAuthInfo studentAuthInfo = sejongAuthenticator.getStudentAuthInfo(command.portalId(), command.portalPassword());
-         return memberRepository.findByStudentId(studentAuthInfo.studentId())
-                .orElseGet(() -> {
-                    Member newMember = Member.builder()
-                            .name(studentAuthInfo.studentName())
-                            .studentId(studentAuthInfo.studentId())
-                            .role(Role.USER)
-                            .build();
-                    return memberRepository.save(newMember);
-                });
+        return memberService.findOrCreateMember(studentAuthInfo);
     }
 
 }
