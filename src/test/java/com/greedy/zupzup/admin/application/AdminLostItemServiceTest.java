@@ -1,5 +1,6 @@
 package com.greedy.zupzup.admin.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -7,6 +8,7 @@ import static org.mockito.BDDMockito.then;
 
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
+import com.greedy.zupzup.admin.lostitem.application.dto.ItemImageBulkDeletedEvent;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
@@ -15,47 +17,36 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
-import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
-import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.greedy.zupzup.category.application.dto.FeatureOptionDto;
 import com.greedy.zupzup.category.domain.FeatureOption;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-public class AdminLostItemServiceTest {
+public class AdminLostItemServiceTest extends ServiceUnitTest {
 
+    @InjectMocks
     private AdminLostItemService service;
+
+    @Mock
     private AdminLostItemRepository adminLostItemRepository;
-    private LostItemImageRepository lostItemImageRepository;
-    private LostItemFeatureRepository lostItemFeatureRepository;
-    private S3ImageFileManager fileManager;
 
-    @BeforeEach
-    void init() {
-        adminLostItemRepository = mock(AdminLostItemRepository.class);
-        lostItemImageRepository = mock(LostItemImageRepository.class);
-        lostItemFeatureRepository = mock(LostItemFeatureRepository.class);
-        fileManager = mock(S3ImageFileManager.class);
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
-        service = new AdminLostItemService(
-                adminLostItemRepository,
-                lostItemImageRepository,
-                fileManager,
-                lostItemFeatureRepository
-        );
-    }
 
     private LostItem stubItem(
             Long id, String desc, String deposit, String foundDetail,
@@ -98,22 +89,37 @@ public class AdminLostItemServiceTest {
     }
 
     @Test
-    void 일괄_삭제시_이미지삭제_및_DB삭제한다() {
+    void 일괄_삭제시_DB삭제_및_이벤트를_발행한다() { // [수정] 테스트 이름
+        // given
         List<Long> ids = List.of(1L, 2L);
         RejectLostItemsRequest req = new RejectLostItemsRequest(ids);
+        List<String> expectedImageUrls = List.of("k1", "k2");
 
         given(lostItemImageRepository.findImageKeysByLostItemIds(ids))
-                .willReturn(List.of("k1", "k2"));
+                .willReturn(expectedImageUrls);
         given(adminLostItemRepository.deleteBulkByIds(ids)).willReturn(2);
 
+        // when
         RejectLostItemsResponse res = service.rejectBulk(req);
 
+        // then
+        // 1. 응답 결과 검증
         assertSoftly(s -> {
             s.assertThat(res.successfulCount()).isEqualTo(2);
         });
 
-        then(fileManager).should().delete("k1");
-        then(fileManager).should().delete("k2");
+        // 2. DB 삭제 로직 호출 검증
+        then(lostItemFeatureRepository).should().deleteByLostItemIds(ids);
+        then(lostItemImageRepository).should().deleteByLostItemIds(ids);
+        then(adminLostItemRepository).should().deleteBulkByIds(ids);
+
+        // 4. 이벤트 발행 검증
+        ArgumentCaptor<ItemImageBulkDeletedEvent> eventCaptor =
+                ArgumentCaptor.forClass(ItemImageBulkDeletedEvent.class);
+
+        then(eventPublisher).should().publishEvent(eventCaptor.capture());
+        ItemImageBulkDeletedEvent publishedEvent = eventCaptor.getValue();
+        assertThat(publishedEvent.imageUrls()).isEqualTo(expectedImageUrls);
     }
 
     @Test
