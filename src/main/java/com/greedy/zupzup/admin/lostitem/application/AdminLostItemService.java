@@ -2,13 +2,13 @@ package com.greedy.zupzup.admin.lostitem.application;
 
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemResult;
+import com.greedy.zupzup.admin.lostitem.application.dto.ItemImageBulkDeletedEvent;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
-import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,8 @@ public class AdminLostItemService {
 
     private final AdminLostItemRepository adminLostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
-    private final S3ImageFileManager s3ImageFileManager;
     private final LostItemFeatureRepository lostItemFeatureRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ApproveLostItemsResponse approveBulk(ApproveLostItemsRequest request) {
@@ -50,15 +51,13 @@ public class AdminLostItemService {
     public RejectLostItemsResponse rejectBulk(RejectLostItemsRequest request) {
         List<Long> lostItemIds = request.lostItemIds();
 
-        List<String> imageKeys = lostItemImageRepository.findImageKeysByLostItemIds(lostItemIds);
-        imageKeys.forEach(s3ImageFileManager::delete);
+        List<String> imageUrls = lostItemImageRepository.findImageKeysByLostItemIds(lostItemIds);
 
         lostItemFeatureRepository.deleteByLostItemIds(lostItemIds);
-
         lostItemImageRepository.deleteByLostItemIds(lostItemIds);
-
         int deletedCount = adminLostItemRepository.deleteBulkByIds(lostItemIds);
 
+        eventPublisher.publishEvent(ItemImageBulkDeletedEvent.from(imageUrls));
         return RejectLostItemsResponse.of(deletedCount, lostItemIds.size());
     }
 

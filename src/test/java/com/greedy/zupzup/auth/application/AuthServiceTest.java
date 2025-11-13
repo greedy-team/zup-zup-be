@@ -10,6 +10,7 @@ import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.member.application.MemberService;
 import com.greedy.zupzup.member.domain.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,6 +33,9 @@ class AuthServiceTest extends ServiceUnitTest {
 
     @InjectMocks
     private AuthService authService;
+
+    @Mock
+    private MemberService memberService;
 
     @Mock
     private SejongAuthenticator sejongAuthenticator;
@@ -218,7 +222,7 @@ class AuthServiceTest extends ServiceUnitTest {
     class AuthenticateSejongAndLogin {
 
         @Test
-        void 세종대학교_인증에_성공하면_회원정보를_저장하고_가입된_멤버_객체를_반환해야_한다() {
+        void 세종대학교_인증에_성공하면_MemberService를_호출하고_멤버_객체를_반환해야_한다() {
             // given
             Member member = MemberFixture.MEMBER();
             ReflectionTestUtils.setField(member, "id", 1L);
@@ -226,8 +230,7 @@ class AuthServiceTest extends ServiceUnitTest {
             SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId(), member.getName());
 
             when(sejongAuthenticator.getStudentAuthInfo(command.portalId(), command.portalPassword())).thenReturn(authInfo);
-            when(memberRepository.findByStudentId(authInfo.studentId())).thenReturn(Optional.empty());
-            when(memberRepository.save(any(Member.class))).thenReturn(member);
+            when(memberService.findOrCreateMember(authInfo)).thenReturn(member);
 
             // when
             Member loginMember = authService.authenticateSejongAndLogin(command);
@@ -238,34 +241,9 @@ class AuthServiceTest extends ServiceUnitTest {
                 softly.assertThat(loginMember.getName()).isEqualTo(member.getName());
                 softly.assertThat(loginMember.getStudentId()).isEqualTo(member.getStudentId());
             });
-            then(memberRepository).should().findByStudentId(member.getStudentId());
-            then(memberRepository).should().save(any(Member.class));
+
             then(sejongAuthenticator).should().getStudentAuthInfo(command.portalId(), command.portalPassword());
-        }
-
-        @Test
-        void 이미_가입된_학번이_존재하면_회원정보를_저장하지_않고_가입된_멤버_객체를_반환해야_한다() {
-            // given
-            Member member = MemberFixture.MEMBER();
-            ReflectionTestUtils.setField(member, "id", 1L);
-            PortalLoginCommand command = new PortalLoginCommand(String.valueOf(member.getStudentId()),  "portalPw");
-            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId(), member.getName());
-
-            when(sejongAuthenticator.getStudentAuthInfo(command.portalId(), command.portalPassword())).thenReturn(authInfo);
-            when(memberRepository.findByStudentId(authInfo.studentId())).thenReturn(Optional.of(member));
-
-            // when
-            Member loginMember = authService.authenticateSejongAndLogin(command);
-
-            // then
-            assertSoftly(softly -> {
-                softly.assertThat(loginMember.getId()).isEqualTo(1L);
-                softly.assertThat(loginMember.getName()).isEqualTo(member.getName());
-                softly.assertThat(loginMember.getStudentId()).isEqualTo(member.getStudentId());
-            });
-            then(memberRepository).should().findByStudentId(member.getStudentId());
-            then(memberRepository).should(never()).save(any(Member.class));
-            then(sejongAuthenticator).should().getStudentAuthInfo(command.portalId(), command.portalPassword());
+            then(memberService).should().findOrCreateMember(authInfo);
         }
 
     }

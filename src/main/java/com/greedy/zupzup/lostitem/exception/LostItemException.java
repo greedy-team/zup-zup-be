@@ -15,7 +15,8 @@ public enum LostItemException implements ExceptionCode {
     ACCESS_FORBIDDEN(HttpStatus.FORBIDDEN, "접근이 제한되었습니다.", "해당 분실물은 조회가 제한됩니다."),
     ACCESS_FORBIDDEN_PLEDGED(HttpStatus.FORBIDDEN, "접근이 제한되었습니다.", "이미 서약 진행 중인 분실물로, 조회가 제한됩니다."),
     ACCESS_FORBIDDEN_FOUND(HttpStatus.FORBIDDEN, "접근이 제한되었습니다.", "이미 주인이 찾아간 분실물로, 조회가 제한됩니다."),
-    FEATURE_REQUIRED_FOR_NON_ETC_CATEGORY(HttpStatus.BAD_REQUEST, "분실물 특징 입력 누락", "분실물 카테고리가 '기타'가 아닌 경우, 특징값 입력이 필요합니다.");
+    FEATURE_REQUIRED_FOR_NON_ETC_CATEGORY(HttpStatus.BAD_REQUEST, "분실물 특징 입력 누락", "분실물 카테고리가 '기타'가 아닌 경우, 필수 특징값이 모두 입력되어야 합니다."),
+    REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "분실물 등록 실패", "분실물 저장 중 예상치 못한 오류가 발생했습니다.");;
 
 
     private final HttpStatus httpStatus;
