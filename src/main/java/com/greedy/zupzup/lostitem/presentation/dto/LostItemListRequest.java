@@ -25,11 +25,11 @@ public record LostItemListRequest(
         );
     }
 
-    private int safePage() {
+    public int safePage() {
         return (page == null || page < MIN_PAGE) ? MIN_PAGE : page;
     }
 
-    private int safeLimit() {
+    public int safeLimit() {
         int raw = (limit == null) ? DEFAULT_LIMIT : limit;
         return Math.max(MIN_LIMIT, Math.min(MAX_LIMIT, raw));
     }
