@@ -1,8 +1,9 @@
 package com.greedy.zupzup.lostitem.application.dto;
 
+import com.greedy.zupzup.global.util.DateTimeUtil;
 import com.greedy.zupzup.lostitem.repository.FoundItemProjection;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record FoundItemListResult(
         Long id,
@@ -13,8 +14,8 @@ public record FoundItemListResult(
         String foundAreaDetail,
         String representativeImageUrl,
         String description,
-        LocalDateTime createdAt,
-        LocalDateTime foundAt
+        OffsetDateTime createdAt,
+        OffsetDateTime foundAt
 ) {
     public static FoundItemListResult from(FoundItemProjection projection) {
         return new FoundItemListResult(
@@ -26,8 +27,8 @@ public record FoundItemListResult(
                 projection.getFoundAreaDetail(),
                 projection.getRepresentativeImageUrl(),
                 projection.getDescription(),
-                projection.getCreatedAt(),
-                projection.getFoundAt()
+                DateTimeUtil.toKstOffset(projection.getCreatedAt()),
+                DateTimeUtil.toKstOffset(projection.getFoundAt())
         );
     }
 }

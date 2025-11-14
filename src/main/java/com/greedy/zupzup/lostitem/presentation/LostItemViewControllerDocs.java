@@ -348,8 +348,8 @@ public interface LostItemViewControllerDocs {
                                                   "foundAreaDetail": "string",
                                                   "representativeImageUrl": "이미지미지미지미지",
                                                   "description": "string",
-                                                  "createdAt": "2025-11-11T21:10:06.100865",
-                                                  "foundAt": "2025-11-11T00:00:00"
+                                                  "createdAt": "2025-11-11T21:10:06.100865+09:00",
+                                                  "foundAt": "2025-11-11T00:00:00+09:00"
                                                 }
                                               ],
                                               "pageInfo": {
