@@ -298,4 +298,115 @@ public interface LostItemViewControllerDocs {
             @MemberAuth LoginMember loginMember,
             @Valid @ParameterObject MyPledgedListRequest query
     );
+
+
+    @Operation(
+            summary = "찾아진 분실물 목록 조회",
+            description = """
+                    카테고리/구역 필터와 페이징으로 분실물 목록을 조회합니다.
+                    - 로그인 불필요
+                    - FOUND 상태의 분실물 조회
+                    - 최근 FOUND 상태로 변한 일자를 기준으로 정렬
+                    """
+    )
+    @Parameters({
+            @Parameter(name = "page", description = "페이지(1 이상 정수)", example = "1"),
+            @Parameter(name = "limit", description = "페이지 크기(1~50)", example = "10"),
+            @Parameter(name = "categoryId", description = "카테고리 ID(선택)", example = "3"),
+            @Parameter(name = "schoolAreaId", description = "학교 구역 ID(선택)", example = "1")
+    })
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "목록 조회 성공",
+                    content = @Content(
+                            schema = @Schema(implementation = LostItemListResponse.class),
+                            examples = @ExampleObject(
+                                    name = "목록 조회 성공 예시",
+                                    value = """
+                                            {
+                                              "count": 2,
+                                              "items": [
+                                                {
+                                                  "id": 4,
+                                                  "categoryId": 1,
+                                                  "categoryName": "핸드폰",
+                                                  "schoolAreaId": 1,
+                                                  "schoolAreaName": "집현관",
+                                                  "foundAreaDetail": "string",
+                                                  "representativeImageUrl": "이미지미지미지미지",
+                                                  "description": "string",
+                                                  "createdAt": "2025-11-11T21:09:09.529911",
+                                                  "foundAt": "2025-11-11T00:00:00"
+                                                },
+                                                {
+                                                  "id": 5,
+                                                  "categoryId": 1,
+                                                  "categoryName": "핸드폰",
+                                                  "schoolAreaId": 1,
+                                                  "schoolAreaName": "집현관",
+                                                  "foundAreaDetail": "string",
+                                                  "representativeImageUrl": "이미지미지미지미지",
+                                                  "description": "string",
+                                                  "createdAt": "2025-11-11T21:10:06.100865+09:00",
+                                                  "foundAt": "2025-11-11T00:00:00+09:00"
+                                                }
+                                              ],
+                                              "pageInfo": {
+                                                "page": 1,
+                                                "size": 10,
+                                                "totalElements": 2,
+                                                "totalPages": 1,
+                                                "hasPrev": false,
+                                                "hasNext": false
+                                              }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청(파라미터 범위/타입 오류 등)",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "limit 초과(>50) 예시",
+                                            value = """
+                                                    {
+                                                      "title": "유효하지 않은 입력값",
+                                                      "status": 400,
+                                                      "detail": "limit: limit는 50 이하이어야 합니다.",
+                                                      "instance": "/api/lost-items"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "파라미터 타입 불일치 예시",
+                                            value = """
+                                                    {
+                                                      "title": "쿼리 파라미터 타입 불일치",
+                                                      "status": 400,
+                                                      "detail": "쿼리 파라미터 'page'는 'Integer' 타입이어야 합니다.",
+                                                      "instance": "/api/lost-items"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "필수 파라미터 누락 예시",
+                                            value = """
+                                                    {
+                                                      "title": "유효하지 않은 쿼리 파라미터",
+                                                      "status": 400,
+                                                      "detail": "필수 쿼리 파라미터 'page'(Integer)가 누락되었습니다.",
+                                                      "instance": "/api/lost-items"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<LostItemListResponse> getFoundItems(@ParameterObject @Valid LostItemListRequest query);
 }

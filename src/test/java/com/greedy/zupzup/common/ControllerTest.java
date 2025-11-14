@@ -171,7 +171,7 @@ public abstract class ControllerTest {
                 .category(category)
                 .status(LostItemStatus.REGISTERED)
                 .foundArea(schoolArea)
-                .pledgedAt(null)
+                .foundAt(null)
                 .build();
 
         lostItemRepository.save(lostItem);
@@ -202,7 +202,7 @@ public abstract class ControllerTest {
                 .category(category)
                 .status(LostItemStatus.REGISTERED)
                 .foundArea(schoolArea)
-                .pledgedAt(null)
+                .foundAt(null)
                 .build();
 
         lostItemRepository.save(lostItem);
@@ -220,7 +220,7 @@ public abstract class ControllerTest {
                 .category(category)
                 .status(LostItemStatus.REGISTERED)
                 .foundArea(area)
-                .pledgedAt(null)
+                .foundAt(null)
                 .build();
 
         lostItemRepository.save(lostItem);

@@ -1,24 +1,21 @@
 package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
-import com.greedy.zupzup.lostitem.application.dto.MyPledgedLostItemCommand;
+import com.greedy.zupzup.lostitem.application.dto.FoundItemListResult;
+import com.greedy.zupzup.lostitem.application.dto.GetItemListCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
-import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
-import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
-import com.greedy.zupzup.lostitem.repository.MyPledgedLostItemProjection;
-import com.greedy.zupzup.lostitem.repository.LostItemRepository;
-import com.greedy.zupzup.lostitem.repository.RepresentativeImageProjection;
+import com.greedy.zupzup.lostitem.repository.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,18 +30,17 @@ public class LostItemViewService {
      * 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<LostItemListCommand> getLostItems(Long categoryId, Long schoolAreaId, Integer page, Integer limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
+    public Page<LostItemListResult> getLostItems(GetItemListCommand command) {
         return lostItemRepository
-                .findList(categoryId, schoolAreaId, LostItemStatus.REGISTERED, pageable)
-                .map(LostItemListCommand::from);
+                .findList(command.categoryId(), command.schoolAreaId(), LostItemStatus.REGISTERED, command.pageable())
+                .map(LostItemListResult::from);
     }
 
     /**
      * 단건 조회
      */
     @Transactional(readOnly = true)
-    public LostItemSimpleViewCommand getSimpleView(Long lostItemId) {
+    public LostItemSimpleViewResult getSimpleView(Long lostItemId) {
         LostItem item = lostItemRepository.getWithCategoryById(lostItemId);
 
         statusGuardForSimpleView(item);
@@ -52,12 +48,12 @@ public class LostItemViewService {
         boolean isEtc = item.isEtcCategory();
 
         if (!isEtc) {
-            return LostItemSimpleViewCommand.of(item, Objects.requireNonNull(item.getCategory()).getIconUrl());
+            return LostItemSimpleViewResult.of(item, Objects.requireNonNull(item.getCategory()).getIconUrl());
         }
 
         String rep = getRepresentativeImageMapByItemIds(List.of(lostItemId))
                 .getOrDefault(lostItemId, "");
-        return LostItemSimpleViewCommand.of(item, rep);
+        return LostItemSimpleViewResult.of(item, rep);
     }
 
     /**
@@ -84,6 +80,16 @@ public class LostItemViewService {
         };
 
         throw new ApplicationException(code);
+    }
+
+
+    /**
+     * 찾아진 분실물 조회
+     */
+    @Transactional(readOnly = true)
+    public Page<FoundItemListResult> getFoundItems(GetItemListCommand command) {
+        return lostItemRepository.findFoundItems(command.categoryId(), command.schoolAreaId(), command.pageable())
+                .map(FoundItemListResult::from);
     }
 
 }

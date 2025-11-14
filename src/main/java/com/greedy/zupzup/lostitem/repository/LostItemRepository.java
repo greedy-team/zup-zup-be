@@ -112,7 +112,7 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
     }
 
-    @Query("""
+    @Query(value = """
                 select
                     li.id                as id,
                     c.id                 as categoryId,
@@ -131,9 +131,51 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 left join li.images img on img.imageOrder = 0
                 where p.owner.id = :memberId
                 order by p.createdAt desc
-            """)
+            """,
+            countQuery = """
+                select count(p)
+                from Pledge p
+                where p.owner.id = :memberId
+            """
+    )
     Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
             @Param("memberId") Long memberId,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select
+                        li.id              as id,
+                        c.id               as categoryId,
+                        c.name             as categoryName,
+                        sa.id              as schoolAreaId,
+                        sa.areaName        as schoolAreaName,
+                        li.foundAreaDetail as foundAreaDetail,
+                        img.imageKey       as representativeImageUrl,
+                        li.description     as description,
+                        li.createdAt       as createdAt,
+                        li.foundAt          as foundAt
+                        from LostItem li
+                        join li.category  c
+                        join li.foundArea sa
+                        left join li.images img on img.imageOrder = 0
+                    where li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.FOUND
+                      and (:categoryId   is null or c.id  = :categoryId)
+                      and (:schoolAreaId is null or sa.id = :schoolAreaId)
+                    order by li.foundAt desc
+                    """,
+            countQuery = """
+                    select count(li)
+                    from LostItem li
+                    where li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.FOUND
+                      and (:categoryId   is null or li.category.id  = :categoryId)
+                      and (:schoolAreaId is null or li.foundArea.id = :schoolAreaId)
+                    """
+    )
+    Page<FoundItemProjection> findFoundItems(
+            @Param("categoryId") Long categoryId,
+            @Param("schoolAreaId") Long schoolAreaId,
             Pageable pageable
     );
 }

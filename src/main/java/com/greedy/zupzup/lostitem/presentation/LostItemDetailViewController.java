@@ -3,7 +3,7 @@ package com.greedy.zupzup.lostitem.presentation;
 import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.lostitem.application.LostItemDetailViewService;
-import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewResult;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemDepositAreaResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemDetailViewResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemImageResponse;
@@ -27,8 +27,8 @@ public class LostItemDetailViewController implements LostItemDetailViewControlle
             @PathVariable Long lostItemId,
             @MemberAuth LoginMember loginMember
     ) {
-        LostItemDetailViewCommand command = service.getDetail(lostItemId, loginMember.memberId());
-        return ResponseEntity.ok(LostItemDetailViewResponse.from(command));
+        LostItemDetailViewResult result = service.getDetail(lostItemId, loginMember.memberId());
+        return ResponseEntity.ok(LostItemDetailViewResponse.from(result));
     }
 
     /**
@@ -40,9 +40,9 @@ public class LostItemDetailViewController implements LostItemDetailViewControlle
             @PathVariable Long lostItemId,
             @MemberAuth LoginMember loginMember
     ) {
-        LostItemDetailViewCommand command =
+        LostItemDetailViewResult result =
                 service.getImagesAfterQuiz(lostItemId, loginMember.memberId());
-        return ResponseEntity.ok(LostItemImageResponse.from(command));
+        return ResponseEntity.ok(LostItemImageResponse.from(result));
     }
 
     /**

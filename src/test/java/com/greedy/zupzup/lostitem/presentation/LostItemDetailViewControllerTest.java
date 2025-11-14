@@ -14,7 +14,6 @@ import com.greedy.zupzup.pledge.domain.Pledge;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,7 +50,6 @@ class LostItemDetailViewControllerTest extends ControllerTest {
         pledgeRepository.save(pledge);
 
         ReflectionTestUtils.setField(item, "status", LostItemStatus.PLEDGED);
-        ReflectionTestUtils.setField(item, "pledgedAt", LocalDate.now());
         lostItemRepository.save(item);
     }
 

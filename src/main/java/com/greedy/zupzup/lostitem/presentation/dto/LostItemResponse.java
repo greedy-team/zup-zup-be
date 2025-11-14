@@ -1,7 +1,7 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemListCommand;
-import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
+import com.greedy.zupzup.lostitem.application.dto.LostItemSimpleViewResult;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +24,7 @@ public record LostItemResponse(
         return ts.atZone(KST).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
-    public static LostItemResponse from(LostItemSimpleViewCommand c) {
+    public static LostItemResponse from(LostItemSimpleViewResult c) {
         return new LostItemResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
                 c.schoolAreaId(), c.schoolAreaName(), c.foundAreaDetail(),
@@ -33,7 +33,7 @@ public record LostItemResponse(
         );
     }
 
-    public static LostItemResponse from(LostItemListCommand c, String representativeImageUrl) {
+    public static LostItemResponse from(LostItemListResult c, String representativeImageUrl) {
         final String finalImage = pickListImage(c, representativeImageUrl);
         return new LostItemResponse(
                 c.id(), c.categoryId(), c.categoryName(), c.categoryIconUrl(),
@@ -43,7 +43,7 @@ public record LostItemResponse(
         );
     }
 
-    private static String pickListImage(LostItemListCommand c, String repUrl) {
+    private static String pickListImage(LostItemListResult c, String repUrl) {
         if ("기타".equals(c.categoryName())) {
             return repUrl;
         }

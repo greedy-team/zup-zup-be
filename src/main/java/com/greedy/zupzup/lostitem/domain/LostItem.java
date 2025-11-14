@@ -15,7 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -49,7 +49,7 @@ public class LostItem extends BaseTimeEntity {
     @Column(nullable = false)
     private LostItemStatus status;
 
-    private LocalDate pledgedAt;
+    private LocalDateTime foundAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -67,7 +67,7 @@ public class LostItem extends BaseTimeEntity {
         this.description = description;
         this.depositArea = depositArea;
         this.status = LostItemStatus.PENDING;
-        this.pledgedAt = null;
+        this.foundAt = null;
         this.category = category;
         this.foundArea = foundArea;
     }
@@ -82,7 +82,11 @@ public class LostItem extends BaseTimeEntity {
 
     public void pledge() {
         this.status = LostItemStatus.PLEDGED;
-        this.pledgedAt = LocalDate.now();
+    }
+
+    public void found() {
+        this.status = LostItemStatus.FOUND;
+        this.foundAt = LocalDateTime.now();
     }
 
     public boolean canAccess(boolean pledgedByMe) {

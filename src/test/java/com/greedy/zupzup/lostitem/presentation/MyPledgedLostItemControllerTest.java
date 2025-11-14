@@ -15,7 +15,6 @@ import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +47,6 @@ class MyPledgedLostItemControllerTest extends ControllerTest {
         Pledge pledge = PledgeFixture.PLEDGE(member, item);
         pledgeRepository.save(pledge);
         ReflectionTestUtils.setField(item, "status", LostItemStatus.PLEDGED);
-        ReflectionTestUtils.setField(item, "pledgedAt", LocalDate.now());
         lostItemRepository.save(item);
     }
 

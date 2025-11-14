@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.presentation.dto;
 
-import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemDetailViewResult;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -14,21 +14,17 @@ public record LostItemDetailViewResponse(
         String description,
         List<String> imageUrls,
         String depositArea,
-        String pledgedAt,
         String createdAt,
         boolean quizRequired,
         boolean quizAnswered,
         boolean pledgedByMe
 ) {
 
-    public static LostItemDetailViewResponse from(LostItemDetailViewCommand command) {
+    public static LostItemDetailViewResponse from(LostItemDetailViewResult command) {
 
         String createdAt = command.createdAt()
                 .atZone(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-
-        String pledgedAt = command.pledgedAt() == null ? null
-                : command.pledgedAt().toString();
 
         return new LostItemDetailViewResponse(
                 command.id(),
@@ -39,7 +35,6 @@ public record LostItemDetailViewResponse(
                 command.description(),
                 command.imageUrls(),
                 command.depositArea(),
-                pledgedAt,
                 createdAt,
                 command.quizRequired(),
                 command.quizAnswered(),
