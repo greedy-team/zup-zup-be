@@ -266,7 +266,7 @@ class LostItemViewControllerTest extends ControllerTest {
     class foundLostItem {
 
         @Test
-        void FOUND_상태의_분실물이_모두_조회_되어야_한다() {
+        void FOUND_상태의_분실물이_모두_조회_되고_200_OK를_응답해야_한다() {
             // given
             LostItem nonQuizLostItem = givenNonQuizLostItem(category);
             anyItem.found();
@@ -274,36 +274,41 @@ class LostItemViewControllerTest extends ControllerTest {
             lostItemRepository.saveAll(List.of(anyItem, nonQuizLostItem));
 
             // when
-            LostItemListResponse response = RestAssured.given().log().all()
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .when()
                     .get("/api/lost-items/found")
                     .then().log().all()
-                    .extract()
-                    .as(LostItemListResponse.class);
+                    .extract();
+
+            LostItemListResponse response = extract.as(LostItemListResponse.class);
 
             // then
             assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.count()).isEqualTo(2);
             });
         }
 
         @Test
-        void FOUND_상태가_아닌_분실물은_조회되면_안_된다() {
+        void FOUND_상태가_아닌_분실물은_조회에_포함되면_안_되고_200_OK를_응답해야_한다() {
             // given
             LostItem registeredStatusItem = givenNonQuizLostItem(category);
             anyItem.found();
             lostItemRepository.save(anyItem);
 
             // when
-            LostItemListResponse response = RestAssured.given().log().all()
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
                     .when()
                     .get("/api/lost-items/found")
                     .then().log().all()
-                    .extract()
-                    .as(LostItemListResponse.class);
+                    .extract();
+
+            LostItemListResponse response = extract.as(LostItemListResponse.class);
+
 
             // then
             assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.count()).isEqualTo(1);
                 softly.assertThat(response.items())
                         .extracting("id")
