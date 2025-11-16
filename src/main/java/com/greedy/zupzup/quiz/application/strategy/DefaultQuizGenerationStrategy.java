@@ -2,8 +2,8 @@ package com.greedy.zupzup.quiz.application.strategy;
 
 import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
-import com.greedy.zupzup.quiz.application.dto.OptionDto;
-import com.greedy.zupzup.quiz.application.dto.QuizDto;
+import com.greedy.zupzup.quiz.application.dto.OptionData;
+import com.greedy.zupzup.quiz.application.dto.QuizData;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +19,7 @@ public class DefaultQuizGenerationStrategy implements QuizGenerationStrategy {
     private static final String ETC_OPTION_TEXT = "기타";
 
     @Override
-    public List<QuizDto> createQuizzes(List<LostItemFeature> lostItemFeatures) {
+    public List<QuizData> createQuizzes(List<LostItemFeature> lostItemFeatures) {
         if (lostItemFeatures == null || lostItemFeatures.isEmpty()) {
             return Collections.emptyList();
         }
@@ -28,18 +28,18 @@ public class DefaultQuizGenerationStrategy implements QuizGenerationStrategy {
                 .collect(Collectors.toList());
     }
 
-    private QuizDto createQuizDto(LostItemFeature lostItemFeature) {
+    private QuizData createQuizDto(LostItemFeature lostItemFeature) {
         List<FeatureOption> allOptions = lostItemFeature.getFeatureOptions();
         FeatureOption correctAnswer = lostItemFeature.getSelectedOption();
 
         List<FeatureOption> selectedOptions = selectQuizOptions(allOptions, correctAnswer);
         sortQuizOptions(selectedOptions);
 
-        List<OptionDto> optionDtos = selectedOptions.stream()
-                .map(OptionDto::from)
+        List<OptionData> optionData = selectedOptions.stream()
+                .map(OptionData::from)
                 .toList();
 
-        return QuizDto.of(lostItemFeature, optionDtos);
+        return QuizData.of(lostItemFeature, optionData);
     }
 
     private List<FeatureOption> selectQuizOptions(List<FeatureOption> allOptions, FeatureOption correctAnswer) {

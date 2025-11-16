@@ -3,14 +3,14 @@ package com.greedy.zupzup.quiz.application.dto;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import java.util.List;
 
-public record QuizDto(
+public record QuizData(
         Long featureId,
         String question,
-        List<OptionDto> options
+        List<OptionData> options
 ) {
 
-    public static QuizDto of(LostItemFeature lostItemFeature, List<OptionDto> options) {
-        return new QuizDto(
+    public static QuizData of(LostItemFeature lostItemFeature, List<OptionData> options) {
+        return new QuizData(
                 lostItemFeature.getFeature().getId(),
                 lostItemFeature.getFeature().getQuizQuestion(),
                 options

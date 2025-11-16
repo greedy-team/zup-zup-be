@@ -13,8 +13,8 @@ import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.quiz.application.dto.OptionDto;
-import com.greedy.zupzup.quiz.application.dto.QuizDto;
+import com.greedy.zupzup.quiz.application.dto.OptionData;
+import com.greedy.zupzup.quiz.application.dto.QuizData;
 import com.greedy.zupzup.quiz.exception.QuizException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,19 +70,19 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
                 .filter(feature -> feature.getFeature().getQuizQuestion().contains("색상"))
                 .findFirst().orElseThrow();
 
-        List<OptionDto> brandOptions = brandFeature.getFeatureOptions().stream()
+        List<OptionData> brandOptions = brandFeature.getFeatureOptions().stream()
                 .limit(4)
-                .map(OptionDto::from)
+                .map(OptionData::from)
                 .toList();
 
-        List<OptionDto> colorOptions = colorFeature.getFeatureOptions().stream()
+        List<OptionData> colorOptions = colorFeature.getFeatureOptions().stream()
                 .limit(4)
-                .map(OptionDto::from)
+                .map(OptionData::from)
                 .toList();
 
-        List<QuizDto> stubbed = List.of(
-                QuizDto.of(brandFeature, brandOptions),
-                QuizDto.of(colorFeature, colorOptions)
+        List<QuizData> stubbed = List.of(
+                QuizData.of(brandFeature, brandOptions),
+                QuizData.of(colorFeature, colorOptions)
         );
 
         given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
@@ -96,7 +96,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         given(defaultQuizGenerationStrategy.createQuizzes(anyList())).willReturn(stubbed);
 
         // when
-        List<QuizDto> result = quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID);
+        List<QuizData> result = quizGenerationService.getLostItemQuizzes(TEST_LOST_ITEM_ID, TEST_MEMBER_ID);
 
         // then
         assertThat(result).isEqualTo(stubbed);
@@ -116,7 +116,7 @@ class QuizGenerationServiceTest extends ServiceUnitTest {
         given(emptyQuizGenerationStrategy.createQuizzes(List.of())).willReturn(List.of());
 
         // when
-        List<QuizDto> result = quizGenerationService.getLostItemQuizzes(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID);
+        List<QuizData> result = quizGenerationService.getLostItemQuizzes(ETC_CATEGORY_LOST_ITEM_ID, TEST_MEMBER_ID);
 
         // then
         assertThat(result).isEmpty();

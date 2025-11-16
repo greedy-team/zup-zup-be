@@ -1,6 +1,6 @@
 package com.greedy.zupzup.quiz.presentation.dto;
 
-public record QuizOption(
+public record OptionData(
         Long id,
         String text
 ) {

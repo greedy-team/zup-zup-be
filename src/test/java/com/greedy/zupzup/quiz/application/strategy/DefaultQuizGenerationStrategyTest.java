@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
-import com.greedy.zupzup.quiz.application.dto.QuizDto;
-import com.greedy.zupzup.quiz.application.dto.OptionDto;
+import com.greedy.zupzup.quiz.application.dto.QuizData;
+import com.greedy.zupzup.quiz.application.dto.OptionData;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,14 +39,14 @@ class DefaultQuizGenerationStrategyTest {
     @Test
     void 특징별로_4지선다를_생성하고_정답을_포함하며_중복_없이_구성한다() {
         // when
-        List<QuizDto> quizzes = strategy.createQuizzes(features);
+        List<QuizData> quizzes = strategy.createQuizzes(features);
 
         // then
         assertThat(quizzes).hasSize(features.size());
-        for (QuizDto quiz : quizzes) {
+        for (QuizData quiz : quizzes) {
             assertThat(quiz.options()).hasSize(QUIZ_OPTIONS_COUNT);
 
-            List<String> texts = quiz.options().stream().map(OptionDto::text).toList();
+            List<String> texts = quiz.options().stream().map(OptionData::text).toList();
             assertThat(Set.copyOf(texts)).hasSize(QUIZ_OPTIONS_COUNT); // 중복 테스트
 
             boolean containsCorrect =
@@ -59,11 +59,11 @@ class DefaultQuizGenerationStrategyTest {
     @Test
     void 옵션에_기타가_있다면_항상_마지막_인덱스에_위치한다() {
         // when
-        List<QuizDto> quizzes = strategy.createQuizzes(features);
+        List<QuizData> quizzes = strategy.createQuizzes(features);
 
         // then
-        for (QuizDto quiz : quizzes) {
-            List<String> texts = quiz.options().stream().map(OptionDto::text).toList();
+        for (QuizData quiz : quizzes) {
+            List<String> texts = quiz.options().stream().map(OptionData::text).toList();
             assertThat(texts).hasSize(QUIZ_OPTIONS_COUNT);
             if (texts.contains(ETC_OPTION_TEXT)) {
                 assertThat(texts.get(QUIZ_OPTIONS_COUNT - 1)).isEqualTo(ETC_OPTION_TEXT);
@@ -74,21 +74,21 @@ class DefaultQuizGenerationStrategyTest {
     @Test
     void 브랜드와_색상_각_퀴즈가_정상적으로_생성된다() {
         // when
-        List<QuizDto> quizzes = strategy.createQuizzes(features);
+        List<QuizData> quizzes = strategy.createQuizzes(features);
 
         // then
-        QuizDto brandQuiz = quizzes.stream()
+        QuizData brandQuiz = quizzes.stream()
                 .filter(quiz -> quiz.question().contains("브랜드"))
                 .findFirst().orElseThrow();
-        QuizDto colorQuiz = quizzes.stream()
+        QuizData colorQuiz = quizzes.stream()
                 .filter(quiz -> quiz.question().contains("색상"))
                 .findFirst().orElseThrow();
 
         assertThat(brandQuiz.options()).hasSize(QUIZ_OPTIONS_COUNT);
         assertThat(colorQuiz.options()).hasSize(QUIZ_OPTIONS_COUNT);
 
-        List<String> brandOptions = brandQuiz.options().stream().map(OptionDto::text).collect(Collectors.toList());
-        List<String> colorOptions = colorQuiz.options().stream().map(OptionDto::text).collect(Collectors.toList());
+        List<String> brandOptions = brandQuiz.options().stream().map(OptionData::text).collect(Collectors.toList());
+        List<String> colorOptions = colorQuiz.options().stream().map(OptionData::text).collect(Collectors.toList());
 
         assertThat(brandOptions).contains("삼성");
         assertThat(colorOptions).contains("블랙");
