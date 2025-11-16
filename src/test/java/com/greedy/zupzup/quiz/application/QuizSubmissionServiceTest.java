@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class QuizSubmissionServiceTest extends ServiceUnitTest {
 

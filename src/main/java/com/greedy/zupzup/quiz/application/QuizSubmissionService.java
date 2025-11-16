@@ -48,7 +48,7 @@ public class QuizSubmissionService {
 
         saveQuizAttempt(existingAttemptOpt, lostItem, member, isCorrect);
 
-        return isCorrect ? QuizResultDto.correct(lostItem) : QuizResultDto.incorrect();
+        return isCorrect ? QuizResultDto.ofCorrect() : QuizResultDto.ofIncorrect();
     }
 
     private Optional<QuizAttempt> validateSubmissionPossibility(LostItem lostItem, Member member) {
