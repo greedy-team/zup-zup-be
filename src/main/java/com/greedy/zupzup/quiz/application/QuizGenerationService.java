@@ -9,7 +9,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.repository.MemberRepository;
-import com.greedy.zupzup.quiz.application.dto.QuizDto;
+import com.greedy.zupzup.quiz.application.dto.QuizData;
 import com.greedy.zupzup.quiz.application.strategy.DefaultQuizGenerationStrategy;
 import com.greedy.zupzup.quiz.application.strategy.EmptyQuizGenerationStrategy;
 import com.greedy.zupzup.quiz.application.strategy.QuizGenerationStrategy;
@@ -33,7 +33,7 @@ public class QuizGenerationService {
     private final EmptyQuizGenerationStrategy emptyQuizGenerationStrategy;
 
     @Transactional(readOnly = true)
-    public List<QuizDto> getLostItemQuizzes(Long lostItemId, Long memberId) {
+    public List<QuizData> getLostItemQuizzes(Long lostItemId, Long memberId) {
 
         Member member = memberRepository.getById(memberId);
         LostItem lostItem = findAndValidateLostItem(lostItemId);

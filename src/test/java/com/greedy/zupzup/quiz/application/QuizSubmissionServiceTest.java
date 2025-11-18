@@ -21,7 +21,7 @@ import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.quiz.application.dto.AnswerCommand;
-import com.greedy.zupzup.quiz.application.dto.QuizResultDto;
+import com.greedy.zupzup.quiz.application.dto.QuizResult;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import com.greedy.zupzup.quiz.exception.QuizException;
 import java.util.List;
@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class QuizSubmissionServiceTest extends ServiceUnitTest {
 
@@ -66,7 +65,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
-        QuizResultDto result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, correctAnswers);
+        QuizResult result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, correctAnswers);
 
         // then
         assertThat(result.correct()).isTrue();
@@ -88,7 +87,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
-        QuizResultDto result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, incorrectAnswers);
+        QuizResult result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, incorrectAnswers);
 
         // then
         assertThat(result.correct()).isFalse();
@@ -107,7 +106,7 @@ class QuizSubmissionServiceTest extends ServiceUnitTest {
         given(lostItemFeatureRepository.findWithFeatureAndOptionsByLostItemId(TEST_LOST_ITEM_ID)).willReturn(correctFeatures);
 
         // when
-        QuizResultDto result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, insufficientAnswers);
+        QuizResult result = quizSubmissionService.submitQuizAnswers(TEST_LOST_ITEM_ID, TEST_MEMBER_ID, insufficientAnswers);
 
         // then
         assertThat(result.correct()).isFalse();

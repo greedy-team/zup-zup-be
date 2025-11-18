@@ -5,16 +5,16 @@ import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 
-public record LostItemDetailDto(
+public record LostItemDetailData(
         String imageUrl,
         String description
 ) {
 
-    public static LostItemDetailDto from(LostItem lostItem) {
+    public static LostItemDetailData from(LostItem lostItem) {
         String imageUrl = lostItem.getImages().stream()
                 .findFirst()
                 .map(LostItemImage::getImageKey)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_IMAGE_NOT_FOUND));
-        return new LostItemDetailDto(imageUrl, lostItem.getDescription());
+        return new LostItemDetailData(imageUrl, lostItem.getDescription());
     }
 }

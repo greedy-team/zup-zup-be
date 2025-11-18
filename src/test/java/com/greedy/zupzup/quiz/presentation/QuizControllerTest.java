@@ -122,7 +122,6 @@ class QuizControllerTest extends ControllerTest {
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.correct()).isTrue();
-                softly.assertThat(response.detail()).isNotNull();
             });
         }
 
@@ -152,7 +151,6 @@ class QuizControllerTest extends ControllerTest {
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.correct()).isFalse();
-                softly.assertThat(response.detail()).isNull();
             });
         }
 
@@ -185,7 +183,6 @@ class QuizControllerTest extends ControllerTest {
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
                 softly.assertThat(response.correct()).isTrue();
-                softly.assertThat(response.detail()).isNotNull();
             });
         }
 

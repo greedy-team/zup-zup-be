@@ -10,7 +10,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.quiz.application.dto.AnswerCommand;
-import com.greedy.zupzup.quiz.application.dto.QuizResultDto;
+import com.greedy.zupzup.quiz.application.dto.QuizResult;
 import com.greedy.zupzup.quiz.domain.QuizAttempt;
 import com.greedy.zupzup.quiz.exception.QuizException;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
@@ -34,7 +34,7 @@ public class QuizSubmissionService {
     private static final long INVALID_OPTION_ID = -1L;
 
     @Transactional
-    public QuizResultDto submitQuizAnswers(Long lostItemId, Long memberId, List<AnswerCommand> answers) {
+    public QuizResult submitQuizAnswers(Long lostItemId, Long memberId, List<AnswerCommand> answers) {
 
         LostItem lostItem = lostItemRepository.getById(lostItemId);
         Member member = memberRepository.getById(memberId);
@@ -48,7 +48,7 @@ public class QuizSubmissionService {
 
         saveQuizAttempt(existingAttemptOpt, lostItem, member, isCorrect);
 
-        return isCorrect ? QuizResultDto.correct(lostItem) : QuizResultDto.incorrect();
+        return isCorrect ? QuizResult.ofCorrect() : QuizResult.ofIncorrect();
     }
 
     private Optional<QuizAttempt> validateSubmissionPossibility(LostItem lostItem, Member member) {
