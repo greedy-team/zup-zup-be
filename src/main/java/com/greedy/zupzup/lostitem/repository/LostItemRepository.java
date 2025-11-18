@@ -4,10 +4,13 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
@@ -174,5 +177,21 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             @Param("categoryId") Long categoryId,
             @Param("schoolAreaId") Long schoolAreaId,
             Pageable pageable
+    );
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update LostItem li
+            set li.status = :newStatus,
+                li.foundAt = :now,
+                li.updatedAt = :now
+            where li.status = :oldStatus and li.updatedAt < :cutoffDate
+            """
+    )
+    int updateExpiredPledgedItemsToFound(@Param("newStatus") LostItemStatus newStatus,
+                                         @Param("oldStatus") LostItemStatus oldStatus,
+                                         @Param("cutoffDate") LocalDateTime cutoffDate,
+                                         @Param("now") LocalDateTime now
     );
 }
