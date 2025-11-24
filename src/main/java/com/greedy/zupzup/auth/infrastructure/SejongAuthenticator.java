@@ -129,7 +129,7 @@ public class SejongAuthenticator {
             rowValues.add(value);
         });
 
-        String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);   // 일단 사용 x
+        String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);   // 사용 x
         String studentIdString = getValueFromList(rowValues, STUDENT_INFO_ID_INDEX);
         String studentName = getValueFromList(rowValues, STUDENT_INFO_NAME_INDEX);
 
@@ -140,7 +140,7 @@ public class SejongAuthenticator {
 
         try {
             int studentId = Integer.parseInt(studentIdString);
-            return new SejongAuthInfo(studentId, studentName);
+            return new SejongAuthInfo(studentId);
         } catch (NumberFormatException e) {
             log.warn("포탈 로그인 | 학번 -> 정수 파싱 오류 studentId={}, studentName={}", studentIdString, studentName);
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
