@@ -31,7 +31,7 @@ class MemberServiceTest extends ServiceUnitTest {
         void 이미_가입된_학번이_존재하면_회원정보를_저장하지_않고_가입된_멤버_객체를_반환해야_한다() {
             // given
             Member member = MemberFixture.MEMBER();
-            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId(), member.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId());
 
             when(memberRepository.findByStudentId(authInfo.studentId())).thenReturn(Optional.of(member));
 
@@ -48,7 +48,7 @@ class MemberServiceTest extends ServiceUnitTest {
         void 가입된_학번이_없으면_회원정보를_저장하고_가입된_멤버_객체를_반환해야_한다() {
             // given
             Member member = MemberFixture.MEMBER();
-            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId(), member.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId());
 
             when(memberRepository.findByStudentId(authInfo.studentId())).thenReturn(Optional.empty());
             when(memberRepository.save(any(Member.class))).thenReturn(member);

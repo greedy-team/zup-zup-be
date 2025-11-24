@@ -52,7 +52,7 @@ class AuthServiceTest extends ServiceUnitTest {
         void 세종대학교_인증에_성공하면_인증된_학번과_이름을_반환해야_한다() {
             // given
             PortalLoginCommand command = new PortalLoginCommand("12345678", "portalPw");
-            SejongAuthInfo authInfo = new SejongAuthInfo(12345678, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(12345678);
 
             when(sejongAuthenticator.getStudentAuthInfo(anyString(), anyString())).thenReturn(authInfo);
             when(memberRepository.existsByStudentId(authInfo.studentId())).thenReturn(false);
@@ -63,7 +63,6 @@ class AuthServiceTest extends ServiceUnitTest {
             // then
             assertSoftly(softly -> {
                 softly.assertThat(result.studentId()).isEqualTo(authInfo.studentId());
-                softly.assertThat(result.studentName()).isEqualTo(authInfo.studentName());
             });
 
             then(sejongAuthenticator).should().getStudentAuthInfo(anyString(), anyString());
@@ -74,7 +73,7 @@ class AuthServiceTest extends ServiceUnitTest {
         void 이미_가입된_학번으로_인증을_하면_예외가_발생해야_한다() {
             // given
             PortalLoginCommand command = new PortalLoginCommand("12345678", "portalPw");
-            SejongAuthInfo authInfo = new SejongAuthInfo(12345678, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(12345678);
 
             when(sejongAuthenticator.getStudentAuthInfo(anyString(), anyString())).thenReturn(authInfo);
             when(memberRepository.existsByStudentId(authInfo.studentId())).thenReturn(true);
@@ -99,7 +98,7 @@ class AuthServiceTest extends ServiceUnitTest {
         public void 회원_가입에_성공하면_회원정보를_저장하고_가입된_멤버_객체를_반환해야_한다() throws Exception {
             // given
             Member signupMember = MemberFixture.MEMBER();
-            SejongAuthInfo authInfo = new SejongAuthInfo(signupMember.getStudentId(), signupMember.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(signupMember.getStudentId());
             SignupCommand command = new SignupCommand(authInfo, signupMember.getStudentId(), signupMember.getPassword());
 
             when(memberRepository.save(any(Member.class))).thenReturn(signupMember);
@@ -110,7 +109,6 @@ class AuthServiceTest extends ServiceUnitTest {
 
             // then
             assertSoftly(softly -> {
-                softly.assertThat(newMember.getName()).isEqualTo(signupMember.getName());
                 softly.assertThat(newMember.getPassword()).isEqualTo("hashedPassword");
                 softly.assertThat(newMember.getStudentId()).isEqualTo(signupMember.getStudentId());
             });
@@ -122,7 +120,7 @@ class AuthServiceTest extends ServiceUnitTest {
         public void 이미_가입된_학번으로_회원가입을_하면_예외가_발생해야_한다() {
             // given
             Member signupMember = MemberFixture.MEMBER();
-            SejongAuthInfo authInfo = new SejongAuthInfo(signupMember.getStudentId(), signupMember.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(signupMember.getStudentId());
             SignupCommand command = new SignupCommand(authInfo, signupMember.getStudentId(), signupMember.getPassword());
 
             when(memberRepository.save(any(Member.class))).thenThrow(DataIntegrityViolationException.class);
@@ -139,7 +137,7 @@ class AuthServiceTest extends ServiceUnitTest {
         @Test
         void 인증된_학번과_가입_요청된_학번이_다르면_예외가_발생해야_한다() {
             // given
-            SejongAuthInfo authInfo = new SejongAuthInfo(12345678, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(12345678);
             SignupCommand command = new SignupCommand(authInfo, 87654321, "password");
 
             // when
@@ -173,7 +171,6 @@ class AuthServiceTest extends ServiceUnitTest {
             // then
             assertSoftly(softly -> {
                 softly.assertThat(loginMember.getId()).isEqualTo(1L);
-                softly.assertThat(loginMember.getName()).isEqualTo(member.getName());
                 softly.assertThat(loginMember.getPassword()).isEqualTo(member.getPassword());
             });
             then(memberRepository).should().findByStudentId(member.getStudentId());
@@ -227,7 +224,7 @@ class AuthServiceTest extends ServiceUnitTest {
             Member member = MemberFixture.MEMBER();
             ReflectionTestUtils.setField(member, "id", 1L);
             PortalLoginCommand command = new PortalLoginCommand(String.valueOf(member.getStudentId()),  "portalPw");
-            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId(), member.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(member.getStudentId());
 
             when(sejongAuthenticator.getStudentAuthInfo(command.portalId(), command.portalPassword())).thenReturn(authInfo);
             when(memberService.findOrCreateMember(authInfo)).thenReturn(member);
@@ -238,7 +235,6 @@ class AuthServiceTest extends ServiceUnitTest {
             // then
             assertSoftly(softly -> {
                 softly.assertThat(loginMember.getId()).isEqualTo(1L);
-                softly.assertThat(loginMember.getName()).isEqualTo(member.getName());
                 softly.assertThat(loginMember.getStudentId()).isEqualTo(member.getStudentId());
             });
 
