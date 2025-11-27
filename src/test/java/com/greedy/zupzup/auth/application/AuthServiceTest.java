@@ -49,7 +49,7 @@ class AuthServiceTest extends ServiceUnitTest {
     class VerifyStudent {
 
         @Test
-        void 세종대학교_인증에_성공하면_인증된_학번과_이름을_반환해야_한다() {
+        void 세종대학교_인증에_성공하면_인증된_학번을_반환해야_한다() {
             // given
             PortalLoginCommand command = new PortalLoginCommand("12345678", "portalPw");
             SejongAuthInfo authInfo = new SejongAuthInfo(12345678);
