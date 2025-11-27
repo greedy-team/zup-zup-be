@@ -22,58 +22,41 @@ public class LostItemPledgeService {
 
     @Transactional
     public CancelPledgeResponse cancelPledge(Long memberId, Long lostItemId) {
+        Pledge pledge = validateAndGetPledge(memberId, lostItemId, LostItemException.INVALID_STATUS_FOR_PLEDGE_CANCEL);
 
-        LostItem lostItem = lostItemRepository.findById(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
-
-        if (lostItem.getStatus() != LostItemStatus.PLEDGED) {
-            throw new ApplicationException(LostItemException.INVALID_STATUS_FOR_PLEDGE_CANCEL);
-        }
-
-        Pledge pledge = pledgeRepository.findByLostItemId(lostItemId)
-                .orElseThrow(() -> new ApplicationException(LostItemException.PLEDGE_NOT_FOUND));
-
-        if (!pledge.getOwner().getId().equals(memberId)) {
-            throw new ApplicationException(LostItemException.PLEDGE_NOT_BY_THIS_USER);
-        }
-
+        LostItem lostItem = pledge.getLostItem();
+        lostItem.changeStatus(LostItemStatus.REGISTERED);
         pledgeRepository.delete(pledge);
 
-        lostItem.changeStatus(LostItemStatus.REGISTERED);
-
-        return new CancelPledgeResponse(
-                lostItemId,
-                "REGISTERED",
-                "서약이 정상적으로 취소되었습니다."
-        );
+        return new CancelPledgeResponse(lostItemId, "REGISTERED", "서약이 정상적으로 취소되었습니다.");
     }
 
     @Transactional
     public FoundCompleteResponse completeFound(Long memberId, Long lostItemId) {
+        Pledge pledge = validateAndGetPledge(memberId, lostItemId,
+                LostItemException.INVALID_STATUS_FOR_PLEDGE_COMPLETE);
 
+        LostItem lostItem = pledge.getLostItem();
+        lostItem.changeStatus(LostItemStatus.FOUND);
+        pledgeRepository.delete(pledge);
+
+        return new FoundCompleteResponse(lostItemId, "FOUND", "습득 완료되었습니다.");
+    }
+
+    private Pledge validateAndGetPledge(Long memberId, Long lostItemId, LostItemException statusException) {
         LostItem lostItem = lostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
 
         if (lostItem.getStatus() != LostItemStatus.PLEDGED) {
-            throw new ApplicationException(LostItemException.INVALID_STATUS_FOR_PLEDGE_COMPLETE);
+            throw new ApplicationException(statusException);
         }
 
         Pledge pledge = pledgeRepository.findByLostItemId(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.PLEDGE_NOT_FOUND));
 
-        if (!pledge.getOwner().getId().equals(memberId)) {
-            throw new ApplicationException(LostItemException.PLEDGE_NOT_BY_THIS_USER);
-        }
+        pledge.validateOwner(memberId);
 
-        lostItem.changeStatus(LostItemStatus.FOUND);
-
-        pledgeRepository.delete(pledge);
-
-        return new FoundCompleteResponse(
-                lostItemId,
-                "FOUND",
-                "습득 완료되었습니다."
-        );
+        return pledge;
     }
 }
 
