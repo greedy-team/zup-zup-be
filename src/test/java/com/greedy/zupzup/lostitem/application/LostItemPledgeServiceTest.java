@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
@@ -13,7 +14,6 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
-import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.pledge.domain.Pledge;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -36,14 +36,12 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.findById(lostItemId))
                 .willReturn(Optional.of(lostItem));
-
         given(lostItem.getStatus()).willReturn(LostItemStatus.PLEDGED);
+
         given(pledgeRepository.findByLostItemId(lostItemId))
                 .willReturn(Optional.of(pledge));
 
-        Member mockOwner = mock(Member.class);
-        given(pledge.getOwner()).willReturn(mockOwner);
-        given(mockOwner.getId()).willReturn(memberId);
+        given(pledge.getLostItem()).willReturn(lostItem);
 
         // when
         var result = lostItemPledgeService.cancelPledge(memberId, lostItemId);
@@ -51,6 +49,7 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
         // then
         assertThat(result.status()).isEqualTo("REGISTERED");
 
+        then(pledge).should().validateOwner(memberId);
         then(pledgeRepository).should().delete(pledge);
         then(lostItem).should().changeStatus(LostItemStatus.REGISTERED);
     }
@@ -67,14 +66,12 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.findById(lostItemId))
                 .willReturn(Optional.of(lostItem));
-
         given(lostItem.getStatus()).willReturn(LostItemStatus.PLEDGED);
         given(pledgeRepository.findByLostItemId(lostItemId))
                 .willReturn(Optional.of(pledge));
 
-        Member owner = mock(Member.class);
-        given(pledge.getOwner()).willReturn(owner);
-        given(owner.getId()).willReturn(99L); // 다른 사람
+        willThrow(new ApplicationException(LostItemException.PLEDGE_NOT_BY_THIS_USER))
+                .given(pledge).validateOwner(memberId);
 
         // when & then
         assertThatThrownBy(() ->
@@ -120,7 +117,6 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
 
         given(lostItemRepository.findById(lostItemId))
                 .willReturn(Optional.of(lostItem));
-
         given(lostItem.getStatus()).willReturn(LostItemStatus.PLEDGED);
 
         given(pledgeRepository.findByLostItemId(lostItemId))
@@ -143,18 +139,15 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
 
         LostItem lostItem = mock(LostItem.class);
         Pledge pledge = mock(Pledge.class);
-        Member owner = mock(Member.class);
 
         given(lostItemRepository.findById(lostItemId))
                 .willReturn(Optional.of(lostItem));
-
         given(lostItem.getStatus()).willReturn(LostItemStatus.PLEDGED);
 
         given(pledgeRepository.findByLostItemId(lostItemId))
                 .willReturn(Optional.of(pledge));
 
-        given(pledge.getOwner()).willReturn(owner);
-        given(owner.getId()).willReturn(memberId);
+        given(pledge.getLostItem()).willReturn(lostItem);
 
         // when
         var result = lostItemPledgeService.completeFound(memberId, lostItemId);
@@ -162,6 +155,7 @@ class LostItemPledgeServiceTest extends ServiceUnitTest {
         // then
         assertThat(result.status()).isEqualTo("FOUND");
 
+        then(pledge).should().validateOwner(memberId);
         then(lostItem).should().changeStatus(LostItemStatus.FOUND);
         then(pledgeRepository).should().delete(pledge);
     }
