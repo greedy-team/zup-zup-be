@@ -19,8 +19,8 @@ public enum LostItemException implements ExceptionCode {
     REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "분실물 등록 실패", "분실물 저장 중 예상치 못한 오류가 발생했습니다."),
     PLEDGE_NOT_FOUND(HttpStatus.NOT_FOUND, "서약 정보 없음", "해당 분실물에 대한 서약 정보가 존재하지 않습니다."),
     PLEDGE_NOT_BY_THIS_USER(HttpStatus.FORBIDDEN, "권한 없음", "해당 서약은 현재 사용자에 의해 만들어진 것이 아닙니다."),
-    INVALID_STATUS_FOR_PLEDGE_CANCEL(HttpStatus.BAD_REQUEST, "서약 취소 불가 상태", "현재 상태에서는 서약을 취소할 수 없습니다."),
-    INVALID_STATUS_FOR_PLEDGE_COMPLETE(HttpStatus.BAD_REQUEST, "습득 완료 처리 불가 상태", "현재 상태에서는 분실물을 습득 완료 처리할 수 없습니다.");
+    INVALID_STATUS_FOR_PLEDGE_CANCEL(HttpStatus.CONFLICT, "서약 취소 불가 상태", "현재 상태에서는 서약을 취소할 수 없습니다."),
+    INVALID_STATUS_FOR_PLEDGE_COMPLETE(HttpStatus.CONFLICT, "습득 완료 처리 불가 상태", "현재 상태에서는 분실물을 습득 완료 처리할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String title;
