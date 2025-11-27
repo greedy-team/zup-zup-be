@@ -95,4 +95,7 @@ public class LostItem extends BaseTimeEntity {
         return true;
     }
 
+    public void changeStatus(LostItemStatus status) {
+        this.status = status;
+    }
 }

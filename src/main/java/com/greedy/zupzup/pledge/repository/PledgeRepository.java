@@ -1,6 +1,7 @@
 package com.greedy.zupzup.pledge.repository;
 
 import com.greedy.zupzup.pledge.domain.Pledge;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,5 +19,8 @@ public interface PledgeRepository extends JpaRepository<Pledge, Long> {
         ORDER BY p.createdAt DESC
     """)
     Page<Long> findLostItemIdsByOwnerId(@Param("ownerId") Long ownerId, Pageable pageable);
+
+    @Query("SELECT p FROM Pledge p WHERE p.lostItem.id = :lostItemId")
+    Optional<Pledge> findByLostItemId(@Param("lostItemId") Long lostItemId);
 
 }
