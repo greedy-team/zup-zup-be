@@ -41,11 +41,11 @@ public class LostItemPledgeService {
 
         lostItem.changeStatus(LostItemStatus.REGISTERED);
 
-        return CancelPledgeResponse.builder()
-                .lostItemId(lostItemId)
-                .status("REGISTERED")
-                .message("서약이 정상적으로 취소되었습니다.")
-                .build();
+        return new CancelPledgeResponse(
+                lostItemId,
+                "REGISTERED",
+                "서약이 정상적으로 취소되었습니다."
+        );
     }
 
     @Transactional
@@ -69,11 +69,11 @@ public class LostItemPledgeService {
 
         pledgeRepository.delete(pledge);
 
-        return FoundCompleteResponse.builder()
-                .lostItemId(lostItemId)
-                .status("FOUND")
-                .message("습득 완료되었습니다.")
-                .build();
+        return new FoundCompleteResponse(
+                lostItemId,
+                "FOUND",
+                "습득 완료되었습니다."
+        );
     }
 }
 
