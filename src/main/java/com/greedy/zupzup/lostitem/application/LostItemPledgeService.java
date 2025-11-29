@@ -2,6 +2,7 @@ package com.greedy.zupzup.lostitem.application;
 
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.presentation.dto.CancelPledgeResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.FoundCompleteResponse;
@@ -45,7 +46,7 @@ public class LostItemPledgeService {
     private Pledge validateAndGetPledge(Long memberId, Long lostItemId, LostItemException statusException) {
         LostItem lostItem = lostItemRepository.getById(lostItemId);
 
-        if (lostItem.isPledgeable()) {
+        if (lostItem.getStatus() != LostItemStatus.PLEDGED) {
             throw new ApplicationException(statusException);
         }
 
