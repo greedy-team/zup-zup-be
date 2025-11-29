@@ -47,7 +47,7 @@ public class LostItemPledgeService {
         LostItem lostItem = lostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
 
-        if (lostItem.getStatus() != LostItemStatus.PLEDGED) {
+        if (lostItem.isPledgeable()) {
             throw new ApplicationException(statusException);
         }
 
