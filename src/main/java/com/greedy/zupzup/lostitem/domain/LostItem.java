@@ -98,4 +98,24 @@ public class LostItem extends BaseTimeEntity {
     public void changeStatus(LostItemStatus status) {
         this.status = status;
     }
+
+    public void cancelPledge() {
+        if (this.status != LostItemStatus.PLEDGED) {
+            throw new IllegalStateException("취소할 수 있는 상태가 아닙니다.");
+        }
+        this.status = LostItemStatus.REGISTERED;
+    }
+
+    public void completeFound() {
+        if (this.status != LostItemStatus.PLEDGED) {
+            throw new IllegalStateException("습득 완료할 수 있는 상태가 아닙니다.");
+        }
+        this.status = LostItemStatus.FOUND;
+        this.foundAt = LocalDateTime.now();
+    }
+
+    public boolean isPledged() {
+        return this.status == LostItemStatus.PLEDGED;
+    }
+
 }
