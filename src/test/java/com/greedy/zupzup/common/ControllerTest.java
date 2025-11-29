@@ -110,7 +110,6 @@ public abstract class ControllerTest {
         Member member = Member.builder()
                 .studentId(studentId)
                 .password(password)
-                .name("테스트유저" + studentId)
                 .role(Role.USER)
                 .build();
         return memberRepository.save(member);

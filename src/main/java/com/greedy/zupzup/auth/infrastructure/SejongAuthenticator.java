@@ -31,6 +31,7 @@ public class SejongAuthenticator {
     private static final String SEJONG_READING_SITE_URL = "https://classic.sejong.ac.kr/classic/reading/status.do";
     private static final String STUDENT_INFO_TABLE_TR = ".b-con-box:has(h4.b-h4-tit01:contains(사용자 정보)) table.b-board-table tbody tr";
     private static final String SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML = "var result = 'OK'";
+    private static final String SEJONG_PORTAL_LOGIN_LOCKED_MESSAGE_IN_HTML = "var result = 'pwdNeedChg'";
 
     private final OkHttpClient client; // 생성자 주입
 
@@ -78,6 +79,12 @@ public class SejongAuthenticator {
 
             // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
             if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
+
+                // 일정 횟수 이상 틀려 포털 계정 잠긴 상태.
+                if (body.contains(SEJONG_PORTAL_LOGIN_LOCKED_MESSAGE_IN_HTML)) {
+                    throw new ApplicationException(AuthException.SEJONG_PORTAL_ACCOUNT_LOCKED);
+                }
+
                 throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
             }
         }
