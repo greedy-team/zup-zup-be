@@ -133,10 +133,10 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 order by p.createdAt desc
             """,
             countQuery = """
-                select count(p)
-                from Pledge p
-                where p.owner.id = :memberId
-            """
+                        select count(p)
+                        from Pledge p
+                        where p.owner.id = :memberId
+                    """
     )
     Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
             @Param("memberId") Long memberId,
