@@ -25,10 +25,10 @@ public class LostItemPledgeService {
         Pledge pledge = validateAndGetPledge(memberId, lostItemId, LostItemException.INVALID_STATUS_FOR_PLEDGE_CANCEL);
 
         LostItem lostItem = pledge.getLostItem();
-        lostItem.changeStatus(LostItemStatus.REGISTERED);
+        lostItem.cancelPledge();
         pledgeRepository.delete(pledge);
 
-        return new CancelPledgeResponse(lostItemId, "REGISTERED", "서약이 정상적으로 취소되었습니다.");
+        return CancelPledgeResponse.of(lostItemId, lostItem.getStatus().name());
     }
 
     @Transactional
@@ -37,10 +37,10 @@ public class LostItemPledgeService {
                 LostItemException.INVALID_STATUS_FOR_PLEDGE_COMPLETE);
 
         LostItem lostItem = pledge.getLostItem();
-        lostItem.changeStatus(LostItemStatus.FOUND);
+        lostItem.completeFound();
         pledgeRepository.delete(pledge);
 
-        return new FoundCompleteResponse(lostItemId, "FOUND", "습득 완료되었습니다.");
+        return FoundCompleteResponse.of(lostItemId, lostItem.getStatus().name());
     }
 
     private Pledge validateAndGetPledge(Long memberId, Long lostItemId, LostItemException statusException) {
