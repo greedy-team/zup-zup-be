@@ -1,7 +1,9 @@
 package com.greedy.zupzup.pledge.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
+import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.member.domain.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,4 +37,10 @@ public class Pledge extends BaseTimeEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lost_item_id", nullable = false, unique = true)
     private LostItem lostItem;
+
+    public void validateOwner(Long memberId) {
+        if (!this.owner.getId().equals(memberId)) {
+            throw new ApplicationException(LostItemException.PLEDGE_NOT_BY_THIS_USER);
+        }
+    }
 }

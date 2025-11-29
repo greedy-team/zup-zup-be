@@ -17,6 +17,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import com.greedy.zupzup.pledge.repository.PledgeRepository;
 import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
@@ -102,6 +103,16 @@ public abstract class ControllerTest {
 
     protected Member givenMember(String password) {
         Member member = MEMBER_WITH_ENCODED_PASSWORD(password);
+        return memberRepository.save(member);
+    }
+
+    protected Member givenMember(Integer studentId, String password) {
+        Member member = Member.builder()
+                .studentId(studentId)
+                .password(password)
+                .name("테스트유저" + studentId)
+                .role(Role.USER)
+                .build();
         return memberRepository.save(member);
     }
 

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -16,13 +17,14 @@ import java.time.LocalDateTime;
 public class LostItemStatusScheduler {
 
     private final LostItemRepository lostItemRepository;
+    private final Clock clock;
 
     @Transactional
     @Scheduled(cron = "0 0 1 * * *")
     public void autoUpdatePledgedToFound() {
         log.info("[Scheduler] 7일 경과 분실물 'PLEDGED' -> 'FOUND' 처리 시작...");
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime cutoffDate = now.minusDays(7);
 
         int updatedCount = lostItemRepository.updateExpiredPledgedItemsToFound(

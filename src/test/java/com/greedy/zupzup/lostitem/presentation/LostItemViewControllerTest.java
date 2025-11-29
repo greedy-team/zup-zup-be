@@ -305,7 +305,6 @@ class LostItemViewControllerTest extends ControllerTest {
 
             LostItemListResponse response = extract.as(LostItemListResponse.class);
 
-
             // then
             assertSoftly(softly -> {
                 softly.assertThat(extract.statusCode()).isEqualTo(200);
