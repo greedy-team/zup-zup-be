@@ -49,7 +49,6 @@ public class AuthService {
 
         try {
             Member newMember = Member.builder()
-                    .name(sejongAuthInfo.studentName())
                     .studentId(sejongAuthInfo.studentId())
                     .password(hashedPassword)
                     .role(Role.USER)

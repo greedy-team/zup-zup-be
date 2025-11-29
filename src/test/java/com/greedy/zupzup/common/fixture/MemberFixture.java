@@ -8,7 +8,6 @@ public class MemberFixture {
 
     public static Member MEMBER() {
         return Member.builder()
-                .name("테스트유저")
                 .studentId(123456)
                 .password("asd")
                 .role(Role.USER)
@@ -20,7 +19,6 @@ public class MemberFixture {
      */
     public static Member MEMBER_WITH_ENCODED_PASSWORD(String password) {
         return Member.builder()
-                .name("테스트유저")
                 .studentId(123456)
                 .password(BCrypt.hashpw(password, BCrypt.gensalt()))
                 .role(Role.USER)
@@ -29,7 +27,6 @@ public class MemberFixture {
 
     public static Member ADMIN_WITH_ENCODED_PASSWORD(String password) {
         return Member.builder()
-                .name("어드민유저")
                 .studentId(123456)
                 .password(BCrypt.hashpw(password, BCrypt.gensalt()))
                 .role(Role.ADMIN)

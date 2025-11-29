@@ -237,7 +237,6 @@ class MyPledgedLostItemControllerTest extends ControllerTest {
             // given
             Member otherMember = Member.builder()
                     .studentId(999999)
-                    .name("OtherUser")
                     .password("other_pass")
                     .role(Role.USER)
                     .build();

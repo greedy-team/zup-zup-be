@@ -36,7 +36,7 @@ class AuthControllerTest extends ControllerTest {
             // given
             Integer studentId = 12345678;
             String portalPw = "portalPw";
-            SejongAuthInfo authInfo = new SejongAuthInfo(studentId, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(studentId);
             when(sejongAuthenticator.getStudentAuthInfo(String.valueOf(studentId), portalPw)).thenReturn(authInfo);
 
             PortalLoginRequest verifyRequest = new PortalLoginRequest(String.valueOf(studentId), portalPw);
@@ -98,7 +98,7 @@ class AuthControllerTest extends ControllerTest {
 
             Integer studentId = givenMember.getStudentId();   // 이미 가입된 멤버와 같은 학번으로 인증 요청
             String portalPw = "portalPw";
-            SejongAuthInfo authInfo = new SejongAuthInfo(studentId, givenMember.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(studentId);
             when(sejongAuthenticator.getStudentAuthInfo(String.valueOf(studentId), portalPw)).thenReturn(authInfo);
 
             PortalLoginRequest verifyRequest = new PortalLoginRequest(String.valueOf(studentId), portalPw);
@@ -286,7 +286,7 @@ class AuthControllerTest extends ControllerTest {
         private ExtractableResponse<Response> verifySejong(Integer studentId) {
 
             String portalPw = "portalPw";
-            SejongAuthInfo authInfo = new SejongAuthInfo(studentId, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(studentId);
             when(sejongAuthenticator.getStudentAuthInfo(String.valueOf(studentId), portalPw)).thenReturn(authInfo);
 
             PortalLoginRequest verifyRequest = new PortalLoginRequest(String.valueOf(studentId), portalPw);
@@ -427,7 +427,7 @@ class AuthControllerTest extends ControllerTest {
             // given
             Integer studentId = 12345678;
             String portalPw = "portalPw";
-            SejongAuthInfo authInfo = new SejongAuthInfo(studentId, "김세종");
+            SejongAuthInfo authInfo = new SejongAuthInfo(studentId);
             when(sejongAuthenticator.getStudentAuthInfo(String.valueOf(studentId), portalPw)).thenReturn(authInfo);
 
             PortalLoginRequest verifyRequest = new PortalLoginRequest(String.valueOf(studentId), portalPw);
@@ -460,7 +460,7 @@ class AuthControllerTest extends ControllerTest {
 
             Integer studentId = givenMember.getStudentId();   // 이미 가입된 멤버와 같은 학번으로 포털 로그인 요청
             String portalPw = "portalPw";
-            SejongAuthInfo authInfo = new SejongAuthInfo(studentId, givenMember.getName());
+            SejongAuthInfo authInfo = new SejongAuthInfo(studentId);
             when(sejongAuthenticator.getStudentAuthInfo(String.valueOf(studentId), portalPw)).thenReturn(authInfo);
 
             PortalLoginRequest verifyRequest = new PortalLoginRequest(String.valueOf(studentId), portalPw);

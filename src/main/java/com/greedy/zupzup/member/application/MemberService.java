@@ -22,7 +22,6 @@ public class MemberService {
         return memberRepository.findByStudentId(studentAuthInfo.studentId())
                 .orElseGet(() -> {
                     Member newMember = Member.builder()
-                            .name(studentAuthInfo.studentName())
                             .studentId(studentAuthInfo.studentId())
                             .role(Role.USER)
                             .build();
