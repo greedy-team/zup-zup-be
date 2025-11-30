@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum AuthException implements ExceptionCode {
 
     INVALID_SEJONG_PORTAL_LOGIN_ID_PW(HttpStatus.UNAUTHORIZED, "세종대학교 포털 로그인 실패", "세종대학교 인증에 실패했습니다. 아이디 비밀번호를 다시 한번 확인해 주세요."),
+    SEJONG_PORTAL_ACCOUNT_LOCKED(HttpStatus.UNAUTHORIZED, "세종대학교 포털 계정 잠김", "세종대학교 포털 비밀번호를 일정 횟수 이상 잘못 입력하여 학교 포털 계정이 잠겼습니다. 세종대학교 홈페이지에서 비밀번호 재설정 후 다시 시도해주세요."),
     SEJONG_PORTAL_LOGIN_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "세종대학교 포털 서버 통신 오류", "세종대학교 포털 서버와의 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."),
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "로그인 만료", "로그인이 만료되었습니다. 다시 로그인해주세요."),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 형식", "인증 정보가 올바르지 않습니다. 다시 로그인해주세요."),
