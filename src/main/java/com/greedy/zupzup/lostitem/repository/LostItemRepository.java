@@ -130,12 +130,15 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
                 join li.foundArea sa
                 left join li.images img on img.imageOrder = 0
                 where p.owner.id = :memberId
+                      and li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.PLEDGED
                 order by p.createdAt desc
             """,
             countQuery = """
                         select count(p)
                         from Pledge p
+                        join p.lostItem li
                         where p.owner.id = :memberId
+                            and li.status = com.greedy.zupzup.lostitem.domain.LostItemStatus.PLEDGED
                     """
     )
     Page<MyPledgedLostItemProjection> findPledgedLostItemsByMemberId(
