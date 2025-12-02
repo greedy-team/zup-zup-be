@@ -13,6 +13,15 @@ spring:
       hibernate:
         format_sql: true
 
+cors:
+  allowed-origins: "https://sejong-zupzup.kr, https://www.sejong-zupzup.kr, https://api.sejong-zupzup.kr, http://localhost:5173, http://localhost:4173"
+
+jwt:
+  cookie:
+    domain: ""
+    secure: false
+    samesite: Lax
+
 logging:
   level:
     org.hibernate.SQL: debug

@@ -5,6 +5,7 @@ import com.greedy.zupzup.auth.presentation.interceptor.AdminInterceptor;
 import com.greedy.zupzup.auth.presentation.interceptor.AuthInterceptor;
 import com.greedy.zupzup.global.presentation.interceptor.LogInterceptor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -22,13 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
     private final AdminInterceptor adminInterceptor;
     private final AuthInterceptor authInterceptor;
 
-    private static final String[] ALLOWED_ORIGINS = {
-            "https://api.sejong-zupzup.kr", // 메인 API 서버
-            "https://www.sejong-zupzup.kr",
-            "https://sejong-zupzup.kr",
-            "http://localhost:5173",
-            "http://localhost:4173"
-    };
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -63,7 +59,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(ALLOWED_ORIGINS)
+                .allowedOrigins(allowedOrigins.toArray(new String[0]))
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true)
