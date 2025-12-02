@@ -10,6 +10,9 @@ spring:
     hibernate:
       ddl-auto: validate
 
+cors:
+  allowed-origins: "https://sejong-zupzup.kr, https://www.sejong-zupzup.kr, https://api.sejong-zupzup.kr"
+
 jwt:
   cookie:
     domain: .sejong-zupzup.kr
