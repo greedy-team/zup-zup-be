@@ -13,6 +13,12 @@ spring:
       hibernate:
         format_sql: true
 
+jwt:
+  cookie:
+    domain: ""
+    secure: false
+    samesite: Lax
+
 logging:
   level:
     org.hibernate.SQL: debug

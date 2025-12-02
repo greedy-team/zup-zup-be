@@ -13,6 +13,12 @@ spring:
       hibernate:
         format_sql: true
 
+jwt:
+  cookie:
+    domain: null
+    secure: false
+    samesite: Lax
+
 logging:
   level:
     org.hibernate.tool.schema.internal.ExceptionHandlerLoggedImpl: error

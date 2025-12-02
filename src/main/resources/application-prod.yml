@@ -10,6 +10,12 @@ spring:
     hibernate:
       ddl-auto: validate
 
+jwt:
+  cookie:
+    domain: .sejong-zupzup.kr
+    secure: true
+    samesite: Lax
+
 management:
   endpoints:
     web:
