@@ -3,7 +3,7 @@ name: zupzup CI/CD with GitHub Actions
 on:
   push:
     branches:
-      - chxghee/chore-56-cookie
+      - main
 
 jobs:
   deploy:
