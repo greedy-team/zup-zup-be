@@ -80,6 +80,7 @@ public class SejongAuthenticator {
                 .header("Host", "portal.sejong.ac.kr")
                 .header("Referer", "https://portal.sejong.ac.kr")
                 .header("Cookie", "chknos=false")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                 .build();
 
         try (Response response = executeWithRetry(client, request)) {
