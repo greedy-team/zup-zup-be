@@ -1,3 +1,7 @@
+logging:
+  level:
+    com.greedy.zupzup.auth.infrastructure.SejongAuthenticator: DEBUG
+
 spring:
 
   datasource:
