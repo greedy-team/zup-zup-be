@@ -21,8 +21,8 @@ public class HttpClientConfig {
     @Bean
     public OkHttpClient buildClient() {
         try {
-            // SSLContext 생성 - TLS 사용 (세종대 서버가 TLSv1.2 사용)
-            SSLContext sslCtx = SSLContext.getInstance("TLS");
+            // SSLContext 생성 - TLSv1.2 명시 (세종대 서버가 TLSv1.2 사용)
+            SSLContext sslCtx = SSLContext.getInstance("TLSv1.2");
             sslCtx.init(null, new TrustManager[]{trustAllManager()}, new java.security.SecureRandom());
             SSLSocketFactory sslFactory = sslCtx.getSocketFactory();
 
