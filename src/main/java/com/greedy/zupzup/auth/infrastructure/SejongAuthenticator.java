@@ -176,16 +176,22 @@ public class SejongAuthenticator {
         int tryCount = 0;
         while (tryCount < MAX_PORTAL_LOGIN_RETRY_COUNT) {
             try {
+                log.info("포털 요청 시도 | tryCount={}, url={}", tryCount, request.url());
                 response = client.newCall(request).execute();
+                log.info("포털 응답 | code={}, message={}", response.code(), response.message());
                 if (response.isSuccessful()) {
                     return response;
                 }
-                response.close();   // 실패 시 자원 반납
+                log.warn("포털 응답 실패 | code={}, body={}", response.code(), response.peekBody(1000).string());
+                response.close();
             } catch (SocketTimeoutException e) {
                 log.warn("포탈 로그인 | 타임아웃 발생 (재시도: {}회)", tryCount);
+            } catch (Exception e) {
+                log.error("포털 요청 예외 | tryCount={}, error={}", tryCount, e.getMessage(), e);
             }
             tryCount++;
         }
+        log.error("포털 로그인 최종 실패 | 재시도 {}회 모두 실패", MAX_PORTAL_LOGIN_RETRY_COUNT);
         throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
     }
 }
