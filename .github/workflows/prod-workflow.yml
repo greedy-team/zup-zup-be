@@ -3,7 +3,7 @@ name: zupzup CI/CD with GitHub Actions
 on:
   push:
     branches:
-      - main
+      - hyerimh/fix-57-server
 
 jobs:
   deploy:
