@@ -2,14 +2,18 @@ package com.greedy.zupzup.global.config;
 
 import com.greedy.zupzup.auth.exception.AuthException;
 import com.greedy.zupzup.global.exception.InfrastructureException;
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import okhttp3.TlsVersion;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.*;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.Arrays;
 
 @Configuration
 public class HttpClientConfig {
@@ -25,7 +29,17 @@ public class HttpClientConfig {
             sslCtx.init(null, new TrustManager[]{trustAllManager()}, new java.security.SecureRandom());
             SSLSocketFactory sslFactory = sslCtx.getSocketFactory();
 
-            // hostnameVerifier: 모든 호스트네임에 대해 OK 처리
+            // 세종대 서버의 AES256-SHA(RSA_WITH_AES_256_CBC_SHA) 허용 설정 추가
+            ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+                    .cipherSuites(
+                            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA
+                    )
+                    .build();
+
             HostnameVerifier hostnameVerifier = (hostname, session) -> true;
 
             // 쿠키 관리
@@ -36,10 +50,13 @@ public class HttpClientConfig {
             return new OkHttpClient.Builder()
                     .sslSocketFactory(sslFactory, trustAllManager())
                     .hostnameVerifier(hostnameVerifier)
+                    .connectionSpecs(Arrays.asList(spec, ConnectionSpec.CLEARTEXT))
                     .cookieJar(new JavaNetCookieJar(cookieManager))
                     .build();
 
         } catch (Exception e) {
+            // 상세 원인 파악을 위해 스택트레이스 출력 추가
+            e.printStackTrace();
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
@@ -47,12 +64,10 @@ public class HttpClientConfig {
     private X509TrustManager trustAllManager() {
         return new X509TrustManager() {
             @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
             @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-            }
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
             @Override
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
