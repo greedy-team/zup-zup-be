@@ -42,13 +42,21 @@ public class SejongAuthenticator {
     public SejongAuthInfo getStudentAuthInfo(String portalId, String portalPassword) {
 
         try {
+            log.info("포털 로그인 시작 | portalId={}", portalId);
             doPortalLogin(client, portalId, portalPassword);
+            log.info("포털 로그인 완료");
 
+            log.info("SSO 리다이렉트 시작");
             ssoRedirectToReadingSite(client);
+            log.info("SSO 리다이렉트 완료");
+
+            log.info("독서 페이지 조회 시작");
             String readingPageHtml = fetchReadingPageHtml(client);
+            log.info("독서 페이지 조회 완료");
 
             return parseHTMLAndGetMemberInfo(readingPageHtml);
         } catch (IOException e) {
+            log.error("포털 로그인 실패 | error={}", e.getMessage(), e);
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
