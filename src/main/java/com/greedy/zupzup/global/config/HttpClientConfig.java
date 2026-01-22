@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.net.ssl.*;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class HttpClientConfig {
@@ -20,8 +21,8 @@ public class HttpClientConfig {
     @Bean
     public OkHttpClient buildClient() {
         try {
-            // SSLContext 생성, 모든 인증서 신뢰 설정
-            SSLContext sslCtx = SSLContext.getInstance("SSL");
+            // SSLContext 생성 - TLS 사용 (세종대 서버가 TLSv1.2 사용)
+            SSLContext sslCtx = SSLContext.getInstance("TLS");
             sslCtx.init(null, new TrustManager[]{trustAllManager()}, new java.security.SecureRandom());
             SSLSocketFactory sslFactory = sslCtx.getSocketFactory();
 
@@ -32,11 +33,14 @@ public class HttpClientConfig {
             CookieManager cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
-            // OkHttpClient 생성
+            // OkHttpClient 생성 (타임아웃 설정 추가)
             return new OkHttpClient.Builder()
                     .sslSocketFactory(sslFactory, trustAllManager())
                     .hostnameVerifier(hostnameVerifier)
                     .cookieJar(new JavaNetCookieJar(cookieManager))
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
 
         } catch (Exception e) {
