@@ -32,6 +32,7 @@ public class SejongAuthenticator {
     private static final String STUDENT_INFO_TABLE_TR = ".b-con-box:has(h4.b-h4-tit01:contains(사용자 정보)) table.b-board-table tbody tr";
     private static final String SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML = "var result = 'OK'";
     private static final String SEJONG_PORTAL_LOGIN_LOCKED_MESSAGE_IN_HTML = "var result = 'pwdNeedChg'";
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
     private final OkHttpClient client; // 생성자 주입
 
@@ -42,21 +43,13 @@ public class SejongAuthenticator {
     public SejongAuthInfo getStudentAuthInfo(String portalId, String portalPassword) {
 
         try {
-            log.info("포털 로그인 시작 | portalId={}", portalId);
             doPortalLogin(client, portalId, portalPassword);
-            log.info("포털 로그인 완료");
 
-            log.info("SSO 리다이렉트 시작");
             ssoRedirectToReadingSite(client);
-            log.info("SSO 리다이렉트 완료");
-
-            log.info("독서 페이지 조회 시작");
             String readingPageHtml = fetchReadingPageHtml(client);
-            log.info("독서 페이지 조회 완료");
 
             return parseHTMLAndGetMemberInfo(readingPageHtml);
         } catch (IOException e) {
-            log.error("포털 로그인 실패 | error={}", e.getMessage(), e);
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
@@ -80,7 +73,7 @@ public class SejongAuthenticator {
                 .header("Host", "portal.sejong.ac.kr")
                 .header("Referer", "https://portal.sejong.ac.kr")
                 .header("Cookie", "chknos=false")
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .header("User-Agent", USER_AGENT)
                 .build();
 
         try (Response response = executeWithRetry(client, request)) {
@@ -104,7 +97,11 @@ public class SejongAuthenticator {
      * 포털 로그인 성공 후 생성된 세션(쿠키)을 이용하여 고전독서인증 사이트로 SSO 인증을 요청합니다
      */
     private void ssoRedirectToReadingSite(OkHttpClient client) throws IOException {
-        Request ssoReq = new Request.Builder().url(SEJONG_SSO_URL).get().build();
+        Request ssoReq = new Request.Builder()
+                .url(SEJONG_SSO_URL)
+                .header("User-Agent", USER_AGENT)
+                .get()
+                .build();
         try (Response ssoResp = client.newCall(ssoReq).execute()) {
             if (!ssoResp.isSuccessful()) {
                 throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
@@ -120,6 +117,7 @@ public class SejongAuthenticator {
 
         Request readingSiteRequest = new Request.Builder()
                 .url(SEJONG_READING_SITE_URL)
+                .header("User-Agent", USER_AGENT)
                 .get()
                 .build();
 
@@ -176,22 +174,16 @@ public class SejongAuthenticator {
         int tryCount = 0;
         while (tryCount < MAX_PORTAL_LOGIN_RETRY_COUNT) {
             try {
-                log.info("포털 요청 시도 | tryCount={}, url={}", tryCount, request.url());
                 response = client.newCall(request).execute();
-                log.info("포털 응답 | code={}, message={}", response.code(), response.message());
                 if (response.isSuccessful()) {
                     return response;
                 }
-                log.warn("포털 응답 실패 | code={}, body={}", response.code(), response.peekBody(1000).string());
-                response.close();
+                response.close();   // 실패 시 자원 반납
             } catch (SocketTimeoutException e) {
                 log.warn("포탈 로그인 | 타임아웃 발생 (재시도: {}회)", tryCount);
-            } catch (Exception e) {
-                log.error("포털 요청 예외 | tryCount={}, error={}", tryCount, e.getMessage(), e);
             }
             tryCount++;
         }
-        log.error("포털 로그인 최종 실패 | 재시도 {}회 모두 실패", MAX_PORTAL_LOGIN_RETRY_COUNT);
         throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
     }
 }
