@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.*;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -20,27 +21,33 @@ public class HttpClientConfig {
     @Bean
     public OkHttpClient buildClient() {
         try {
-            // 모든 인증서를 신뢰하도록 설정 (Handshake Failure 해결의 핵심)
-            SSLContext sslCtx = SSLContext.getInstance("TLS");
-            sslCtx.init(null, new TrustManager[]{trustAllManager()}, new java.security.SecureRandom());
+            X509TrustManager trustManager = getDefaultTrustManager();
 
-            // 세종대 서버의 낡은 암호화 방식(Cipher Suites)을 모두 허용하도록 강제 설정
-            ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
-                    .allEnabledCipherSuites() // 모든 암호화 알고리즘 활성화
+            SSLContext sslCtx = SSLContext.getInstance("TLSv1.2");
+            sslCtx.init(null, new TrustManager[]{trustManager}, new java.security.SecureRandom());
+
+            ConnectionSpec sejongSpec = new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_2)
+                    .cipherSuites(
+                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                            CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256
+                    )
                     .build();
 
             CookieManager cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
             return new OkHttpClient.Builder()
-                    .sslSocketFactory(sslCtx.getSocketFactory(), trustAllManager())
-                    .hostnameVerifier((hostname, session) -> true)
-                    // 중요: COMPATIBLE_TLS와 CLEARTEXT를 둘 다 지원하도록 설정
-                    .connectionSpecs(Arrays.asList(spec, ConnectionSpec.CLEARTEXT))
+                    .sslSocketFactory(sslCtx.getSocketFactory(), trustManager)
+                    .connectionSpecs(Arrays.asList(sejongSpec, ConnectionSpec.CLEARTEXT))
                     .cookieJar(new JavaNetCookieJar(cookieManager))
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
                     .build();
 
         } catch (Exception e) {
@@ -49,18 +56,20 @@ public class HttpClientConfig {
         }
     }
 
-    private X509TrustManager trustAllManager() {
-        return new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
+    /**
+     * 시스템 기본 TrustManager 가져오기 (인증서 검증 유지)
+     */
+    private X509TrustManager getDefaultTrustManager() throws Exception {
+        TrustManagerFactory factory = TrustManagerFactory.getInstance(
+                TrustManagerFactory.getDefaultAlgorithm()
+        );
+        factory.init((KeyStore) null);
 
-            @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
-
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[0];
+        for (TrustManager tm : factory.getTrustManagers()) {
+            if (tm instanceof X509TrustManager) {
+                return (X509TrustManager) tm;
             }
-        };
+        }
+        throw new IllegalStateException("X509TrustManager를 찾을 수 없습니다");
     }
 }
