@@ -33,32 +33,25 @@ public class SejongAuthenticator {
     private static final String SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML = "var result = 'OK'";
     private static final String SEJONG_PORTAL_LOGIN_LOCKED_MESSAGE_IN_HTML = "var result = 'pwdNeedChg'";
 
-    private final OkHttpClient client; // 생성자 주입
+    // 브라우저 위장을 위한 필수 헤더
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    private static final String REFERER_URL = "https://portal.sejong.ac.kr/jsp/login/login.jsp";
 
+    private final OkHttpClient client;
 
-    /**
-     * 세종대학교 포털 로그인을 통해 학생 인증을 진행합니다.
-     */
     public SejongAuthInfo getStudentAuthInfo(String portalId, String portalPassword) {
-
         try {
             doPortalLogin(client, portalId, portalPassword);
-
             ssoRedirectToReadingSite(client);
             String readingPageHtml = fetchReadingPageHtml(client);
-
             return parseHTMLAndGetMemberInfo(readingPageHtml);
         } catch (IOException e) {
+            log.error("세종대 인증 과정 중 IO 예외 발생: {}", e.getMessage());
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
 
-
-    /**
-     * 세종대학교 포털 로그인을 진행합니다.
-     */
     private void doPortalLogin(OkHttpClient client, String portalId, String portalPassword) throws IOException {
-
         FormBody formBody = new FormBody.Builder()
                 .add("mainLogin", "N")
                 .add("rtUrl", "library.sejong.ac.kr")
@@ -70,32 +63,36 @@ public class SejongAuthenticator {
                 .url(SEJONG_PORTAL_LOGIN_URL)
                 .post(formBody)
                 .header("Host", "portal.sejong.ac.kr")
-                .header("Referer", "https://portal.sejong.ac.kr")
+                .header("Referer", REFERER_URL)
+                .header("User-Agent", USER_AGENT)
+                .header("Content-Type", "application/x-www-form-urlencoded")
                 .header("Cookie", "chknos=false")
                 .build();
 
         try (Response response = executeWithRetry(client, request)) {
             String body = response.body() != null ? response.body().string() : "";
 
-            // var result = 'OK' 라는 코드가 있으면 로그인 성공 -> 그외 로그인 실패
-            if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
+            // 차단 페이지(Alert!!!) 여부 확인
+            if (body.contains("Alert!!!") || body.contains("접속을 차단 합니다")) {
+                log.error("!!! [차단] 세종대 방화벽이 요청을 거부함. IP 또는 헤더 이슈.");
+                throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
+            }
 
-                // 일정 횟수 이상 틀려 포털 계정 잠긴 상태.
+            if (!body.contains(SEJONG_PORTAL_LOGIN_SUCCESS_MESSAGE_IN_HTML)) {
                 if (body.contains(SEJONG_PORTAL_LOGIN_LOCKED_MESSAGE_IN_HTML)) {
                     throw new ApplicationException(AuthException.SEJONG_PORTAL_ACCOUNT_LOCKED);
                 }
-
                 throw new ApplicationException(AuthException.INVALID_SEJONG_PORTAL_LOGIN_ID_PW);
             }
         }
     }
 
-
-    /**
-     * 포털 로그인 성공 후 생성된 세션(쿠키)을 이용하여 고전독서인증 사이트로 SSO 인증을 요청합니다
-     */
     private void ssoRedirectToReadingSite(OkHttpClient client) throws IOException {
-        Request ssoReq = new Request.Builder().url(SEJONG_SSO_URL).get().build();
+        Request ssoReq = new Request.Builder()
+                .url(SEJONG_SSO_URL)
+                .header("User-Agent", USER_AGENT)
+                .get()
+                .build();
         try (Response ssoResp = client.newCall(ssoReq).execute()) {
             if (!ssoResp.isSuccessful()) {
                 throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
@@ -103,14 +100,10 @@ public class SejongAuthenticator {
         }
     }
 
-
-    /**
-     * 로그인된 세션을 사용하여 고전독서인증 페이지의 HTML을 가져옵니다.
-     */
     private String fetchReadingPageHtml(OkHttpClient client) throws IOException {
-
         Request readingSiteRequest = new Request.Builder()
                 .url(SEJONG_READING_SITE_URL)
+                .header("User-Agent", USER_AGENT)
                 .get()
                 .build();
 
@@ -122,26 +115,19 @@ public class SejongAuthenticator {
         }
     }
 
-
-    /**
-     * 고전독서 페이지에서 학생 정보를 추출합니다.
-     */
     private SejongAuthInfo parseHTMLAndGetMemberInfo(String html) {
         Document doc = Jsoup.parse(html);
-
         List<String> rowValues = new ArrayList<>();
-
         doc.select(STUDENT_INFO_TABLE_TR).forEach(tr -> {
             String value = tr.select("td").text().trim();
             rowValues.add(value);
         });
 
-        String major = getValueFromList(rowValues, STUDENT_INFO_MAJOR_INDEX);   // 사용 x
         String studentIdString = getValueFromList(rowValues, STUDENT_INFO_ID_INDEX);
         String studentName = getValueFromList(rowValues, STUDENT_INFO_NAME_INDEX);
 
-        if (studentIdString == null || studentIdString.isBlank() || studentName == null || studentName.isBlank()) {
-            log.warn("포탈 로그인 | 고전 독서 페이지에서 학생 정보 추출 실패");
+        if (studentIdString == null || studentIdString.isBlank()) {
+            log.warn("학생 정보 파싱 실패. 응답 HTML 확인 필요.");
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
 
@@ -149,7 +135,6 @@ public class SejongAuthenticator {
             int studentId = Integer.parseInt(studentIdString);
             return new SejongAuthInfo(studentId);
         } catch (NumberFormatException e) {
-            log.warn("포탈 로그인 | 학번 -> 정수 파싱 오류 studentId={}, studentName={}", studentIdString, studentName);
             throw new InfrastructureException(AuthException.SEJONG_PORTAL_LOGIN_FAILED);
         }
     }
@@ -158,22 +143,15 @@ public class SejongAuthenticator {
         return list.size() > index ? list.get(index) : null;
     }
 
-
-    /**
-     * 포털 로그인을 시도합니다.
-     */
     private Response executeWithRetry(OkHttpClient client, Request request) throws IOException {
-        Response response = null;
         int tryCount = 0;
         while (tryCount < MAX_PORTAL_LOGIN_RETRY_COUNT) {
             try {
-                response = client.newCall(request).execute();
-                if (response.isSuccessful()) {
-                    return response;
-                }
-                response.close();   // 실패 시 자원 반납
+                Response response = client.newCall(request).execute();
+                if (response.isSuccessful()) return response;
+                response.close();
             } catch (SocketTimeoutException e) {
-                log.warn("포탈 로그인 | 타임아웃 발생 (재시도: {}회)", tryCount);
+                log.warn("타임아웃 발생 (재시도: {}회)", tryCount + 1);
             }
             tryCount++;
         }
