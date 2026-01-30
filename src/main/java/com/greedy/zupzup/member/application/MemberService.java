@@ -1,6 +1,7 @@
 package com.greedy.zupzup.member.application;
 
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
+import com.greedy.zupzup.member.application.dto.MemberEmailUpdateCommand;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
 import com.greedy.zupzup.member.repository.MemberRepository;
@@ -27,6 +28,12 @@ public class MemberService {
                             .build();
                     return memberRepository.save(newMember);
                 });
+    }
+
+    @Transactional
+    public void updateEmail(MemberEmailUpdateCommand command) {
+        Member member = memberRepository.getById(command.memberId());
+        member.updateEmailInfo(command.email(), command.emailAlertEnabled());
     }
 
 }
