@@ -24,4 +24,13 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Column(unique = true)
+    private String email;
+
+    private Boolean emailAlertEnabled;
+
+    public void updateEmailInfo(String email, Boolean emailAlertEnabled) {
+        this.email = email;
+        this.emailAlertEnabled = emailAlertEnabled;
+    }
 }
