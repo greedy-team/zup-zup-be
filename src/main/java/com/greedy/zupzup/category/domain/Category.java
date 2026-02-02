@@ -36,6 +36,9 @@ public class Category {
     @Column(nullable = false)
     private String iconUrl;
 
+    @Column(nullable = true)
+    private String emoji;
+
     @OneToMany(mappedBy = "category",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
