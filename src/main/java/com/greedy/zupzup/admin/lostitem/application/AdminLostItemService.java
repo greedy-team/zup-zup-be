@@ -8,10 +8,22 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
+import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
+import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.lostitem.application.LostItemStorageService;
+import com.greedy.zupzup.lostitem.application.dto.CreateImageCommand;
+import com.greedy.zupzup.lostitem.application.dto.CreateLostItemCommand;
+import com.greedy.zupzup.lostitem.application.dto.LostItemRegisterData;
+import com.greedy.zupzup.lostitem.application.dto.UploadedImageData;
 import com.greedy.zupzup.lostitem.domain.LostItem;
+import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
+import com.greedy.zupzup.lostitem.exception.LostItemException;
+import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterRequest;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import java.util.Collections;
@@ -24,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +46,11 @@ public class AdminLostItemService {
     private final LostItemImageRepository lostItemImageRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final LostItemStorageService lostItemStorageService;
+    private final S3ImageFileManager s3ImageFileManager;
+    private final S3FileCleanupService s3FileCleanupService;
+
+    private static final String IMAGE_DIRECTORY = "lost-item-images";
 
     @Transactional
     public ApproveLostItemsResponse approveBulk(ApproveLostItemsRequest request) {
@@ -75,6 +93,79 @@ public class AdminLostItemService {
         List<AdminLostItemResult> commands = buildCommands(items, imageMap, featureMap);
 
         return AdminPendingLostItemListResponse.of(commands, page, limit, commands.size());
+    }
+
+    @Transactional
+    public void updateLostItem(Long lostItemId, UpdateLostItemRequest request, List<MultipartFile> images) {
+
+        LostItem lostItem = adminLostItemRepository.findById(lostItemId)
+                .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
+
+        CreateLostItemCommand dummyCommand = CreateLostItemCommand.of(
+                new LostItemRegisterRequest(request.description(), request.depositArea(),
+                        request.foundAreaId(), request.foundAreaDetail(),
+                        request.categoryId(), request.featureOptions()),
+                Collections.emptyList()
+        );
+        LostItemRegisterData validData = lostItemStorageService.getValidRegisterData(dummyCommand);
+
+        List<String> oldImageUrls = lostItemImageRepository.findImageKeysByLostItemIds(List.of(lostItemId));
+        List<UploadedImageData> newUploadedImages = Collections.emptyList();
+
+        if (images != null && !images.isEmpty()) {
+            newUploadedImages = uploadNewImages(images);
+            updateImages(lostItem, newUploadedImages);
+        }
+
+        try {
+            lostItem.updateInfo(
+                    request.description(),
+                    request.depositArea(),
+                    validData.foundSchoolArea(),
+                    request.foundAreaDetail(),
+                    validData.category()
+            );
+
+            updateFeatures(lostItem, validData);
+            lostItem.approve();
+
+            if (!newUploadedImages.isEmpty()) {
+                s3FileCleanupService.cleanupOrphanFiles(oldImageUrls);
+            }
+
+        } catch (Exception e) {
+            if (!newUploadedImages.isEmpty()) {
+                List<String> currentUploadedUrls = newUploadedImages.stream().map(UploadedImageData::url).toList();
+                s3FileCleanupService.cleanupOrphanFiles(currentUploadedUrls);
+            }
+            throw e;
+        }
+    }
+
+    private List<UploadedImageData> uploadNewImages(List<MultipartFile> images) {
+        List<CreateImageCommand> imageCommands = CreateLostItemCommand.toCreateImageCommandListWithValidation(images);
+        return imageCommands.stream()
+                .map(img -> new UploadedImageData(s3ImageFileManager.upload(img.imageFile(), IMAGE_DIRECTORY),
+                        img.order()))
+                .toList();
+    }
+
+    private void updateImages(LostItem lostItem, List<UploadedImageData> uploadedImages) {
+        lostItemImageRepository.deleteByLostItemIds(List.of(lostItem.getId()));
+        List<LostItemImage> newImageEntities = uploadedImages.stream()
+                .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
+                .toList();
+        lostItemImageRepository.saveAll(newImageEntities);
+    }
+
+    private void updateFeatures(LostItem lostItem, LostItemRegisterData validData) {
+        lostItemFeatureRepository.deleteByLostItemIds(List.of(lostItem.getId()));
+        if (validData.isNonETC()) {
+            List<LostItemFeature> newFeatures = validData.itemFeatureAndOptions().stream()
+                    .map(pair -> LostItemFeature.of(lostItem, pair.getFirst(), pair.getSecond()))
+                    .toList();
+            lostItemFeatureRepository.saveAll(newFeatures);
+        }
     }
 
     private List<LostItem> findPendingItems(Pageable pageable) {

@@ -6,15 +6,23 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,5 +52,15 @@ public class AdminLostItemController {
                 adminLostItemService.getPendingLostItems(query.safePage(), query.safeLimit());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping(value = "/{lostItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UpdateLostItemResponse> updateLostItem(
+            @PathVariable Long lostItemId,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @Valid @RequestPart("updateRequest") UpdateLostItemRequest updateRequest) {
+
+        adminLostItemService.updateLostItem(lostItemId, updateRequest, images);
+        return ResponseEntity.ok(UpdateLostItemResponse.from(lostItemId));
     }
 }
