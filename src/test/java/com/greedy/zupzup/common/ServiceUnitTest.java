@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.alert.repository.KeywordAlertRepository;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
@@ -53,6 +54,9 @@ public abstract class ServiceUnitTest {
 
     @Mock
     protected PledgeRepository pledgeRepository;
+
+    @Mock
+    protected KeywordAlertRepository keywordAlertRepository;
 
     @Mock
     protected DefaultQuizGenerationStrategy defaultQuizGenerationStrategy;
