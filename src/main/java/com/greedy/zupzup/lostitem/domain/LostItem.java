@@ -72,6 +72,15 @@ public class LostItem extends BaseTimeEntity {
         this.foundArea = foundArea;
     }
 
+    public void updateInfo(String description, String depositArea, SchoolArea foundArea,
+                           String foundAreaDetail, Category category) {
+        this.description = description;
+        this.depositArea = depositArea;
+        this.foundArea = foundArea;
+        this.foundAreaDetail = foundAreaDetail;
+        this.category = category;
+    }
+
     public boolean isEtcCategory() {
         return this.category.isEtcCategory();
     }
@@ -118,4 +127,9 @@ public class LostItem extends BaseTimeEntity {
         return this.status == LostItemStatus.PLEDGED;
     }
 
+    public void approve() {
+        if (this.status == LostItemStatus.PENDING) {
+            this.status = LostItemStatus.REGISTERED;
+        }
+    }
 }
