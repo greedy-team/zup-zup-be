@@ -16,6 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Boolean existsByIdAndRole(Long memberId, Role role);
 
+    boolean existsByEmail(String email);
+
     default Member getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new ApplicationException(MemberException.MEMBER_NOT_FOUND));

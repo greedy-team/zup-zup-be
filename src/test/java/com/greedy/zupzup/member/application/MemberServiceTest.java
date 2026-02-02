@@ -78,6 +78,7 @@ class MemberServiceTest extends ServiceUnitTest {
             MemberEmailUpdateCommand command = new MemberEmailUpdateCommand(member.getId(), "new@example.com", true);
 
             given(memberRepository.getById(member.getId())).willReturn(member);
+            given(memberRepository.existsByEmail("new@example.com")).willReturn(false);
 
             // when
             memberService.updateEmail(command);
@@ -100,6 +101,22 @@ class MemberServiceTest extends ServiceUnitTest {
             assertThatThrownBy(() -> memberService.updateEmail(command))
                     .isInstanceOf(ApplicationException.class)
                     .hasMessage(MemberException.MEMBER_NOT_FOUND.getDetail());
+        }
+
+        @Test
+        void 이미_존재하는_이메일로_수정하려하면_예외가_발생해야_한다() {
+            // given
+            Member member = MemberFixture.MEMBER();
+            String duplicateEmail = "duplicate@example.com";
+            MemberEmailUpdateCommand command = new MemberEmailUpdateCommand(member.getId(), duplicateEmail, true);
+
+            given(memberRepository.getById(member.getId())).willReturn(member);
+            given(memberRepository.existsByEmail(duplicateEmail)).willReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> memberService.updateEmail(command))
+                    .isInstanceOf(ApplicationException.class)
+                    .hasMessage(MemberException.DUPLICATE_EMAIL.getDetail());
         }
     }
 
