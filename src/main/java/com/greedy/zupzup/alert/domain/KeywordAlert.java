@@ -35,4 +35,11 @@ public class KeywordAlert extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    public static KeywordAlert subscribe(Member member, Category category) {
+        return KeywordAlert.builder()
+                .member(member)
+                .category(category)
+                .build();
+    }
 }
