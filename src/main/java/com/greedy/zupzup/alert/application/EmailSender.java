@@ -35,7 +35,10 @@ public class EmailSender {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, ENCODING);
 
             Context context = new Context();
-            context.setVariables(command.variables());
+            context.setVariable("categoryDigests", command.categoryDigests());
+            context.setVariable("totalCount", command.totalCount());
+            context.setVariable("baseUrl", command.baseUrl());
+            context.setVariable("date", command.date());
 
             String htmlContent = templateEngine.process(TEMPLATE_NAME, context);
 

@@ -56,80 +56,41 @@ public class AlertScheduler {
     }
 
     private void sendMail(String email, List<AlertDigestProjection> projections) {
-        Map<String, CategoryDigest> categoryDigests =
-                createCategoryDigests(projections);
+        Map<String, CategoryDigest> categoryDigests = createCategoryDigests(projections);
+        long totalCount = projections.stream().mapToLong(AlertDigestProjection::getCount).sum();
 
-        long totalCount = projections.stream()
-                .mapToLong(AlertDigestProjection::getCount)
-                .sum();
-
-        MailSendCommand command = createMailCommand(
+        // 💡 복잡한 Map 생성 없이 바로 Command 생성!
+        MailSendCommand command = MailSendCommand.of(
                 email,
                 categoryDigests,
-                totalCount
+                totalCount,
+                BASE_URL
         );
 
         emailSender.sendEmail(command);
     }
 
-    private Map<String, CategoryDigest> createCategoryDigests(
-            List<AlertDigestProjection> projections
-    ) {
-        Map<String, List<AlertDigestProjection>> groupedByCategory =
-                projections.stream()
-                        .collect(Collectors.groupingBy(
-                                AlertDigestProjection::getCategoryName
-                        ));
+    private Map<String, CategoryDigest> createCategoryDigests(List<AlertDigestProjection> projections) {
+        Map<String, List<AlertDigestProjection>> groupedByCategory = projections.stream()
+                .collect(Collectors.groupingBy(AlertDigestProjection::getCategoryName));
 
         Map<String, CategoryDigest> result = new HashMap<>();
 
         groupedByCategory.forEach((categoryName, items) -> {
-            long totalCount = items.stream()
-                    .mapToLong(AlertDigestProjection::getCount)
-                    .sum();
-
-            Map<String, Long> itemsByLocation =
-                    items.stream()
-                            .collect(Collectors.toMap(
-                                    AlertDigestProjection::getAreaName,
-                                    AlertDigestProjection::getCount,
-                                    Long::sum
-                            ));
+            long totalCount = items.stream().mapToLong(AlertDigestProjection::getCount).sum();
+            Map<String, Long> itemsByLocation = items.stream()
+                    .collect(Collectors.toMap(
+                            AlertDigestProjection::getAreaName,
+                            AlertDigestProjection::getCount,
+                            Long::sum
+                    ));
 
             String emoji = items.get(0).getCategoryEmoji();
-            if (emoji == null || emoji.isBlank()) {
-                emoji = DEFAULT_CATEGORY_EMOJI;
-            }
+            if (emoji == null || emoji.isBlank()) emoji = DEFAULT_CATEGORY_EMOJI;
 
-            result.put(
-                    categoryName,
-                    CategoryDigest.of(
-                            categoryName,
-                            emoji,
-                            totalCount,
-                            itemsByLocation
-                    )
-            );
+            result.put(categoryName, CategoryDigest.of(categoryName, emoji, totalCount, itemsByLocation));
         });
 
         return result;
-    }
-
-    private MailSendCommand createMailCommand(
-            String email,
-            Map<String, CategoryDigest> categoryDigests,
-            long totalCount
-    ) {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("categoryDigests", categoryDigests);
-        variables.put("totalCount", totalCount);
-        variables.put("date", LocalDate.now().toString());
-        variables.put("baseUrl", BASE_URL);
-
-        return MailSendCommand.of(
-                email,
-                "[줍줍] " + LocalDate.now() + " 새 분실물 알림",
-                variables
-        );
     }
 }
