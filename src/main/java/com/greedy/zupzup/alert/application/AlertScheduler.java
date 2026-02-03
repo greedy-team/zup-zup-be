@@ -3,6 +3,7 @@ package com.greedy.zupzup.alert.application;
 import com.greedy.zupzup.alert.application.dto.CategoryDigest;
 import com.greedy.zupzup.alert.application.dto.MailSendCommand;
 import com.greedy.zupzup.alert.repository.AlertDigestProjection;
+import com.greedy.zupzup.global.util.DateTimeUtil;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class AlertScheduler {
     private final LostItemRepository lostItemRepository;
     private final EmailSender emailSender;
 
-    @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(cron = "0 0 9 * * *", zone = DateTimeUtil.KST_ZONE_NAME)
     public void sendDailyDigest() {
         log.info("[AlertScheduler] 일일 다이제스트 발송 시작");
 
