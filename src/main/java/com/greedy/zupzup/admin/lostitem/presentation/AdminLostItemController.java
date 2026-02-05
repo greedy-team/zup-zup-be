@@ -57,10 +57,17 @@ public class AdminLostItemController {
     @PutMapping(value = "/{lostItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UpdateLostItemResponse> updateLostItem(
             @PathVariable Long lostItemId,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @Valid @RequestPart("updateRequest") UpdateLostItemRequest updateRequest) {
-
-        adminLostItemService.updateLostItem(lostItemId, updateRequest, images);
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
+            @RequestPart("keepImageIds") List<Long> keepImageIds,
+            @RequestPart("updateRequest") UpdateLostItemRequest updateRequest
+    ) {
+        adminLostItemService.updateLostItem(
+                lostItemId,
+                updateRequest,
+                keepImageIds,
+                newImages
+        );
         return ResponseEntity.ok(UpdateLostItemResponse.from(lostItemId));
     }
+
 }

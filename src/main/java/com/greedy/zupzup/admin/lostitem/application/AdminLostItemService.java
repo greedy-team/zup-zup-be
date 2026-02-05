@@ -96,28 +96,69 @@ public class AdminLostItemService {
     }
 
     @Transactional
-    public void updateLostItem(Long lostItemId, UpdateLostItemRequest request, List<MultipartFile> images) {
+    public void updateLostItem(Long lostItemId,
+                               UpdateLostItemRequest request,
+                               List<Long> keepImageIds,
+                               List<MultipartFile> newImages) {
 
         LostItem lostItem = adminLostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
 
-        CreateLostItemCommand dummyCommand = CreateLostItemCommand.of(
-                new LostItemRegisterRequest(request.description(), request.depositArea(),
-                        request.foundAreaId(), request.foundAreaDetail(),
-                        request.categoryId(), request.featureOptions()),
-                Collections.emptyList()
-        );
-        LostItemRegisterData validData = lostItemStorageService.getValidRegisterData(dummyCommand);
-
-        List<String> oldImageUrls = lostItemImageRepository.findImageKeysByLostItemIds(List.of(lostItemId));
-        List<UploadedImageData> newUploadedImages = Collections.emptyList();
-
-        if (images != null && !images.isEmpty()) {
-            newUploadedImages = uploadNewImages(images);
-            updateImages(lostItem, newUploadedImages);
+        if (lostItem.getStatus() != LostItemStatus.PENDING) {
+            throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
 
+        CreateLostItemCommand dummyCommand = CreateLostItemCommand.of(
+                new LostItemRegisterRequest(
+                        request.description(),
+                        request.depositArea(),
+                        request.foundAreaId(),
+                        request.foundAreaDetail(),
+                        request.categoryId(),
+                        request.featureOptions()
+                ),
+                Collections.emptyList()
+        );
+
+        LostItemRegisterData validData =
+                lostItemStorageService.getValidRegisterData(dummyCommand);
+
+        List<LostItemImage> existingImages =
+                lostItemImageRepository.findByLostItemId(lostItemId);
+
+        List<Long> safeKeepIds = (keepImageIds == null) ? List.of() : keepImageIds;
+
+        if (!safeKeepIds.isEmpty()) {
+            long count = lostItemImageRepository
+                    .countByIdInAndLostItemId(safeKeepIds, lostItemId);
+            if (count != safeKeepIds.size()) {
+                throw new ApplicationException(LostItemException.INVALID_IMAGE_ACCESS);
+            }
+        }
+
+        List<LostItemImage> toDelete = existingImages.stream()
+                .filter(img -> !safeKeepIds.contains(img.getId()))
+                .toList();
+
+        List<UploadedImageData> uploadedNewImages = List.of();
+
         try {
+            if (!toDelete.isEmpty()) {
+                lostItemImageRepository.deleteAll(toDelete);
+                s3FileCleanupService.cleanupOrphanFiles(
+                        toDelete.stream().map(LostItemImage::getImageKey).toList()
+                );
+            }
+
+            if (newImages != null && !newImages.isEmpty()) {
+                uploadedNewImages = uploadNewImages(newImages);
+                lostItemImageRepository.saveAll(
+                        uploadedNewImages.stream()
+                                .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
+                                .toList()
+                );
+            }
+
             lostItem.updateInfo(
                     request.description(),
                     request.depositArea(),
@@ -127,16 +168,14 @@ public class AdminLostItemService {
             );
 
             updateFeatures(lostItem, validData);
+
             lostItem.approve();
 
-            if (!newUploadedImages.isEmpty()) {
-                s3FileCleanupService.cleanupOrphanFiles(oldImageUrls);
-            }
-
         } catch (Exception e) {
-            if (!newUploadedImages.isEmpty()) {
-                List<String> currentUploadedUrls = newUploadedImages.stream().map(UploadedImageData::url).toList();
-                s3FileCleanupService.cleanupOrphanFiles(currentUploadedUrls);
+            if (!uploadedNewImages.isEmpty()) {
+                s3FileCleanupService.cleanupOrphanFiles(
+                        uploadedNewImages.stream().map(UploadedImageData::url).toList()
+                );
             }
             throw e;
         }
@@ -148,14 +187,6 @@ public class AdminLostItemService {
                 .map(img -> new UploadedImageData(s3ImageFileManager.upload(img.imageFile(), IMAGE_DIRECTORY),
                         img.order()))
                 .toList();
-    }
-
-    private void updateImages(LostItem lostItem, List<UploadedImageData> uploadedImages) {
-        lostItemImageRepository.deleteByLostItemIds(List.of(lostItem.getId()));
-        List<LostItemImage> newImageEntities = uploadedImages.stream()
-                .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
-                .toList();
-        lostItemImageRepository.saveAll(newImageEntities);
     }
 
     private void updateFeatures(LostItem lostItem, LostItemRegisterData validData) {
