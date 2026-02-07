@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/lost-items")
-public class AdminLostItemController {
+public class AdminLostItemController implements AdminLostItemControllerDocs{
 
     private final AdminLostItemService adminLostItemService;
     private final ObjectMapper objectMapper;
