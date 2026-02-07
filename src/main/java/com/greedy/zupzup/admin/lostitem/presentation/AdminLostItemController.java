@@ -1,5 +1,6 @@
 package com.greedy.zupzup.admin.lostitem.presentation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminLostItemController {
 
     private final AdminLostItemService adminLostItemService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping("/approve")
     public ResponseEntity<ApproveLostItemsResponse> approveBulk(
@@ -58,16 +60,10 @@ public class AdminLostItemController {
     public ResponseEntity<UpdateLostItemResponse> updateLostItem(
             @PathVariable Long lostItemId,
             @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
-            @RequestPart("keepImageIds") List<Long> keepImageIds,
-            @RequestPart("updateRequest") UpdateLostItemRequest updateRequest
+            @RequestPart(value = "keepImageIds", required = false) List<Long> keepImageIds,
+            @RequestPart(value = "updateRequest") @Valid UpdateLostItemRequest updateRequest
     ) {
-        adminLostItemService.updateLostItem(
-                lostItemId,
-                updateRequest,
-                keepImageIds,
-                newImages
-        );
+        adminLostItemService.updateLostItem(lostItemId, updateRequest, keepImageIds, newImages);
         return ResponseEntity.ok(UpdateLostItemResponse.from(lostItemId));
     }
-
 }

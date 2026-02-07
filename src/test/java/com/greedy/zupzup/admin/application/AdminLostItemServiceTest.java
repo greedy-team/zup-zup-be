@@ -1,10 +1,14 @@
 package com.greedy.zupzup.admin.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
@@ -14,20 +18,23 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.common.ServiceUnitTest;
+import com.greedy.zupzup.lostitem.application.dto.LostItemRegisterData;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
+
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import com.greedy.zupzup.category.domain.FeatureOption;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -35,6 +42,7 @@ import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public class AdminLostItemServiceTest extends ServiceUnitTest {
 
@@ -42,11 +50,14 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
     private AdminLostItemService service;
 
     @Mock
-    private AdminLostItemRepository adminLostItemRepository;
-
-    @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    private void setupValidRegisterData() {
+        LostItemRegisterData mockData = mock(LostItemRegisterData.class);
+        given(mockData.foundSchoolArea()).willReturn(mock(SchoolArea.class));
+        given(mockData.category()).willReturn(mock(Category.class));
+        given(lostItemStorageService.getValidRegisterData(any())).willReturn(mockData);
+    }
 
     private LostItem stubItem(
             Long id, String desc, String deposit, String foundDetail,
@@ -171,5 +182,66 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
             s.assertThat(dto.optionValue()).isEqualTo("삼성");
             s.assertThat(dto.quizQuestion()).isEqualTo("제조사는 무엇인가요?");
         });
+    }
+
+
+    private UpdateLostItemRequest validRequest() {
+        return new UpdateLostItemRequest(
+                "설명 수정",
+                "보관 장소",
+                1L,
+                "발견 위치",
+                10L,
+                List.of() // featureOptions
+        );
+    }
+
+    private LostItem pendingLostItem(Long id) {
+        LostItem item = mock(LostItem.class);
+        given(item.getId()).willReturn(id);
+        given(item.getStatus()).willReturn(LostItemStatus.PENDING);
+        return item;
+    }
+
+    @Test
+    void 관리자_분실물_수정시_기존이미지만_유지하고_정보를_수정해도_승인된다() {
+        // given
+        Long lostItemId = 1L;
+        LostItem item = pendingLostItem(lostItemId);
+        setupValidRegisterData();
+
+        given(adminLostItemRepository.findById(lostItemId)).willReturn(Optional.of(item));
+
+        List<Long> keepImageIds = List.of(10L);
+        given(lostItemImageRepository.countByIdInAndLostItemId(keepImageIds, lostItemId)).willReturn(1L);
+        given(lostItemImageRepository.findByLostItemId(lostItemId)).willReturn(List.of(mock(LostItemImage.class)));
+
+        // when
+        service.updateLostItem(lostItemId, validRequest(), keepImageIds, List.of());
+
+        // then
+        then(item).should().approve();
+    }
+
+    @Test
+    void 관리자_분실물_수정시_기존이미지는_유지하고_새이미지를_추가한뒤_승인한다() {
+        // given
+        Long lostItemId = 1L;
+        LostItem item = pendingLostItem(lostItemId);
+        setupValidRegisterData();
+
+        given(adminLostItemRepository.findById(lostItemId)).willReturn(Optional.of(item));
+
+        List<Long> keepImageIds = List.of(10L);
+        given(lostItemImageRepository.countByIdInAndLostItemId(keepImageIds, lostItemId)).willReturn(1L);
+        given(lostItemImageRepository.findByLostItemId(lostItemId)).willReturn(List.of(mock(LostItemImage.class)));
+        given(s3ImageFileManager.upload(any(), any())).willReturn("new-img-url");
+
+        // when
+        service.updateLostItem(lostItemId, validRequest(), keepImageIds, List.of(mock(MultipartFile.class)));
+
+        // then
+        then(item).should().approve();
+        then(lostItemImageRepository).should().saveAll(any());
     }
 }

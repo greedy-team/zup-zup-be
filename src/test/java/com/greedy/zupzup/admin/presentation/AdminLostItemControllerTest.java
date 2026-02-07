@@ -1,14 +1,22 @@
 package com.greedy.zupzup.admin.presentation;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.common.ControllerTest;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
+import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
+import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.repository.MemberRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -18,6 +26,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+import jakarta.servlet.http.Cookie;
 
 class AdminLostItemControllerTest extends ControllerTest {
 
@@ -25,6 +38,21 @@ class AdminLostItemControllerTest extends ControllerTest {
     private Member adminMember;
     private String adminToken;
     private Category category;
+
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private LostItemRepository lostItemRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private Cookie adminCookie;
+    private Long lostItemId;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUpAdmin() {
@@ -193,6 +221,54 @@ class AdminLostItemControllerTest extends ControllerTest {
                 List<String> quizQuestions = extract.jsonPath()
                         .getList("items.find{it.id == " + i1.getId() + "}.featureOptions.quizQuestion");
                 softly.assertThat(quizQuestions).contains("어떤 브랜드의 제품인가요?", "제품의 색상은 무엇인가요?");
+            });
+        }
+    }
+
+    @Nested
+    @DisplayName("관리자 분실물 수정 API")
+    class AdminUpdateApi {
+
+        @Test
+        void 분실물_정보와_이미지를_수정하고_200_OK를_반환한다() throws Exception {
+            // given
+            LostItem item = givenPendingLostItemWithFeatures(category);
+            givenLostItemImages(item.getId(), List.of("img1", "img2"));
+
+            List<ItemFeatureRequest> featureOptions = List.of(
+                    new ItemFeatureRequest(1L, 1L),
+                    new ItemFeatureRequest(2L, 5L)
+            );
+
+            List<Long> keepImageIds = List.of(
+                    lostItemImageRepository.findByLostItemId(item.getId()).get(0).getId()
+            );
+
+            UpdateLostItemRequest updateRequest = new UpdateLostItemRequest(
+                    "수정된 설명",
+                    "학생회관",
+                    1L,
+                    "1층",
+                    category.getId(),
+                    featureOptions
+            );
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .contentType("multipart/form-data")
+                    .multiPart("keepImageIds", objectMapper.writeValueAsString(keepImageIds), "application/json")
+                    .multiPart("updateRequest", objectMapper.writeValueAsString(updateRequest), "application/json")
+                    .when()
+                    .put("/api/admin/lost-items/" + item.getId())
+                    .then().log().all()
+                    .extract();
+
+            // then
+            assertSoftly(softly -> {
+                softly.assertThat(extract.statusCode()).isEqualTo(200);
+                LostItem updated = lostItemRepository.findById(item.getId()).orElseThrow();
+                softly.assertThat(updated.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
             });
         }
     }

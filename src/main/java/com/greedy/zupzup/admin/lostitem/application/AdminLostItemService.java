@@ -14,7 +14,6 @@ import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.application.LostItemStorageService;
-import com.greedy.zupzup.lostitem.application.dto.CreateImageCommand;
 import com.greedy.zupzup.lostitem.application.dto.CreateLostItemCommand;
 import com.greedy.zupzup.lostitem.application.dto.LostItemRegisterData;
 import com.greedy.zupzup.lostitem.application.dto.UploadedImageData;
@@ -23,13 +22,14 @@ import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
-import com.greedy.zupzup.lostitem.presentation.dto.LostItemRegisterRequest;
+import com.greedy.zupzup.lostitem.exception.LostItemImageException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -101,92 +101,131 @@ public class AdminLostItemService {
                                List<Long> keepImageIds,
                                List<MultipartFile> newImages) {
 
+        LostItem lostItem = findPendingLostItem(lostItemId);
+
+        validateImageCount(keepImageIds, newImages);
+
+        LostItemRegisterData validData = getValidatedRegisterData(request);
+
+        List<UploadedImageData> uploadedNewImages = syncImages(lostItem, keepImageIds, newImages);
+
+        try {
+            updateDomainInfo(lostItem, request, validData);
+            updateFeatures(lostItem, validData);
+
+            lostItem.approve();
+
+        } catch (Exception e) {
+            cleanupNewlyUploadedImages(uploadedNewImages);
+            throw e;
+        }
+    }
+
+    private LostItem findPendingLostItem(Long lostItemId) {
         LostItem lostItem = adminLostItemRepository.findById(lostItemId)
                 .orElseThrow(() -> new ApplicationException(LostItemException.LOST_ITEM_NOT_FOUND));
 
         if (lostItem.getStatus() != LostItemStatus.PENDING) {
             throw new ApplicationException(LostItemException.ACCESS_FORBIDDEN);
         }
+        return lostItem;
+    }
 
-        CreateLostItemCommand dummyCommand = CreateLostItemCommand.of(
-                new LostItemRegisterRequest(
-                        request.description(),
-                        request.depositArea(),
-                        request.foundAreaId(),
-                        request.foundAreaDetail(),
-                        request.categoryId(),
-                        request.featureOptions()
-                ),
-                Collections.emptyList()
+    private void validateImageCount(List<Long> keepImageIds, List<MultipartFile> newImages) {
+        int keepCount = (keepImageIds == null) ? 0 : keepImageIds.size();
+        int newCount = (newImages == null) ? 0 : newImages.size();
+        if (keepCount + newCount < 1) {
+            throw new ApplicationException(LostItemImageException.INVALID_IMAGE_COUNT);
+        }
+    }
+
+    private LostItemRegisterData getValidatedRegisterData(UpdateLostItemRequest request) {
+        CreateLostItemCommand dummyCommand = new CreateLostItemCommand(
+                request.description(),
+                request.depositArea(),
+                request.foundAreaId(),
+                request.foundAreaDetail(),
+                request.categoryId(),
+                CreateLostItemCommand.toItemFeatureOptionList(request.featureOptions()),
+                List.of()
         );
+        return lostItemStorageService.getValidRegisterData(dummyCommand);
+    }
 
-        LostItemRegisterData validData =
-                lostItemStorageService.getValidRegisterData(dummyCommand);
-
-        List<LostItemImage> existingImages =
-                lostItemImageRepository.findByLostItemId(lostItemId);
-
+    private List<UploadedImageData> syncImages(LostItem lostItem, List<Long> keepImageIds, List<MultipartFile> newImages) {
+        List<LostItemImage> existingImages = lostItemImageRepository.findByLostItemId(lostItem.getId());
         List<Long> safeKeepIds = (keepImageIds == null) ? List.of() : keepImageIds;
 
+        validateImageOwnership(lostItem.getId(), safeKeepIds);
+
+        deleteExcludedImages(existingImages, safeKeepIds);
+
+        return uploadAndSaveNewImages(lostItem, newImages);
+    }
+
+    private void validateImageOwnership(Long lostItemId, List<Long> safeKeepIds) {
         if (!safeKeepIds.isEmpty()) {
-            long count = lostItemImageRepository
-                    .countByIdInAndLostItemId(safeKeepIds, lostItemId);
+            long count = lostItemImageRepository.countByIdInAndLostItemId(safeKeepIds, lostItemId);
             if (count != safeKeepIds.size()) {
                 throw new ApplicationException(LostItemException.INVALID_IMAGE_ACCESS);
             }
         }
+    }
 
+    private void deleteExcludedImages(List<LostItemImage> existingImages, List<Long> safeKeepIds) {
         List<LostItemImage> toDelete = existingImages.stream()
                 .filter(img -> !safeKeepIds.contains(img.getId()))
                 .toList();
 
-        List<UploadedImageData> uploadedNewImages = List.of();
-
-        try {
-            if (!toDelete.isEmpty()) {
-                lostItemImageRepository.deleteAll(toDelete);
-                s3FileCleanupService.cleanupOrphanFiles(
-                        toDelete.stream().map(LostItemImage::getImageKey).toList()
-                );
-            }
-
-            if (newImages != null && !newImages.isEmpty()) {
-                uploadedNewImages = uploadNewImages(newImages);
-                lostItemImageRepository.saveAll(
-                        uploadedNewImages.stream()
-                                .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
-                                .toList()
-                );
-            }
-
-            lostItem.updateInfo(
-                    request.description(),
-                    request.depositArea(),
-                    validData.foundSchoolArea(),
-                    request.foundAreaDetail(),
-                    validData.category()
+        if (!toDelete.isEmpty()) {
+            lostItemImageRepository.deleteAll(toDelete);
+            s3FileCleanupService.cleanupOrphanFiles(
+                    toDelete.stream().map(LostItemImage::getImageKey).toList()
             );
+        }
+    }
 
-            updateFeatures(lostItem, validData);
+    private List<UploadedImageData> uploadAndSaveNewImages(LostItem lostItem, List<MultipartFile> newImages) {
+        if (newImages == null || newImages.isEmpty()) {
+            return List.of();
+        }
 
-            lostItem.approve();
+        List<UploadedImageData> uploaded = uploadNewImages(newImages);
+        lostItemImageRepository.saveAll(
+                uploaded.stream()
+                        .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
+                        .toList()
+        );
+        return uploaded;
+    }
 
-        } catch (Exception e) {
-            if (!uploadedNewImages.isEmpty()) {
-                s3FileCleanupService.cleanupOrphanFiles(
-                        uploadedNewImages.stream().map(UploadedImageData::url).toList()
-                );
-            }
-            throw e;
+    private void updateDomainInfo(LostItem lostItem, UpdateLostItemRequest request, LostItemRegisterData validData) {
+        lostItem.updateInfo(
+                request.description(),
+                request.depositArea(),
+                validData.foundSchoolArea(),
+                request.foundAreaDetail(),
+                validData.category()
+        );
+    }
+
+    private void cleanupNewlyUploadedImages(List<UploadedImageData> uploadedNewImages) {
+        if (!uploadedNewImages.isEmpty()) {
+            s3FileCleanupService.cleanupOrphanFiles(
+                    uploadedNewImages.stream().map(UploadedImageData::url).toList()
+            );
         }
     }
 
     private List<UploadedImageData> uploadNewImages(List<MultipartFile> images) {
-        List<CreateImageCommand> imageCommands = CreateLostItemCommand.toCreateImageCommandListWithValidation(images);
-        return imageCommands.stream()
-                .map(img -> new UploadedImageData(s3ImageFileManager.upload(img.imageFile(), IMAGE_DIRECTORY),
-                        img.order()))
-                .toList();
+        if (images == null || images.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return IntStream.range(0, images.size())
+                .mapToObj(i -> {
+                    String url = s3ImageFileManager.upload(images.get(i), IMAGE_DIRECTORY);
+                    return new UploadedImageData(url, i);
+                }).toList();
     }
 
     private void updateFeatures(LostItem lostItem, LostItemRegisterData validData) {
