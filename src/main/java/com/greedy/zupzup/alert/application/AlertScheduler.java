@@ -33,7 +33,7 @@ public class AlertScheduler {
     public void sendDailyDigest() {
         log.info("[AlertScheduler] 일일 다이제스트 발송 시작");
 
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(DateTimeUtil.KST_ZONE_ID), LocalTime.of(9, 0));
         LocalDateTime start = end.minusDays(1);
 
         List<AlertDigestProjection> digestData =
@@ -60,7 +60,6 @@ public class AlertScheduler {
         Map<String, CategoryDigest> categoryDigests = createCategoryDigests(projections);
         long totalCount = projections.stream().mapToLong(AlertDigestProjection::getCount).sum();
 
-        // 💡 복잡한 Map 생성 없이 바로 Command 생성!
         MailSendCommand command = MailSendCommand.of(
                 email,
                 categoryDigests,
