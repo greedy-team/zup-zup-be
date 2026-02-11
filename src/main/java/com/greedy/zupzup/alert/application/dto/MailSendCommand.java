@@ -19,7 +19,7 @@ public record MailSendCommand(
     ) {
         return new MailSendCommand(
                 email,
-                "[줍줍] " + LocalDate.now() + " 새 분실물 알림",
+                "[줍줍] " + LocalDate.now() + " 오늘의 분실물 소식입니다 📬",
                 categoryDigests,
                 totalCount,
                 LocalDate.now().toString(),
