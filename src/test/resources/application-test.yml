@@ -13,6 +13,12 @@ spring:
       hibernate:
         format_sql: true
 
+  mail:
+    username: test@example.com
+    password: password
+    host: smtp.example.com
+    port: 587
+
 logging:
   level:
     org.hibernate.tool.schema.internal.ExceptionHandlerLoggedImpl: error
