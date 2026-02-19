@@ -6,7 +6,9 @@ import com.greedy.zupzup.alert.domain.KeywordAlert;
 import com.greedy.zupzup.alert.repository.KeywordAlertRepository;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.repository.CategoryRepository;
+import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.member.domain.Member;
+import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,22 +38,49 @@ public class AlertService {
     public void updateSubscriptions(SubscriptionUpdateCommand command) {
         Member member = memberRepository.getById(command.memberId());
 
-        keywordAlertRepository.deleteAllByMemberId(member.getId());
-
-        if (command.categoryIds() == null || command.categoryIds().isEmpty()) {
-            return;
+        if (!member.hasEmail()) {
+            throw new ApplicationException(MemberException.EMAIL_NOT_REGISTERED);
         }
 
-        List<Long> uniqueCategoryIds = command.categoryIds().stream()
-                .distinct()
+        List<Long> requestCategoryIds = getUniqueCategoryIds(command.categoryIds());
+        List<KeywordAlert> existingAlerts = keywordAlertRepository.findAllByMemberId(member.getId());
+
+        deleteUnsubscribedAlerts(existingAlerts, requestCategoryIds);
+        addNewSubscriptions(member, existingAlerts, requestCategoryIds);
+    }
+
+    private List<Long> getUniqueCategoryIds(List<Long> categoryIds) {
+        if (categoryIds == null) {
+            return List.of();
+        }
+        return categoryIds.stream().distinct().toList();
+    }
+
+    private void deleteUnsubscribedAlerts(List<KeywordAlert> existingAlerts, List<Long> requestCategoryIds) {
+        List<KeywordAlert> alertsToDelete = existingAlerts.stream()
+                .filter(alert -> !requestCategoryIds.contains(alert.getCategory().getId()))
                 .toList();
 
-        List<Category> categories = categoryRepository.getAllByIds(uniqueCategoryIds);
+        if (!alertsToDelete.isEmpty()) {
+            keywordAlertRepository.deleteAll(alertsToDelete);
+        }
+    }
 
-        List<KeywordAlert> newAlerts = categories.stream()
-                .map(category -> KeywordAlert.subscribe(member, category))
+    private void addNewSubscriptions(Member member, List<KeywordAlert> existingAlerts, List<Long> requestCategoryIds) {
+        List<Long> existingCategoryIds = existingAlerts.stream()
+                .map(alert -> alert.getCategory().getId())
                 .toList();
 
-        keywordAlertRepository.saveAll(newAlerts);
+        List<Long> categoryIdsToAdd = requestCategoryIds.stream()
+                .filter(id -> !existingCategoryIds.contains(id))
+                .toList();
+
+        if (!categoryIdsToAdd.isEmpty()) {
+            List<Category> categories = categoryRepository.getAllByIds(categoryIdsToAdd);
+            List<KeywordAlert> newAlerts = categories.stream()
+                    .map(category -> KeywordAlert.subscribe(member, category))
+                    .toList();
+            keywordAlertRepository.saveAll(newAlerts);
+        }
     }
 }

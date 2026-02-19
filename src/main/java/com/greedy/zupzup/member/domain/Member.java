@@ -33,4 +33,8 @@ public class Member extends BaseTimeEntity {
         this.email = email;
         this.emailAlertEnabled = emailAlertEnabled;
     }
+
+    public boolean hasEmail() {
+        return this.email != null && !this.email.isBlank();
+    }
 }
