@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.alert.repository.KeywordAlertRepository;
 import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.category.domain.Category;
@@ -82,6 +83,9 @@ public abstract class ControllerTest {
 
     @Autowired
     protected PledgeRepository pledgeRepository;
+
+    @Autowired
+    protected KeywordAlertRepository keywordAlertRepository;
 
     @Autowired
     protected JwtTokenProvider jwtTokenProvider;
