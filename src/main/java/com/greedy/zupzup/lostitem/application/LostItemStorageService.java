@@ -1,5 +1,6 @@
 package com.greedy.zupzup.lostitem.application;
 
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemCommand;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -8,6 +9,8 @@ import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
+import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.application.dto.*;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
@@ -18,12 +21,14 @@ import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +40,8 @@ public class LostItemStorageService {
     private final FeatureOptionRepository featureOptionRepository;
     private final SchoolAreaRepository schoolAreaRepository;
     private final CategoryRepository categoryRepository;
-
+    private final S3FileCleanupService s3FileCleanupService;
+    private final S3ImageFileManager s3ImageFileManager;
 
     /**
      * 1. 분실물 등록에 필요한 모든 데이터를 조회하고 유효성을 검사.
@@ -137,4 +143,89 @@ public class LostItemStorageService {
         lostItemFeatureRepository.saveAll(newFeatures);
     }
 
+    @Transactional(readOnly = true)
+    public LostItemRegisterData getValidUpdateData(UpdateLostItemCommand command) {
+
+        Category category = getCategory(command.categoryId());
+        SchoolArea foundSchoolArea = schoolAreaRepository.getAreaById(command.foundAreaId());
+
+        if (category.isEtcCategory() || command.featureOptions() == null) {
+            return new LostItemRegisterData(category, foundSchoolArea, List.of());
+        }
+
+        List<ItemFeatureOptionCommand> featureCommands =
+                command.featureOptions().stream()
+                        .map(opt -> new ItemFeatureOptionCommand(
+                                opt.featureId(),
+                                opt.optionId()
+                        ))
+                        .toList();
+
+        List<Pair<Feature, FeatureOption>> validFeatureAndOptions =
+                getValidFeatureAndOptions(category, featureCommands);
+
+        return new LostItemRegisterData(category, foundSchoolArea, validFeatureAndOptions);
+    }
+
+    @Transactional
+    public void updateLostItem(LostItem lostItem, UpdateLostItemCommand command,
+                               LostItemRegisterData validData, List<Long> keepImageIds,
+                               List<UploadedImageData> uploadedImages, List<LostItemImage> existingImages) {
+
+        List<Long> safeKeepIds = (keepImageIds == null) ? List.of() : keepImageIds;
+        List<LostItemImage> toDelete = existingImages.stream()
+                .filter(img -> !safeKeepIds.contains(img.getId()))
+                .toList();
+
+        if (!toDelete.isEmpty()) {
+            lostItemImageRepository.deleteAll(toDelete);
+            s3FileCleanupService.cleanupOrphanFiles(
+                    toDelete.stream().map(LostItemImage::getImageKey).toList()
+            );
+        }
+
+        if (uploadedImages != null && !uploadedImages.isEmpty()) {
+            List<LostItemImage> newImages = uploadedImages.stream()
+                    .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
+                    .toList();
+            lostItemImageRepository.saveAll(newImages);
+        }
+
+        lostItem.updateInfo(
+                command.description(),
+                command.depositArea(),
+                validData.foundSchoolArea(),
+                command.foundAreaDetail(),
+                validData.category()
+        );
+
+        lostItemFeatureRepository.deleteByLostItemIds(List.of(lostItem.getId()));
+        if (validData.isNonETC()) {
+            List<LostItemFeature> newFeatures = validData.itemFeatureAndOptions().stream()
+                    .map(pair -> LostItemFeature.of(lostItem, pair.getFirst(), pair.getSecond()))
+                    .toList();
+            lostItemFeatureRepository.saveAll(newFeatures);
+        }
+
+        lostItem.approve();
+    }
+
+    public List<UploadedImageData> uploadImages(List<MultipartFile> images) {
+        if (images == null || images.isEmpty()) return List.of();
+
+        return IntStream.range(0, images.size())
+                .mapToObj(i -> {
+                    String url = s3ImageFileManager.upload(images.get(i), "lost-item-images");
+                    return new UploadedImageData(url, i);
+                })
+                .toList();
+    }
+
+    public void cleanupImages(List<UploadedImageData> images) {
+        if (images == null || images.isEmpty()) return;
+
+        s3FileCleanupService.cleanupOrphanFiles(
+                images.stream().map(UploadedImageData::url).toList()
+        );
+    }
 }
