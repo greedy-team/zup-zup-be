@@ -26,6 +26,7 @@ import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -91,7 +92,6 @@ public class AdminLostItemService {
 
     public UpdateLostItemResult updateLostItem(Long lostItemId,
                                                UpdateLostItemCommand command,
-                                               List<Long> keepImageIds,
                                                List<MultipartFile> newImages) {
 
         List<UploadedImageData> uploadedImages =
@@ -101,7 +101,6 @@ public class AdminLostItemService {
             return updateLostItemTx(
                     lostItemId,
                     command,
-                    keepImageIds,
                     uploadedImages
             );
         } catch (Exception e) {
@@ -113,13 +112,14 @@ public class AdminLostItemService {
     @Transactional
     public UpdateLostItemResult updateLostItemTx(Long lostItemId,
                                                  UpdateLostItemCommand command,
-                                                 List<Long> keepImageIds,
                                                  List<UploadedImageData> uploadedImages) {
 
         LostItem lostItem = findPendingLostItem(lostItemId);
 
         List<LostItemImage> existingImages =
                 lostItemImageRepository.findByLostItemId(lostItemId);
+
+        List<Long> keepImageIds = command.keepImageIds();
 
         validateImageOwnershipInMemory(existingImages, keepImageIds);
 
@@ -138,12 +138,18 @@ public class AdminLostItemService {
         return UpdateLostItemResult.from(lostItemId);
     }
 
-
-    private void validateImageOwnershipInMemory(List<LostItemImage> existingImages, List<Long> keepImageIds) {
+    private void validateImageOwnershipInMemory(
+            List<LostItemImage> existingImages,
+            List<Long> keepImageIds
+    ) {
         if (keepImageIds == null || keepImageIds.isEmpty()) {
             return;
         }
-        List<Long> existingIds = existingImages.stream().map(LostItemImage::getId).toList();
+
+        Set<Long> existingIds = existingImages.stream()
+                .map(LostItemImage::getId)
+                .collect(Collectors.toSet());
+
         if (!existingIds.containsAll(keepImageIds)) {
             throw new ApplicationException(LostItemException.INVALID_IMAGE_ACCESS);
         }
