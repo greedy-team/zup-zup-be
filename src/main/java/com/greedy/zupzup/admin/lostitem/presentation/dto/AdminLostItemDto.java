@@ -1,10 +1,10 @@
-package com.greedy.zupzup.admin.lostitem.application.dto;
+package com.greedy.zupzup.admin.lostitem.presentation.dto;
 
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import java.util.List;
 import java.util.Map;
 
-public record AdminLostItemResult(
+public record AdminLostItemDto(
         Long id,
         Long categoryId,
         String categoryName,
@@ -15,15 +15,15 @@ public record AdminLostItemResult(
         String description,
         String depositArea,
         List<String> imageUrl,
-        List<AdminFeatureOptionDto> featureOptions
+        List<LostItemFeatureOptionDto> featureOptions
 ) {
-    public static AdminLostItemResult from(
+    public static AdminLostItemDto from(
             LostItem item,
             List<String> imageUrls,
-            List<AdminFeatureOptionDto> featureOptions
+            List<LostItemFeatureOptionDto> featureOptions
     ) {
 
-        return new AdminLostItemResult(
+        return new AdminLostItemDto(
                 item.getId(),
                 item.getCategory().getId(),
                 item.getCategory().getName(),
@@ -38,10 +38,10 @@ public record AdminLostItemResult(
         );
     }
 
-    public static List<AdminLostItemResult> fromList(
+    public static List<AdminLostItemDto> fromList(
             List<LostItem> items,
             Map<Long, List<String>> imageMap,
-            Map<Long, List<AdminFeatureOptionDto>> featureMap
+            Map<Long, List<LostItemFeatureOptionDto>> featureMap
     ) {
         return items.stream()
                 .map(item -> from(

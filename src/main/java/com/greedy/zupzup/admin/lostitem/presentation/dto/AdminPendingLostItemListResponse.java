@@ -1,18 +1,16 @@
 package com.greedy.zupzup.admin.lostitem.presentation.dto;
 
-import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemResult;
-
 import com.greedy.zupzup.lostitem.presentation.dto.PageInfoResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
 public record AdminPendingLostItemListResponse(
         int count,
-        List<AdminLostItemResult> items,
+        List<AdminLostItemDto> items,
         PageInfoResponse pageInfo
 ) {
-    public static AdminPendingLostItemListResponse of(Page<AdminLostItemResult> pageResult) {
-        List<AdminLostItemResult> items = pageResult.getContent();
+    public static AdminPendingLostItemListResponse of(Page<AdminLostItemDto> pageResult) {
+        List<AdminLostItemDto> items = pageResult.getContent();
 
         return new AdminPendingLostItemListResponse(
                 items.size(),
@@ -22,7 +20,7 @@ public record AdminPendingLostItemListResponse(
     }
 
     public static AdminPendingLostItemListResponse of(
-            List<AdminLostItemResult> commands,
+            List<AdminLostItemDto> commands,
             int page,
             int limit,
             long totalCount

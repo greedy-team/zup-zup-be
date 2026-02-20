@@ -1,7 +1,7 @@
 package com.greedy.zupzup.admin.lostitem.application;
 
-import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
-import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemResult;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.LostItemFeatureOptionDto;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminLostItemDto;
 import com.greedy.zupzup.admin.lostitem.application.dto.ItemImageBulkDeletedEvent;
 import com.greedy.zupzup.admin.lostitem.application.dto.UpdateLostItemResult;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
@@ -12,8 +12,6 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse
 import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemCommand;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
-import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.application.LostItemStorageService;
 import com.greedy.zupzup.lostitem.application.dto.LostItemRegisterData;
 import com.greedy.zupzup.lostitem.application.dto.UploadedImageData;
@@ -23,12 +21,10 @@ import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -83,10 +79,10 @@ public class AdminLostItemService {
         List<Long> ids = extractIds(items);
 
         Map<Long, List<String>> imageMap = loadImageMap(ids);
-        Map<Long, List<AdminFeatureOptionDto>> featureMap = loadFeatureMap(ids);
+        Map<Long, List<LostItemFeatureOptionDto>> featureMap = loadFeatureMap(ids);
 
-        List<AdminLostItemResult> results =
-                AdminLostItemResult.fromList(items, imageMap, featureMap);
+        List<AdminLostItemDto> results =
+                AdminLostItemDto.fromList(items, imageMap, featureMap);
         return AdminPendingLostItemListResponse.of(results, page, limit, results.size());
     }
 
@@ -180,11 +176,11 @@ public class AdminLostItemService {
                 ));
     }
 
-    private Map<Long, List<AdminFeatureOptionDto>> loadFeatureMap(List<Long> ids) {
+    private Map<Long, List<LostItemFeatureOptionDto>> loadFeatureMap(List<Long> ids) {
         return lostItemFeatureRepository.findFeaturesForLostItems(ids).stream()
                 .collect(Collectors.groupingBy(
                         lf -> lf.getLostItem().getId(),
-                        Collectors.mapping(lf -> AdminFeatureOptionDto.of(lf.getSelectedOption()), Collectors.toList())
+                        Collectors.mapping(lf -> LostItemFeatureOptionDto.of(lf.getSelectedOption()), Collectors.toList())
                 ));
     }
 }
