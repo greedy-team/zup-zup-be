@@ -1,9 +1,7 @@
 package com.greedy.zupzup.admin.presentation;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
@@ -16,7 +14,6 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
-import com.greedy.zupzup.member.repository.MemberRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -27,10 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import jakarta.servlet.http.Cookie;
 
 class AdminLostItemControllerTest extends ControllerTest {
 
@@ -46,11 +40,6 @@ class AdminLostItemControllerTest extends ControllerTest {
     @Autowired
     private LostItemRepository lostItemRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-    private Cookie adminCookie;
-    private Long lostItemId;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -270,6 +259,30 @@ class AdminLostItemControllerTest extends ControllerTest {
                 LostItem updated = lostItemRepository.findById(item.getId()).orElseThrow();
                 softly.assertThat(updated.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
             });
+        }
+
+        @Test
+        void 이미_승인된_분실물을_수정하려고_하면_403_FORBIDDEN을_응답한다() throws Exception {
+            // given
+            LostItem registeredItem = givenRegisteredLostItem(category);
+
+            UpdateLostItemRequest updateRequest = new UpdateLostItemRequest(
+                    "수정 시도", "장소", 1L, "상세", category.getId(), List.of()
+            );
+
+            // when
+            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .contentType("multipart/form-data")
+                    .multiPart("keepImageIds", "[]", "application/json")
+                    .multiPart("updateRequest", objectMapper.writeValueAsString(updateRequest), "application/json")
+                    .when()
+                    .put("/api/admin/lost-items/" + registeredItem.getId())
+                    .then().log().all()
+                    .extract();
+
+            // then
+            assertThat(extract.statusCode()).isEqualTo(403);
         }
     }
 }
