@@ -2,6 +2,7 @@ package com.greedy.zupzup.admin.presentation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
@@ -15,8 +16,10 @@ import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,6 +51,15 @@ class AdminLostItemControllerTest extends ControllerTest {
         adminMember = givenAdmin("admin_pw");
         adminToken = givenAccessToken(adminMember);
         category = givenElectronicsCategory();
+    }
+
+    @BeforeEach
+    void setUpRestAssured() {
+        RestAssured.config = RestAssured.config()
+                .encoderConfig(
+                        io.restassured.config.EncoderConfig.encoderConfig()
+                                .defaultContentCharset("UTF-8")
+                );
     }
 
     @Nested
@@ -224,65 +236,87 @@ class AdminLostItemControllerTest extends ControllerTest {
             LostItem item = givenPendingLostItemWithFeatures(category);
             givenLostItemImages(item.getId(), List.of("img1", "img2"));
 
-            List<ItemFeatureRequest> featureOptions = List.of(
-                    new ItemFeatureRequest(1L, 1L),
-                    new ItemFeatureRequest(2L, 5L)
-            );
-
             List<Long> keepImageIds = List.of(
                     lostItemImageRepository.findByLostItemId(item.getId()).get(0).getId()
             );
 
-            UpdateLostItemRequest updateRequest = new UpdateLostItemRequest(
+            List<ItemFeatureRequest> features = List.of(
+                    new ItemFeatureRequest(1L, 1L),
+                    new ItemFeatureRequest(2L, 5L)
+            );
+
+            UpdateLostItemRequest request = new UpdateLostItemRequest(
                     "수정된 설명",
                     "학생회관",
                     1L,
                     "1층",
                     category.getId(),
-                    featureOptions
+                    features,
+                    keepImageIds
             );
 
             // when
-            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+            ExtractableResponse<Response> res = RestAssured.given()
                     .cookie(ACCESS_TOKEN_NAME, adminToken)
-                    .contentType("multipart/form-data")
-                    .multiPart("keepImageIds", objectMapper.writeValueAsString(keepImageIds), "application/json")
-                    .multiPart("updateRequest", objectMapper.writeValueAsString(updateRequest), "application/json")
+                    .contentType(ContentType.MULTIPART)
+                    .multiPart(
+                            "updateRequest",
+                            "updateRequest",
+                            objectMapper.writeValueAsBytes(request),
+                            "application/json"
+                    )
                     .when()
                     .put("/api/admin/lost-items/" + item.getId())
-                    .then().log().all()
+                    .then()
                     .extract();
 
             // then
-            assertSoftly(softly -> {
-                softly.assertThat(extract.statusCode()).isEqualTo(200);
+            assertSoftly(s -> {
+                s.assertThat(res.statusCode()).isEqualTo(200);
+
                 LostItem updated = lostItemRepository.findById(item.getId()).orElseThrow();
-                softly.assertThat(updated.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+
+                s.assertThat(updated.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+                s.assertThat(updated.getDescription()).isEqualTo("수정된 설명");
+
+                List<Long> imageIds = lostItemImageRepository.findByLostItemId(item.getId())
+                        .stream()
+                        .map(img -> img.getId())
+                        .toList();
+
+                s.assertThat(imageIds).containsExactlyInAnyOrderElementsOf(keepImageIds);
             });
         }
 
         @Test
         void 이미_승인된_분실물을_수정하려고_하면_403_FORBIDDEN을_응답한다() throws Exception {
-            // given
-            LostItem registeredItem = givenRegisteredLostItem(category);
+            LostItem item = givenRegisteredLostItem(category);
 
-            UpdateLostItemRequest updateRequest = new UpdateLostItemRequest(
-                    "수정 시도", "장소", 1L, "상세", category.getId(), List.of()
+            UpdateLostItemRequest request = new UpdateLostItemRequest(
+                    "수정",
+                    "장소",
+                    1L,
+                    "상세",
+                    category.getId(),
+                    List.of(),
+                    List.of()
             );
 
-            // when
-            ExtractableResponse<Response> extract = RestAssured.given().log().all()
+            ExtractableResponse<Response> res = RestAssured.given()
                     .cookie(ACCESS_TOKEN_NAME, adminToken)
-                    .contentType("multipart/form-data")
-                    .multiPart("keepImageIds", "[]", "application/json")
-                    .multiPart("updateRequest", objectMapper.writeValueAsString(updateRequest), "application/json")
+                    .contentType(ContentType.MULTIPART)
+                    .multiPart(
+                            "updateRequest",
+                            objectMapper.writeValueAsString(request),
+                            "application/json"
+                    )
                     .when()
-                    .put("/api/admin/lost-items/" + registeredItem.getId())
-                    .then().log().all()
+                    .put("/api/admin/lost-items/" + item.getId())
+                    .then()
                     .extract();
 
-            // then
-            assertThat(extract.statusCode()).isEqualTo(403);
+            assertThat(res.statusCode()).isEqualTo(403);
         }
+
     }
 }

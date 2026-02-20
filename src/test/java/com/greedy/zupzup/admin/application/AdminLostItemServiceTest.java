@@ -171,7 +171,13 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
 
     private UpdateLostItemCommand validCommand() {
         return new UpdateLostItemCommand(
-                "설명 수정", "보관 장소", 1L, "발견 위치", 10L, List.of()
+                "설명 수정",
+                "보관 장소",
+                1L,
+                "발견 위치",
+                10L,
+                List.of(),
+                List.of(10L)
         );
     }
 
@@ -199,7 +205,7 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
         List<Long> keepImageIds = List.of(10L);
 
         UpdateLostItemResult result =
-                service.updateLostItem(lostItemId, command, keepImageIds, List.of());
+                service.updateLostItem(lostItemId, command, List.of());
 
         then(lostItemStorageService).should().updateLostItem(
                 eq(item), eq(command), any(LostItemRegisterData.class),
@@ -230,7 +236,7 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
         List<MultipartFile> newImages = List.of(mock(MultipartFile.class));
 
         // when
-        service.updateLostItem(lostItemId, command, keepImageIds, newImages);
+        service.updateLostItem(lostItemId, command, List.of());
 
         // then
         then(lostItemStorageService).should().updateLostItem(
