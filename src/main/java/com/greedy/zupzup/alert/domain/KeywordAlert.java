@@ -1,17 +1,16 @@
-package com.greedy.zupzup.alert;
+package com.greedy.zupzup.alert.domain;
 
 import com.greedy.zupzup.global.BaseTimeEntity;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.category.domain.Category;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.*;
-import java.time.LocalDate;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,11 +28,6 @@ public class KeywordAlert extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String lostArea;
-
-    @Column(nullable = false)
-    private LocalDate lostDate;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -41,4 +35,11 @@ public class KeywordAlert extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    public static KeywordAlert subscribe(Member member, Category category) {
+        return KeywordAlert.builder()
+                .member(member)
+                .category(category)
+                .build();
+    }
 }
