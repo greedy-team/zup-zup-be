@@ -18,7 +18,9 @@ public record UpdateLostItemCommand(
         @NotNull(message = "카테고리 ID는 필수입니다.")
         Long categoryId,
         @Valid @NotNull(message = "특징 옵션 목록은 필수입니다.")
-        List<ItemFeatureRequest> featureOptions
+        List<ItemFeatureRequest> featureOptions,
+        List<Long> keepImageIds
+
 ) {
     public static UpdateLostItemCommand of(UpdateLostItemRequest request) {
         return new UpdateLostItemCommand(
@@ -27,7 +29,8 @@ public record UpdateLostItemCommand(
                 request.foundAreaId(),
                 request.foundAreaDetail(),
                 request.categoryId(),
-                request.featureOptions()
+                request.featureOptions(),
+                request.keepImageIds() == null ? List.of() : request.keepImageIds()
         );
     }
 }

@@ -24,5 +24,8 @@ public record UpdateLostItemRequest(
 
         @Valid
         @NotNull(message = "특징 옵션 목록은 필수입니다.")
-        List<ItemFeatureRequest> featureOptions
-) {}
+        List<ItemFeatureRequest> featureOptions,
+        List<Long> keepImageIds
+
+) {
+}
