@@ -1,8 +1,11 @@
 package com.greedy.zupzup.member.application;
 
 import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
+import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.member.application.dto.MemberEmailUpdateCommand;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.domain.Role;
+import com.greedy.zupzup.member.exception.MemberException;
 import com.greedy.zupzup.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,19 @@ public class MemberService {
                             .build();
                     return memberRepository.save(newMember);
                 });
+    }
+
+    @Transactional
+    public void updateEmail(MemberEmailUpdateCommand command) {
+        Member member = memberRepository.getById(command.memberId());
+
+        if (!command.email().equals(member.getEmail())) {
+            if (memberRepository.existsByEmail(command.email())) {
+                throw new ApplicationException(MemberException.DUPLICATE_EMAIL);
+            }
+        }
+
+        member.updateEmailInfo(command.email(), command.emailAlertEnabled());
     }
 
 }

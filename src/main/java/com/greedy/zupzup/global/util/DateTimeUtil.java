@@ -6,7 +6,8 @@ import java.time.ZoneId;
 
 public class DateTimeUtil {
 
-    private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
+    public static final String KST_ZONE_NAME = "Asia/Seoul";
+    public static final ZoneId KST_ZONE_ID = ZoneId.of(KST_ZONE_NAME);
 
     private DateTimeUtil() {
     }
