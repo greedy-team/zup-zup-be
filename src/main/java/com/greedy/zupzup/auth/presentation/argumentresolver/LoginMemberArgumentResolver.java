@@ -2,6 +2,7 @@ package com.greedy.zupzup.auth.presentation.argumentresolver;
 
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
 import com.greedy.zupzup.auth.presentation.annotation.MemberAuth;
+import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        boolean required = parameter.getParameterAnnotation(MemberAuth.class).required();
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 
         LoginMember loginMember = (LoginMember) request.getAttribute("loginMember");
@@ -34,7 +36,14 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             return loginMember;
         }
 
-        return getLoginMemberFromAccessToken(request);
+        try {
+            return getLoginMemberFromAccessToken(request);
+        } catch (ApplicationException e) {
+            if (!required) {
+                return null;
+            }
+            throw e;
+        }
     }
 
     private LoginMember getLoginMemberFromAccessToken(HttpServletRequest request) {
