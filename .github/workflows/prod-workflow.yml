@@ -85,6 +85,8 @@ jobs:
             ACCESS_TOKEN_SECRET_KEY=${{ secrets.ACCESS_TOKEN_SECRET_KEY }}
             ACCESS_TOKEN_EXPIRATION=${{ secrets.ACCESS_TOKEN_EXPIRATION }}
             STUDENT_VERIFICATION_SESSION_TIME=${{ secrets.STUDENT_VERIFICATION_SESSION_TIME }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
             EOF
             
             chmod +x /home/ubuntu/zupzup/script/deploy.sh
