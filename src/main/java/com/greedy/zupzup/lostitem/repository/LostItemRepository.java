@@ -62,6 +62,45 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
             Pageable pageable
     );
 
+    @Query(
+            value = """
+                    select
+                        li.id              as id,
+                        c.id               as categoryId,
+                        c.name             as categoryName,
+                        c.iconUrl          as categoryIconUrl,
+                        sa.id              as schoolAreaId,
+                        sa.areaName        as schoolAreaName,
+                        li.foundAreaDetail as foundAreaDetail,
+                        li.createdAt       as createdAt
+                    from LostItem li
+                        join li.category  c
+                        join li.foundArea sa
+                    where li.status = :status
+                      and (:categoryId   is null or c.id  = :categoryId)
+                      and (:schoolAreaId is null or sa.id = :schoolAreaId)
+                      and li.id not in :excludedIds
+                    order by li.createdAt desc
+                    """,
+            countQuery = """
+                    select count(li)
+                    from LostItem li
+                        join li.category  c
+                        join li.foundArea sa
+                    where li.status = :status
+                      and (:categoryId   is null or c.id  = :categoryId)
+                      and (:schoolAreaId is null or sa.id = :schoolAreaId)
+                      and li.id not in :excludedIds
+                    """
+    )
+    Page<LostItemListProjection> findListExcluding(
+            @Param("categoryId") Long categoryId,
+            @Param("schoolAreaId") Long schoolAreaId,
+            @Param("status") LostItemStatus status,
+            @Param("excludedIds") List<Long> excludedIds,
+            Pageable pageable
+    );
+
     @Query("""
             select li from LostItem li
             join fetch li.category
