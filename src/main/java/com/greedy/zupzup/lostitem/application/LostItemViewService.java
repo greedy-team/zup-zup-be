@@ -9,6 +9,7 @@ import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.application.dto.LostItemListResult;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.*;
+import com.greedy.zupzup.quiz.repository.QuizAttemptRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -25,12 +26,21 @@ public class LostItemViewService {
 
     private final LostItemRepository lostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
 
     /**
      * 목록 조회
      */
     @Transactional(readOnly = true)
     public Page<LostItemListResult> getLostItems(GetItemListCommand command) {
+        if (command.memberId() != null) {
+            List<Long> failedIds = quizAttemptRepository.findFailedLostItemIdsByMemberId(command.memberId());
+            if (!failedIds.isEmpty()) {
+                return lostItemRepository
+                        .findListExcluding(command.categoryId(), command.schoolAreaId(), LostItemStatus.REGISTERED, failedIds, command.pageable())
+                        .map(LostItemListResult::from);
+            }
+        }
         return lostItemRepository
                 .findList(command.categoryId(), command.schoolAreaId(), LostItemStatus.REGISTERED, command.pageable())
                 .map(LostItemListResult::from);
