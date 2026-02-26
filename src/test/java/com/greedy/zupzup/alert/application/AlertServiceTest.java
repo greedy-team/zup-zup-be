@@ -3,7 +3,7 @@ package com.greedy.zupzup.alert.application;
 import static com.greedy.zupzup.common.fixture.CategoryFixture.ELECTRONIC;
 import static com.greedy.zupzup.common.fixture.CategoryFixture.WALLET;
 import static com.greedy.zupzup.common.fixture.KeywordAlertFixture.KEYWORD_ALERT;
-import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER;
+import static com.greedy.zupzup.common.fixture.MemberFixture.MEMBER_WITH_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
@@ -38,7 +38,7 @@ class AlertServiceTest extends ServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        member = MEMBER();
+        member = MEMBER_WITH_EMAIL();
         category1 = ELECTRONIC();
         category2 = WALLET();
         setId(member, TEST_MEMBER_ID);
@@ -73,17 +73,19 @@ class AlertServiceTest extends ServiceUnitTest {
         @Test
         void 구독_목록을_수정하면_기존_구독을_삭제하고_새로운_구독을_저장해야_한다() {
             // given
-            List<Long> newCategoryIds = List.of(TEST_CATEGORY_ID_1, TEST_CATEGORY_ID_2);
+            List<Long> newCategoryIds = List.of(TEST_CATEGORY_ID_2);
             SubscriptionUpdateCommand command = new SubscriptionUpdateCommand(TEST_MEMBER_ID, newCategoryIds);
 
+            KeywordAlert existingAlert = KEYWORD_ALERT(member, category1);
             given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
-            given(categoryRepository.getAllByIds(anyList())).willReturn(List.of(category1, category2));
+            given(keywordAlertRepository.findAllByMemberId(TEST_MEMBER_ID)).willReturn(List.of(existingAlert));
+            given(categoryRepository.getAllByIds(anyList())).willReturn(List.of(category2));
 
             // when
             alertService.updateSubscriptions(command);
 
             // then
-            then(keywordAlertRepository).should().deleteAllByMemberId(TEST_MEMBER_ID);
+            then(keywordAlertRepository).should().deleteAll(anyList());
             then(keywordAlertRepository).should().saveAll(anyList());
         }
 
@@ -93,13 +95,15 @@ class AlertServiceTest extends ServiceUnitTest {
             List<Long> emptyCategoryIds = List.of();
             SubscriptionUpdateCommand command = new SubscriptionUpdateCommand(TEST_MEMBER_ID, emptyCategoryIds);
 
+            KeywordAlert existingAlert = KEYWORD_ALERT(member, category1);
             given(memberRepository.getById(TEST_MEMBER_ID)).willReturn(member);
+            given(keywordAlertRepository.findAllByMemberId(TEST_MEMBER_ID)).willReturn(List.of(existingAlert));
 
             // when
             alertService.updateSubscriptions(command);
 
             // then
-            then(keywordAlertRepository).should().deleteAllByMemberId(TEST_MEMBER_ID);
+            then(keywordAlertRepository).should().deleteAll(anyList());
             then(keywordAlertRepository).should(never()).saveAll(anyList());
         }
     }
