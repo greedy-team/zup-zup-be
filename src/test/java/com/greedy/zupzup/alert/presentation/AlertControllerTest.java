@@ -34,7 +34,7 @@ class AlertControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-        member = givenMember(TEST_PASSWORD);
+        member = givenMemberWithEmail(TEST_PASSWORD);
         accessToken = givenAccessToken(member);
         category1 = givenElectronicsCategory();
         category2 = givenWalletCategory();

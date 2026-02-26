@@ -110,6 +110,11 @@ public abstract class ControllerTest {
         return memberRepository.save(member);
     }
 
+    protected Member givenMemberWithEmail(String password) {
+        Member member = MEMBER_WITH_EMAIL_ENCODED_PASSWORD(password);
+        return memberRepository.save(member);
+    }
+
     protected Member givenMember(Integer studentId, String password) {
         Member member = Member.builder()
                 .studentId(studentId)
