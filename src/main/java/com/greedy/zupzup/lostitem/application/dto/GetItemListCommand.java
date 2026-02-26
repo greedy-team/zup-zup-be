@@ -6,7 +6,8 @@ import org.springframework.data.domain.Pageable;
 public record GetItemListCommand(
         Long categoryId,
         Long schoolAreaId,
-        Pageable pageable
+        Pageable pageable,
+        Long memberId
 ) {
     public static final int PAGE_NUMBER_OFFSET = 1;
 
@@ -14,7 +15,17 @@ public record GetItemListCommand(
         return new GetItemListCommand(
                 categoryId,
                 schoolAreaId,
-                PageRequest.of(page - PAGE_NUMBER_OFFSET, limit)
+                PageRequest.of(page - PAGE_NUMBER_OFFSET, limit),
+                null
+        );
+    }
+
+    public static GetItemListCommand of(Long categoryId, Long schoolAreaId, Integer page, Integer limit, Long memberId) {
+        return new GetItemListCommand(
+                categoryId,
+                schoolAreaId,
+                PageRequest.of(page - PAGE_NUMBER_OFFSET, limit),
+                memberId
         );
     }
 }
