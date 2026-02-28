@@ -17,7 +17,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemCommand;
+import com.greedy.zupzup.admin.lostitem.application.dto.UpdateLostItemCommand;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
@@ -41,7 +41,6 @@ import org.mockito.Mock;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 public class AdminLostItemServiceTest extends ServiceUnitTest {
 

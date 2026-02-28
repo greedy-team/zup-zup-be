@@ -1,5 +1,6 @@
-package com.greedy.zupzup.admin.lostitem.presentation.dto;
+package com.greedy.zupzup.admin.lostitem.application.dto;
 
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
 import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

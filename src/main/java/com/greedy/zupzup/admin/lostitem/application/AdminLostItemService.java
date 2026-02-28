@@ -9,7 +9,7 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
-import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemCommand;
+import com.greedy.zupzup.admin.lostitem.application.dto.UpdateLostItemCommand;
 import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.global.exception.ApplicationException;
 import com.greedy.zupzup.lostitem.application.LostItemStorageService;

@@ -1,6 +1,6 @@
 package com.greedy.zupzup.lostitem.application;
 
-import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemCommand;
+import com.greedy.zupzup.admin.lostitem.application.dto.UpdateLostItemCommand;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
