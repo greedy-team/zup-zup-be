@@ -31,7 +31,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -86,66 +85,40 @@ public class AdminLostItemService {
         return AdminPendingLostItemListResponse.of(results, page, limit, results.size());
     }
 
-    public UpdateLostItemResult updateLostItem(Long lostItemId,
-                                               UpdateLostItemCommand command,
-                                               List<MultipartFile> newImages) {
+    public UpdateLostItemResult updateLostItem(UpdateLostItemCommand command) {
 
-        List<UploadedImageData> uploadedImages =
-                lostItemStorageService.uploadImages(newImages);
+        LostItem lostItem = findPendingLostItem(command.lostItemId());
+        List<LostItemImage> existingImages = lostItemImageRepository.findByLostItemId(command.lostItemId());
+        validateImageOwnership(existingImages, command.keepImageIds());
+
+        LostItemRegisterData validatedData = lostItemStorageService.getValidUpdateData(command);
+
+        List<UploadedImageData> uploadedImages = lostItemStorageService.uploadImages(command.newImages());
 
         try {
-            return updateLostItemTx(
-                    lostItemId,
+            List<String> oldKeysToDelete = lostItemStorageService.updateInTransaction(
+                    lostItem,
                     command,
-                    uploadedImages
+                    validatedData,
+                    uploadedImages,
+                    existingImages
             );
+
+            lostItemStorageService.deleteOldImages(oldKeysToDelete);
+
+            return UpdateLostItemResult.from(command.lostItemId());
+
         } catch (Exception e) {
             lostItemStorageService.cleanupImages(uploadedImages);
             throw e;
         }
     }
 
-    @Transactional
-    public UpdateLostItemResult updateLostItemTx(Long lostItemId,
-                                                 UpdateLostItemCommand command,
-                                                 List<UploadedImageData> uploadedImages) {
-
-        LostItem lostItem = findPendingLostItem(lostItemId);
-
-        List<LostItemImage> existingImages =
-                lostItemImageRepository.findByLostItemId(lostItemId);
-
-        List<Long> keepImageIds = command.keepImageIds();
-
-        validateImageOwnershipInMemory(existingImages, keepImageIds);
-
-        LostItemRegisterData validData =
-                lostItemStorageService.getValidUpdateData(command);
-
-        lostItemStorageService.updateLostItem(
-                lostItem,
-                command,
-                validData,
-                keepImageIds,
-                uploadedImages,
-                existingImages
-        );
-
-        return UpdateLostItemResult.from(lostItemId);
-    }
-
-    private void validateImageOwnershipInMemory(
-            List<LostItemImage> existingImages,
-            List<Long> keepImageIds
-    ) {
-        if (keepImageIds == null || keepImageIds.isEmpty()) {
-            return;
-        }
-
+    private void validateImageOwnership(List<LostItemImage> existingImages, List<Long> keepImageIds) {
+        if (keepImageIds == null || keepImageIds.isEmpty()) return;
         Set<Long> existingIds = existingImages.stream()
                 .map(LostItemImage::getId)
                 .collect(Collectors.toSet());
-
         if (!existingIds.containsAll(keepImageIds)) {
             throw new ApplicationException(LostItemException.INVALID_IMAGE_ACCESS);
         }

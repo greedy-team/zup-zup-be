@@ -15,6 +15,7 @@ import com.greedy.zupzup.lostitem.application.dto.*;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
+import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.exception.LostItemException;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
@@ -168,64 +169,55 @@ public class LostItemStorageService {
     }
 
     @Transactional
-    public void updateLostItem(LostItem lostItem, UpdateLostItemCommand command,
-                               LostItemRegisterData validData, List<Long> keepImageIds,
-                               List<UploadedImageData> uploadedImages, List<LostItemImage> existingImages) {
-
-        List<Long> safeKeepIds = (keepImageIds == null) ? List.of() : keepImageIds;
-        List<LostItemImage> toDelete = existingImages.stream()
-                .filter(img -> !safeKeepIds.contains(img.getId()))
+    public List<String> updateInTransaction(
+            LostItem lostItem,
+            UpdateLostItemCommand command,
+            LostItemRegisterData validatedData,
+            List<UploadedImageData> uploadedImages,
+            List<LostItemImage> existingImages
+    ) {
+        List<String> oldKeysToDelete = existingImages.stream()
+                .filter(img -> !command.keepImageIds().contains(img.getId()))
+                .map(LostItemImage::getImageKey)
                 .toList();
-
-        if (!toDelete.isEmpty()) {
-            lostItemImageRepository.deleteAll(toDelete);
-            s3FileCleanupService.cleanupOrphanFiles(
-                    toDelete.stream().map(LostItemImage::getImageKey).toList()
-            );
-        }
-
-        if (uploadedImages != null && !uploadedImages.isEmpty()) {
-            List<LostItemImage> newImages = uploadedImages.stream()
-                    .map(data -> LostItemImage.of(lostItem, data.url(), data.order()))
-                    .toList();
-            lostItemImageRepository.saveAll(newImages);
-        }
-
-        lostItem.updateInfo(
-                command.description(),
-                command.depositArea(),
-                validData.foundSchoolArea(),
-                command.foundAreaDetail(),
-                validData.category()
-        );
 
         lostItemFeatureRepository.deleteByLostItemIds(List.of(lostItem.getId()));
-        if (validData.isNonETC()) {
-            List<LostItemFeature> newFeatures = validData.itemFeatureAndOptions().stream()
-                    .map(pair -> LostItemFeature.of(lostItem, pair.getFirst(), pair.getSecond()))
-                    .toList();
-            lostItemFeatureRepository.saveAll(newFeatures);
+        if (validatedData.isNonETC()) {
+            saveLostItemFeatureAndOptions(validatedData.itemFeatureAndOptions(), lostItem);
         }
 
-        lostItem.approve();
+        List<LostItemImage> toDeleteFromDb = existingImages.stream()
+                .filter(img -> !command.keepImageIds().contains(img.getId()))
+                .toList();
+        lostItemImageRepository.deleteAllInBatch(toDeleteFromDb);
+
+        saveLostItemImage(uploadedImages, lostItem);
+
+        lostItem.updateAdmin(
+                command.description(),
+                command.depositArea(),
+                validatedData.foundSchoolArea(),
+                validatedData.category(),
+                command.foundAreaDetail(),
+                LostItemStatus.REGISTERED
+        );
+
+        return oldKeysToDelete;
     }
 
-    public List<UploadedImageData> uploadImages(List<MultipartFile> images) {
-        if (images == null || images.isEmpty()) return List.of();
+    public List<UploadedImageData> uploadImages(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) return List.of();
 
-        return IntStream.range(0, images.size())
-                .mapToObj(i -> {
-                    String url = s3ImageFileManager.upload(images.get(i), "lost-item-images");
-                    return new UploadedImageData(url, i);
-                })
+        return IntStream.range(0, files.size())
+                .mapToObj(i -> new UploadedImageData(s3ImageFileManager.upload(files.get(i), "lost-items"), i))
                 .toList();
     }
 
-    public void cleanupImages(List<UploadedImageData> images) {
-        if (images == null || images.isEmpty()) return;
+    public void cleanupImages(List<UploadedImageData> uploadedImages) {
+        uploadedImages.forEach(img -> s3ImageFileManager.delete(img.url()));
+    }
 
-        s3FileCleanupService.cleanupOrphanFiles(
-                images.stream().map(UploadedImageData::url).toList()
-        );
+    public void deleteOldImages(List<String> keys) {
+        keys.forEach(s3ImageFileManager::delete);
     }
 }

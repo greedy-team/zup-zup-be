@@ -1,7 +1,5 @@
     package com.greedy.zupzup.admin.lostitem.presentation;
 
-    import com.fasterxml.jackson.core.type.TypeReference;
-    import com.fasterxml.jackson.databind.ObjectMapper;
     import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
     import com.greedy.zupzup.admin.lostitem.application.dto.UpdateLostItemResult;
     import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
@@ -14,7 +12,6 @@
     import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemResponse;
     import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
     import jakarta.validation.Valid;
-    import java.util.Collections;
     import java.util.List;
     import lombok.RequiredArgsConstructor;
     import org.springframework.http.MediaType;
@@ -59,29 +56,14 @@
             return ResponseEntity.ok(response);
         }
 
-        @Override
         @PutMapping(value = "/{lostItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<UpdateLostItemResponse> updateLostItem(
                 @PathVariable Long lostItemId,
-
-                @RequestPart(value = "newImages", required = false)
-                List<MultipartFile> newImages,
-
-                @RequestPart("updateRequest")
-                @Valid UpdateLostItemRequest updateRequest
+                @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
+                @RequestPart("updateRequest") @Valid UpdateLostItemRequest updateRequest
         ) {
-
-            UpdateLostItemCommand command = UpdateLostItemCommand.of(updateRequest);
-
-            UpdateLostItemResult result = adminLostItemService.updateLostItem(
-                    lostItemId,
-                    command,
-                    newImages
-            );
-
-            return ResponseEntity.ok(
-                    UpdateLostItemResponse.from(result.lostItemId())
-            );
-
+            UpdateLostItemCommand command = UpdateLostItemCommand.of(lostItemId, updateRequest, newImages);
+            UpdateLostItemResult result = adminLostItemService.updateLostItem(command);
+            return ResponseEntity.ok(UpdateLostItemResponse.from(result.lostItemId()));
         }
     }
