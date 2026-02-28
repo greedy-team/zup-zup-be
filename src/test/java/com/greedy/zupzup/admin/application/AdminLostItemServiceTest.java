@@ -23,6 +23,7 @@ import com.greedy.zupzup.category.domain.Feature;
 import com.greedy.zupzup.category.domain.FeatureOption;
 import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.lostitem.application.dto.LostItemRegisterData;
+import com.greedy.zupzup.lostitem.application.dto.UploadedImageData;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemFeature;
 import com.greedy.zupzup.lostitem.domain.LostItemImage;
@@ -169,78 +170,60 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
         });
     }
 
-    private UpdateLostItemCommand validCommand() {
+    private UpdateLostItemCommand validCommand(Long lostItemId, List<Long> keepImageIds) {
         return new UpdateLostItemCommand(
+                lostItemId,
                 "설명 수정",
                 "보관 장소",
                 1L,
                 "발견 위치",
                 10L,
                 List.of(),
-                List.of(10L)
+                keepImageIds,
+                List.of() // newImages
         );
     }
-
     private LostItem pendingLostItem(Long id) {
         return mock(LostItem.class);
     }
 
 
     @Test
-    void 관리자_분실물_수정시_기존이미지만_유지하고_정보를_수정해도_승인된다() {
-        Long lostItemId = 1L;
-        LostItem item = pendingLostItem(lostItemId);
-
-        lenient().when(item.getStatus()).thenReturn(LostItemStatus.PENDING);
-
-        given(adminLostItemRepository.findById(lostItemId)).willReturn(Optional.of(item));
-
-        setupValidRegisterData();
-
-        LostItemImage existingImg = mock(LostItemImage.class);
-        given(existingImg.getId()).willReturn(10L);
-        given(lostItemImageRepository.findByLostItemId(lostItemId)).willReturn(List.of(existingImg));
-
-        UpdateLostItemCommand command = validCommand();
-        List<Long> keepImageIds = List.of(10L);
-
-        UpdateLostItemResult result =
-                service.updateLostItem(lostItemId, command, List.of());
-
-        then(lostItemStorageService).should().updateLostItem(
-                eq(item), eq(command), any(LostItemRegisterData.class),
-                eq(keepImageIds), any(), any()
-        );
-
-        assertThat(result.lostItemId()).isEqualTo(lostItemId);
-    }
-
-    @Test
-    void 관리자_분실물_수정시_기존이미지는_유지하고_새이미지를_추가한뒤_승인한다() {
+    void 관리자_분실물_수정시_S3업로드와_DB트랜잭션을_순차적으로_호출한다() {
         // given
         Long lostItemId = 1L;
-        LostItem item = pendingLostItem(lostItemId);
+        List<Long> keepImageIds = List.of(10L);
+        UpdateLostItemCommand command = validCommand(lostItemId, keepImageIds);
 
-        lenient().when(item.getStatus()).thenReturn(LostItemStatus.PENDING);
-
-        setupValidRegisterData();
-
+        LostItem item = mock(LostItem.class);
+        given(item.getStatus()).willReturn(LostItemStatus.PENDING);
         given(adminLostItemRepository.findById(lostItemId)).willReturn(Optional.of(item));
 
         LostItemImage existingImg = mock(LostItemImage.class);
         given(existingImg.getId()).willReturn(10L);
         given(lostItemImageRepository.findByLostItemId(lostItemId)).willReturn(List.of(existingImg));
 
-        UpdateLostItemCommand command = validCommand();
-        List<Long> keepImageIds = List.of(10L);
-        List<MultipartFile> newImages = List.of(mock(MultipartFile.class));
+        LostItemRegisterData mockRegData = mock(LostItemRegisterData.class);
+        given(lostItemStorageService.getValidUpdateData(command)).willReturn(mockRegData);
+
+        List<UploadedImageData> mockUploads = List.of(new UploadedImageData("url", 0));
+        given(lostItemStorageService.uploadImages(any())).willReturn(mockUploads);
+
+        List<String> oldKeys = List.of("oldKey");
+        given(lostItemStorageService.updateInTransaction(eq(item), eq(command), eq(mockRegData), any(), any()))
+                .willReturn(oldKeys);
 
         // when
-        service.updateLostItem(lostItemId, command, List.of());
+        UpdateLostItemResult result = service.updateLostItem(command);
 
         // then
-        then(lostItemStorageService).should().updateLostItem(
-                eq(item), eq(command), any(LostItemRegisterData.class), eq(keepImageIds), any(), any()
-        );
+        assertSoftly(s -> {
+            s.assertThat(result.lostItemId()).isEqualTo(lostItemId);
+        });
+
+        // 호출 순서 및 위임 검증
+        then(lostItemStorageService).should().uploadImages(any());
+        then(lostItemStorageService).should().updateInTransaction(eq(item), eq(command), eq(mockRegData), any(), any());
+        then(lostItemStorageService).should().deleteOldImages(oldKeys);
     }
 }
