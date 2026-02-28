@@ -62,7 +62,8 @@ public class LostItem extends BaseTimeEntity {
     @OneToMany(mappedBy = "lostItem")
     private List<LostItemImage> images = new ArrayList<>();
 
-    public LostItem(String foundAreaDetail, String description, String depositArea, Category category, SchoolArea foundArea) {
+    public LostItem(String foundAreaDetail, String description, String depositArea, Category category,
+                    SchoolArea foundArea) {
         this.foundAreaDetail = foundAreaDetail;
         this.description = description;
         this.depositArea = depositArea;
@@ -99,12 +100,26 @@ public class LostItem extends BaseTimeEntity {
     }
 
     public boolean canAccess(boolean pledgedByMe) {
-        if (this.status == LostItemStatus.FOUND) return false;
-        if (this.status == LostItemStatus.PLEDGED && !pledgedByMe) return false;
+        if (this.status == LostItemStatus.FOUND) {
+            return false;
+        }
+        if (this.status == LostItemStatus.PLEDGED && !pledgedByMe) {
+            return false;
+        }
         return true;
     }
 
     public void changeStatus(LostItemStatus status) {
+        this.status = status;
+    }
+
+    public void updateAdmin(String description, String depositArea, SchoolArea foundArea,
+                            Category category, String foundAreaDetail, LostItemStatus status) {
+        this.description = description;
+        this.depositArea = depositArea;
+        this.foundArea = foundArea;
+        this.category = category;
+        this.foundAreaDetail = foundAreaDetail;
         this.status = status;
     }
 
@@ -125,11 +140,5 @@ public class LostItem extends BaseTimeEntity {
 
     public boolean isPledged() {
         return this.status == LostItemStatus.PLEDGED;
-    }
-
-    public void approve() {
-        if (this.status == LostItemStatus.PENDING) {
-            this.status = LostItemStatus.REGISTERED;
-        }
     }
 }
