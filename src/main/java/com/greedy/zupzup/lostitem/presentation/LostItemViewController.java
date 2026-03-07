@@ -33,8 +33,12 @@ public class LostItemViewController implements LostItemViewControllerDocs{
 
     /** 목록 */
     @GetMapping
-    public ResponseEntity<LostItemListResponse> list(@Valid LostItemListRequest query) {
-        Page<LostItemListResult> page = lostItemViewService.getLostItems(query.toCommand());
+    public ResponseEntity<LostItemListResponse> list(
+            @MemberAuth(required = false) LoginMember loginMember,
+            @Valid LostItemListRequest query
+    ) {
+        Long memberId = loginMember != null ? loginMember.memberId() : null;
+        Page<LostItemListResult> page = lostItemViewService.getLostItems(query.toCommand(memberId));
 
         List<Long> ids = page.getContent().stream().map(LostItemListResult::id).toList();
         Map<Long, String> repImageMap = lostItemViewService.getRepresentativeImageMapByItemIds(ids);
