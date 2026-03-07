@@ -26,12 +26,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminLostItemService {
@@ -110,12 +112,15 @@ public class AdminLostItemService {
 
         } catch (Exception e) {
             lostItemStorageService.cleanupImages(uploadedImages);
-            throw e;
+            log.error("분실물 DB 수정 실패. S3 롤백", e);
+            throw new ApplicationException(LostItemException.UPDATE_FAILED);
         }
     }
 
     private void validateImageOwnership(List<LostItemImage> existingImages, List<Long> keepImageIds) {
-        if (keepImageIds == null || keepImageIds.isEmpty()) return;
+        if (keepImageIds == null || keepImageIds.isEmpty()) {
+            return;
+        }
         Set<Long> existingIds = existingImages.stream()
                 .map(LostItemImage::getId)
                 .collect(Collectors.toSet());
@@ -153,7 +158,8 @@ public class AdminLostItemService {
         return lostItemFeatureRepository.findFeaturesForLostItems(ids).stream()
                 .collect(Collectors.groupingBy(
                         lf -> lf.getLostItem().getId(),
-                        Collectors.mapping(lf -> LostItemFeatureOptionDto.of(lf.getSelectedOption()), Collectors.toList())
+                        Collectors.mapping(lf -> LostItemFeatureOptionDto.of(lf.getSelectedOption()),
+                                Collectors.toList())
                 ));
     }
 }
