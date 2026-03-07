@@ -9,7 +9,6 @@ import com.greedy.zupzup.category.exception.LostItemFeatureException;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.global.exception.ApplicationException;
-import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
 import com.greedy.zupzup.lostitem.application.dto.*;
 import com.greedy.zupzup.lostitem.domain.LostItem;
@@ -22,6 +21,8 @@ import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.schoolarea.domain.SchoolArea;
 import com.greedy.zupzup.schoolarea.repository.SchoolAreaRepository;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
@@ -35,13 +36,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class LostItemStorageService {
 
+    private static final String IMAGE_DIRECTORY = "lost-item-images";
     private final LostItemRepository lostItemRepository;
     private final LostItemImageRepository lostItemImageRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
     private final FeatureOptionRepository featureOptionRepository;
     private final SchoolAreaRepository schoolAreaRepository;
     private final CategoryRepository categoryRepository;
-    private final S3FileCleanupService s3FileCleanupService;
     private final S3ImageFileManager s3ImageFileManager;
 
     /**
@@ -57,7 +58,8 @@ public class LostItemStorageService {
             return new LostItemRegisterData(category, foundSchoolArea, List.of());
         }
 
-        List<Pair<Feature, FeatureOption>> validFeatureAndOptions = getValidFeatureAndOptions(category, command.featureOptions());
+        List<Pair<Feature, FeatureOption>> validFeatureAndOptions = getValidFeatureAndOptions(category,
+                command.featureOptions());
         return new LostItemRegisterData(category, foundSchoolArea, validFeatureAndOptions);
     }
 
@@ -72,7 +74,8 @@ public class LostItemStorageService {
     private List<Pair<Feature, FeatureOption>> getValidFeatureAndOptions(Category category,
                                                                          List<ItemFeatureOptionCommand> requestedFeatureOptions) {
 
-        if (requestedFeatureOptions == null || requestedFeatureOptions.isEmpty() || category.getFeatures().size() != requestedFeatureOptions.size()) {
+        if (requestedFeatureOptions == null || requestedFeatureOptions.isEmpty()
+                || category.getFeatures().size() != requestedFeatureOptions.size()) {
             throw new ApplicationException(LostItemException.FEATURE_REQUIRED_FOR_NON_ETC_CATEGORY);
         }
 
@@ -80,7 +83,8 @@ public class LostItemStorageService {
         return requestedFeatureOptions.stream()
                 .map(featureOption -> {
                     Feature existsFeature = getValidFeature(category, featureOption.featureId());
-                    FeatureOption existsOption = getValidFeatureOption(options, existsFeature.getId(), featureOption.optionId());
+                    FeatureOption existsOption = getValidFeatureOption(options, existsFeature.getId(),
+                            featureOption.optionId());
                     return Pair.of(existsFeature, existsOption);
                 })
                 .toList();
@@ -100,7 +104,8 @@ public class LostItemStorageService {
                 .orElseThrow(() -> new ApplicationException(CategoryException.INVALID_CATEGORY_FEATURE));
     }
 
-    private FeatureOption getValidFeatureOption(List<FeatureOption> options, Long existsFeatureId, Long requestedOptionId) {
+    private FeatureOption getValidFeatureOption(List<FeatureOption> options, Long existsFeatureId,
+                                                Long requestedOptionId) {
         return options.stream()
                 .filter(option -> option.isValidSelection(existsFeatureId, requestedOptionId))
                 .findAny()
@@ -112,7 +117,8 @@ public class LostItemStorageService {
      * 2. 새로운 분실물 데이터를 등록
      */
     @Transactional
-    public LostItem createNewLostItem(CreateLostItemCommand command, LostItemRegisterData validatedData, List<UploadedImageData> uploadedImages) {
+    public LostItem createNewLostItem(CreateLostItemCommand command, LostItemRegisterData validatedData,
+                                      List<UploadedImageData> uploadedImages) {
 
         LostItem newLostItem = saveLostItem(command, validatedData.category(), validatedData.foundSchoolArea());
         saveLostItemImage(uploadedImages, newLostItem);
@@ -125,7 +131,8 @@ public class LostItemStorageService {
     }
 
     private LostItem saveLostItem(CreateLostItemCommand command, Category category, SchoolArea foundSchoolArea) {
-        LostItem newLostItem = new LostItem(command.foundAreaDetail(), command.description(), command.depositArea(), category, foundSchoolArea);
+        LostItem newLostItem = new LostItem(command.foundAreaDetail(), command.description(), command.depositArea(),
+                category, foundSchoolArea);
         lostItemRepository.save(newLostItem);
         return newLostItem;
     }
@@ -137,9 +144,11 @@ public class LostItemStorageService {
         lostItemImageRepository.saveAll(lostItemImages);
     }
 
-    private void saveLostItemFeatureAndOptions(List<Pair<Feature, FeatureOption>> itemFeatureAndOptions, LostItem newLostItem) {
+    private void saveLostItemFeatureAndOptions(List<Pair<Feature, FeatureOption>> itemFeatureAndOptions,
+                                               LostItem newLostItem) {
         List<LostItemFeature> newFeatures = itemFeatureAndOptions.stream()
-                .map(featureOption -> new LostItemFeature(newLostItem, featureOption.getFirst(), featureOption.getSecond()))
+                .map(featureOption -> new LostItemFeature(newLostItem, featureOption.getFirst(),
+                        featureOption.getSecond()))
                 .toList();
         lostItemFeatureRepository.saveAll(newFeatures);
     }
@@ -186,12 +195,7 @@ public class LostItemStorageService {
             saveLostItemFeatureAndOptions(validatedData.itemFeatureAndOptions(), lostItem);
         }
 
-        List<LostItemImage> toDeleteFromDb = existingImages.stream()
-                .filter(img -> !command.keepImageIds().contains(img.getId()))
-                .toList();
-        lostItemImageRepository.deleteAllInBatch(toDeleteFromDb);
-
-        saveLostItemImage(uploadedImages, lostItem);
+        updateImagesWithReindexing(lostItem, command.keepImageIds(), uploadedImages, existingImages);
 
         lostItem.updateAdmin(
                 command.description(),
@@ -205,11 +209,42 @@ public class LostItemStorageService {
         return oldKeysToDelete;
     }
 
+    private void updateImagesWithReindexing(
+            LostItem lostItem,
+            List<Long> keepImageIds,
+            List<UploadedImageData> uploadedImages,
+            List<LostItemImage> existingImages
+    ) {
+        List<LostItemImage> keptImages = existingImages.stream()
+                .filter(img -> keepImageIds.contains(img.getId()))
+                .sorted(Comparator.comparing(LostItemImage::getImageOrder))
+                .toList();
+
+        List<LostItemImage> newImageEntities = uploadedImages.stream()
+                .map(img -> new LostItemImage(img.url(), 0, lostItem))
+                .toList();
+
+        List<LostItemImage> toDeleteFromDb = existingImages.stream()
+                .filter(img -> !keepImageIds.contains(img.getId()))
+                .toList();
+        lostItemImageRepository.deleteAllInBatch(toDeleteFromDb);
+
+        List<LostItemImage> totalImages = new ArrayList<>();
+        totalImages.addAll(keptImages);
+        totalImages.addAll(newImageEntities);
+
+        IntStream.range(0, totalImages.size()).forEach(i -> {
+            totalImages.get(i).updateOrder(i);
+        });
+
+        lostItemImageRepository.saveAll(totalImages);
+    }
+
     public List<UploadedImageData> uploadImages(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) return List.of();
 
         return IntStream.range(0, files.size())
-                .mapToObj(i -> new UploadedImageData(s3ImageFileManager.upload(files.get(i), "lost-items"), i))
+                .mapToObj(i -> new UploadedImageData(s3ImageFileManager.upload(files.get(i), IMAGE_DIRECTORY), i))
                 .toList();
     }
 
