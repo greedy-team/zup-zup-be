@@ -5,6 +5,7 @@ import com.greedy.zupzup.auth.application.dto.SejongAuthInfo;
 import com.greedy.zupzup.common.ServiceUnitTest;
 import com.greedy.zupzup.common.fixture.MemberFixture;
 import com.greedy.zupzup.global.exception.ApplicationException;
+import com.greedy.zupzup.member.application.dto.MemberEmailInfoResult;
 import com.greedy.zupzup.member.application.dto.MemberEmailUpdateCommand;
 import com.greedy.zupzup.member.domain.Member;
 import com.greedy.zupzup.member.exception.MemberException;
@@ -64,6 +65,41 @@ class MemberServiceTest extends ServiceUnitTest {
             assertThat(resultMember).isEqualTo(member);
             then(memberRepository).should().findByStudentId(authInfo.studentId());
             then(memberRepository).should().save(any(Member.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("이메일 정보 조회")
+    class GetEmailInfo {
+
+        @Test
+        void 이메일_정보를_조회하면_회원의_이메일과_알림설정을_반환해야_한다() {
+            // given
+            Member member = MemberFixture.MEMBER_WITH_EMAIL();
+            setId(member, 1L);
+
+            given(memberRepository.getById(member.getId())).willReturn(member);
+
+            // when
+            MemberEmailInfoResult result = memberService.getEmailInfo(member.getId());
+
+            // then
+            assertThat(result.email()).isEqualTo(member.getEmail());
+            assertThat(result.emailAlertEnabled()).isEqualTo(member.getEmailAlertEnabled());
+        }
+
+        @Test
+        void 존재하지_않는_회원의_이메일_정보를_조회하려하면_예외가_발생해야_한다() {
+            // given
+            Long nonExistentMemberId = 999L;
+
+            given(memberRepository.getById(nonExistentMemberId))
+                    .willThrow(new ApplicationException(MemberException.MEMBER_NOT_FOUND));
+
+            // when & then
+            assertThatThrownBy(() -> memberService.getEmailInfo(nonExistentMemberId))
+                    .isInstanceOf(ApplicationException.class)
+                    .hasMessage(MemberException.MEMBER_NOT_FOUND.getDetail());
         }
     }
 
