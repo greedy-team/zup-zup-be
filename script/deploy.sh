@@ -95,8 +95,7 @@ done
 # Health Check가 최종적으로 실패한 경우, 롤백을 시작
 echo "  → $APP_NAME 애플리케이션 실행 실패" >> $DEPLOY_LOG
 echo "  → 실패한 '$TARGET_ENV' 컨테이너의 마지막 로그 50줄을 출력" >> $DEPLOY_LOG
-docker compose -f "$DOCKER_COMPOSE_FILE" logs --tail 50 "web-$TARGET_ENV" >> "$DEPLOY_LOG" 2>&1
-
+docker compose logs --tail 50 "web-$TARGET_ENV" >> $DEPLOY_LOG 2>&1
 
 echo "  → 배포 롤백을 시작합니다." >> $DEPLOY_LOG
 containerId=$(docker ps -a -q --filter "name=web-$TARGET_ENV")

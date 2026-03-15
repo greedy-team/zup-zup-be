@@ -3,7 +3,7 @@ name: zupzup CI/CD with GitHub Actions
 on:
   push:
     branches:
-      - hyerimh/feat-58-email
+      - main
 
 jobs:
   deploy:
