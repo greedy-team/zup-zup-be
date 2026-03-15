@@ -132,7 +132,10 @@ public interface LostItemViewControllerDocs {
                     )
             )
     })
-    ResponseEntity<LostItemListResponse> list(@ParameterObject @Valid LostItemListRequest query);
+    ResponseEntity<LostItemListResponse> list(
+            @Parameter(hidden = true) LoginMember loginMember,
+            @ParameterObject @Valid LostItemListRequest query
+    );
 
     @Operation(
             summary = "분실물 단건(간단) 조회",

@@ -17,12 +17,11 @@ public record LostItemListRequest(
     public static final int MAX_LIMIT = 50;
 
     public GetItemListCommand toCommand() {
-        return GetItemListCommand.of(
-                categoryId,
-                schoolAreaId,
-                safePage(),
-                safeLimit()
-        );
+        return GetItemListCommand.of(categoryId, schoolAreaId, safePage(), safeLimit());
+    }
+
+    public GetItemListCommand toCommand(Long memberId) {
+        return GetItemListCommand.of(categoryId, schoolAreaId, safePage(), safeLimit(), memberId);
     }
 
     public int safePage() {

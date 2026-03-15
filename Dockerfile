@@ -2,11 +2,21 @@ FROM amazoncorretto:21-alpine-jdk
 
 WORKDIR /app
 
+# 먼저 커스텀 보안 정책 파일 생성
+RUN echo "jdk.tls.disabledAlgorithms=SSLv3, TLSv1, TLSv1.1, RC4, DES, MD5withRSA, \\" > /app/custom.security && \
+    echo " DH keySize < 1024, EC keySize < 224, 3DES_EDE_CBC, anon, NULL" >> /app/custom.security && \
+    echo "jdk.tls.legacyAlgorithms=" >> /app/custom.security
+
 COPY build/libs/sejong-zupzup-0.0.1-SNAPSHOT.jar /app.jar
 
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "/app.jar"]
+ENTRYPOINT ["java", \
+            "-Duser.timezone=Asia/Seoul", \
+            "-Djava.security.properties=/app/custom.security", \
+            "-Dhttps.protocols=TLSv1.2", \
+            "-Djdk.tls.client.protocols=TLSv1.2", \
+            "-jar", "/app.jar"]
 
-CMD ["-Dspring.profiles.active=prod"]
+CMD ["--spring.profiles.active=prod"]
 
 EXPOSE 8080
 EXPOSE 8081

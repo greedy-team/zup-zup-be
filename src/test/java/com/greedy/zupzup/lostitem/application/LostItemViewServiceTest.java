@@ -36,7 +36,7 @@ class LostItemViewServiceTest extends ServiceUnitTest {
 
     @BeforeEach
     void init() {
-        service = new LostItemViewService(lostItemRepository, lostItemImageRepository);
+        service = new LostItemViewService(lostItemRepository, lostItemImageRepository, quizAttemptRepository);
     }
 
     @Test
