@@ -2,6 +2,7 @@ package com.greedy.zupzup.member.presentation;
 
 import com.greedy.zupzup.auth.presentation.argumentresolver.LoginMember;
 import com.greedy.zupzup.global.exception.ErrorResponse;
+import com.greedy.zupzup.member.presentation.dto.MemberEmailInfoResponse;
 import com.greedy.zupzup.member.presentation.dto.MemberEmailUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Member", description = "회원 관련 API")
 public interface MemberControllerDocs {
+
+    @Operation(
+            summary = "이메일 및 알림 설정 조회",
+            description = """
+                    회원의 이메일 주소와 알림 수신 여부를 조회합니다.
+                    **※ 로그인(액세스 토큰)이 반드시 필요한 API 입니다.**
+                    """,
+            security = @SecurityRequirement(name = "zupzupAccessTokenAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "인증 실패 예시", value = """
+                                    {
+                                      "title": "인증되지 않은 요청",
+                                      "status": 401,
+                                      "detail": "로그인이 필요합니다.",
+                                      "instance": "/api/members/me/email"
+                                    }
+                                    """
+                            )
+                    )
+            ),
+            @ApiResponse(responseCode = "404", description = "회원 정보 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                            examples = @ExampleObject(name = "회원 없음 예시", value = """
+                                    {
+                                      "title": "회원을 찾을 수 없음",
+                                      "status": 404,
+                                      "detail": "해당 ID의 회원을 찾을 수 없습니다.",
+                                      "instance": "/api/members/me/email"
+                                    }
+                                    """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<MemberEmailInfoResponse> getEmailInfo(
+            @Parameter(hidden = true) LoginMember loginMember
+    );
 
     @Operation(
             summary = "이메일 및 알림 설정 수정",

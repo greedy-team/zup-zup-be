@@ -13,3 +13,4 @@ public record MemberEmailUpdateRequest(
         Boolean emailAlertEnabled
 ) {
 }
+
