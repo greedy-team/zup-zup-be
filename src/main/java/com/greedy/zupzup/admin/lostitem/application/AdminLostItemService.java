@@ -3,6 +3,7 @@ package com.greedy.zupzup.admin.lostitem.application;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminLostItemResult;
 import com.greedy.zupzup.admin.lostitem.application.dto.ItemImageBulkDeletedEvent;
+import com.greedy.zupzup.alert.application.strategy.AlertStrategy;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
@@ -14,6 +15,7 @@ import com.greedy.zupzup.lostitem.domain.LostItemImage;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ public class AdminLostItemService {
     private final LostItemImageRepository lostItemImageRepository;
     private final LostItemFeatureRepository lostItemFeatureRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AlertStrategy alertStrategy;
 
     @Transactional
     public ApproveLostItemsResponse approveBulk(ApproveLostItemsRequest request) {
@@ -41,9 +44,11 @@ public class AdminLostItemService {
         int successCount = adminLostItemRepository.updateStatusBulkByIds(
                 lostItemIds,
                 LostItemStatus.REGISTERED,
-                LostItemStatus.PENDING
+                LostItemStatus.PENDING,
+                LocalDateTime.now()
         );
 
+        alertStrategy.sendAlert(lostItemIds);
         return ApproveLostItemsResponse.of(successCount, lostItemIds.size());
     }
 

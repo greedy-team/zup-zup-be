@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>줍줍 알림</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Apple SD Gothic Neo', sans-serif;">
+
+<table role="presentation" style="width: 100%; border: none; border-collapse: collapse; border-spacing: 0;">
+    <tr>
+        <td style="padding: 40px 0;">
+            <table role="presentation"
+                   style="width: 600px; max-width: 100%; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: none; border-collapse: collapse; border-spacing: 0;">
+                <tr>
+                    <td style="background-color: #009689; padding: 30px 0; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🗺️ 줍줍 (ZupZup)</h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 40px 30px;">
+                        <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 10px 0;">
+                            안녕하세요, 줍줍입니다.<br>
+                            <strong style="color: #009689;" th:text="${date}">2025-01-19 18:32</strong>에 새로운 분실물이 등록되었습니다.
+                        </p>
+
+                        <div style="border-bottom: 2px dashed #eeeeee; margin: 20px 0;"></div>
+
+                        <div th:each="entry : ${categoryDigests}" style="margin-bottom: 20px;">
+                            <h3 style="color: #333; font-size: 18px; margin: 0 0 10px 0;"
+                                th:text="${entry.value.emoji + ' ' + entry.key}">📱 전자기기</h3>
+
+                            <ul style="padding-left: 20px; color: #444; line-height: 1.8; margin: 0;">
+                                <li th:each="locationEntry : ${entry.value.itemsByLocation}"
+                                    th:text="${locationEntry.key}">광개토관</li>
+                            </ul>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 40px;">
+                            <a th:href="${baseUrl}"
+                               target="_blank"
+                               style="display: inline-block; padding: 14px 30px; background-color: #009689; color: #ffffff; text-decoration: none; font-weight: bold; border-radius: 30px;">
+                                줍줍 확인하러 가기 🚀
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="background-color: #f8f9fa; padding: 20px; text-align: center; color: #888; font-size: 12px;">
+                        &copy; 2025 ZupZup Project. All rights reserved.<br>
+                        본 메일은 발신 전용입니다.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

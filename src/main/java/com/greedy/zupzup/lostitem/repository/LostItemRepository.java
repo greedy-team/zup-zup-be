@@ -250,13 +250,20 @@ public interface LostItemRepository extends JpaRepository<LostItem, Long> {
         join li.foundArea sa
         join KeywordAlert ka on ka.category = c
         join ka.member m
-        where li.createdAt >= :start
-          and li.createdAt < :end
+        where li.id in :ids
           and m.email is not null
           and m.emailAlertEnabled = true
         group by m.email, c.name, c.emoji, sa.areaName
         """)
-    List<AlertDigestProjection> findDigestData(
-            LocalDateTime start, LocalDateTime end
+    List<AlertDigestProjection> findDigestDataByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+            select li.id
+            from LostItem li
+            where li.approvedAt between :start and :end
+            """)
+    List<Long> findIdsByApprovedAtBetween(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 }
