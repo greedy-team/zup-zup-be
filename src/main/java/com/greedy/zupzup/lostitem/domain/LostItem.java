@@ -51,6 +51,8 @@ public class LostItem extends BaseTimeEntity {
 
     private LocalDateTime foundAt;
 
+    private LocalDateTime approvedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

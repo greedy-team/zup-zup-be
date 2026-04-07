@@ -2,6 +2,7 @@ package com.greedy.zupzup.admin.lostitem.repository;
 
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface AdminLostItemRepository extends JpaRepository<LostItem, Long> {
     @Modifying
-    @Query("UPDATE LostItem li SET li.status = :targetStatus WHERE li.id IN :ids AND li.status = :expectedStatus")
+    @Query("UPDATE LostItem li SET li.status = :targetStatus, li.approvedAt = :approvedAt WHERE li.id IN :ids AND li.status = :expectedStatus")
     int updateStatusBulkByIds(
             @Param("ids") List<Long> ids,
             @Param("targetStatus") LostItemStatus targetStatus,
-            @Param("expectedStatus") LostItemStatus expectedStatus
+            @Param("expectedStatus") LostItemStatus expectedStatus,
+            @Param("approvedAt") LocalDateTime approvedAt
     );
 
     @Modifying
