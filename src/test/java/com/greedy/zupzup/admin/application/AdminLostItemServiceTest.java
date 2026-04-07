@@ -2,11 +2,14 @@ package com.greedy.zupzup.admin.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.BDDMockito.then;
 
 import com.greedy.zupzup.admin.lostitem.application.AdminLostItemService;
+import com.greedy.zupzup.alert.application.strategy.AlertStrategy;
 import com.greedy.zupzup.admin.lostitem.application.dto.AdminFeatureOptionDto;
 import com.greedy.zupzup.admin.lostitem.application.dto.ItemImageBulkDeletedEvent;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.AdminPendingLostItemListResponse;
@@ -47,6 +50,9 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private AlertStrategy alertStrategy;
+
 
     private LostItem stubItem(
             Long id, String desc, String deposit, String foundDetail,
@@ -77,7 +83,8 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
         List<Long> ids = List.of(1L, 2L);
         ApproveLostItemsRequest req = new ApproveLostItemsRequest(ids);
 
-        given(adminLostItemRepository.updateStatusBulkByIds(ids, LostItemStatus.REGISTERED, LostItemStatus.PENDING))
+        given(adminLostItemRepository.updateStatusBulkByIds(
+                eq(ids), eq(LostItemStatus.REGISTERED), eq(LostItemStatus.PENDING), any(LocalDateTime.class)))
                 .willReturn(2);
 
         ApproveLostItemsResponse res = service.approveBulk(req);
@@ -86,6 +93,7 @@ public class AdminLostItemServiceTest extends ServiceUnitTest {
             s.assertThat(res.successfulCount()).isEqualTo(2);
             s.assertThat(res.totalRequestedCount()).isEqualTo(2);
         });
+        then(alertStrategy).should().sendAlert(ids);
     }
 
     @Test
