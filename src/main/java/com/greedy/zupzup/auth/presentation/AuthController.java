@@ -31,6 +31,7 @@ public class AuthController implements AuthControllerDocs {
     private static final String SEJONG_VERIFICATION_INFO_SESSION_KEY = "sejongAuthInfo";
 
     private final AuthService authService;
+    private final CookieUtil cookieUtil;
     private final JwtTokenProvider jwtTokenProvider;
 
 
@@ -80,7 +81,7 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        CookieUtil.setToken("", 0, response);
+        cookieUtil.setToken("", 0, response);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -97,7 +98,7 @@ public class AuthController implements AuthControllerDocs {
 
     private void setAccessToken(HttpServletResponse response, Member member) {
         String accessToken = jwtTokenProvider.createAccessToken(member);
-        CookieUtil.setToken(accessToken, jwtTokenProvider.accessExpirationSecond, response);
+        cookieUtil.setToken(accessToken, jwtTokenProvider.accessExpirationSecond, response);
     }
 
 }

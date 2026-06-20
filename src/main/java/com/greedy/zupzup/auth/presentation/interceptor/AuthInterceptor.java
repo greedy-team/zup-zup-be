@@ -15,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CookieUtil cookieUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -24,7 +25,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String accessToken = CookieUtil.extractToken(request.getCookies());
+        String accessToken = cookieUtil.extractToken(request.getCookies());
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
 
         if (loginMemberId == null) {

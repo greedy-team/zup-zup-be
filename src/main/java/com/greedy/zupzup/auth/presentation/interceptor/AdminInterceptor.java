@@ -22,6 +22,7 @@ public class AdminInterceptor implements HandlerInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
+    private final CookieUtil cookieUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -31,7 +32,7 @@ public class AdminInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String accessToken = CookieUtil.extractToken(request.getCookies());
+        String accessToken = cookieUtil.extractToken(request.getCookies());
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
 
         if (!memberRepository.existsByIdAndRole(loginMemberId, Role.ADMIN)) {

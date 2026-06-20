@@ -18,6 +18,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CookieUtil cookieUtil;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -47,7 +48,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     private LoginMember getLoginMemberFromAccessToken(HttpServletRequest request) {
-        String accessToken = CookieUtil.extractToken(request.getCookies());
+        String accessToken = cookieUtil.extractToken(request.getCookies());
         Long loginMemberId = jwtTokenProvider.getLoginMemberId(accessToken);
         return new LoginMember(loginMemberId);
     }
