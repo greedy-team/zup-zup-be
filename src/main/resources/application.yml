@@ -6,6 +6,11 @@ server:
       timeout: ${STUDENT_VERIFICATION_SESSION_TIME:1m}
 
 spring:
+  profiles:
+    group:
+      dev: dev, realtime
+      prod: prod, realtime
+
   servlet:
     multipart:
       max-file-size: 10MB     # 개별 파일 최대 크기

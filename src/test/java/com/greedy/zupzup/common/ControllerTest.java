@@ -1,5 +1,6 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.alert.application.strategy.AlertStrategy;
 import com.greedy.zupzup.alert.repository.KeywordAlertRepository;
 import com.greedy.zupzup.auth.infrastructure.SejongAuthenticator;
 import com.greedy.zupzup.auth.jwt.JwtTokenProvider;
@@ -47,6 +48,9 @@ import static com.greedy.zupzup.common.fixture.SchoolAreaFixture.*;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class ControllerTest {
+
+    @MockitoBean
+    protected AlertStrategy alertStrategy;
 
     @MockitoBean
     protected S3ImageFileManager imageFileManager;

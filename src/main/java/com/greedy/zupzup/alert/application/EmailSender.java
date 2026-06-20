@@ -17,7 +17,6 @@ import org.thymeleaf.context.Context;
 @RequiredArgsConstructor
 public class EmailSender {
 
-    private static final String TEMPLATE_NAME = "alert-digest";
     private static final String ENCODING = "UTF-8";
     private static final String SENDER_NAME = "줍줍(ZupZup)";
 
@@ -40,7 +39,7 @@ public class EmailSender {
             context.setVariable("baseUrl", command.baseUrl());
             context.setVariable("date", command.date());
 
-            String htmlContent = templateEngine.process(TEMPLATE_NAME, context);
+            String htmlContent = templateEngine.process(command.templateName(), context);
 
             helper.setTo(command.to());
             helper.setSubject(command.subject());
