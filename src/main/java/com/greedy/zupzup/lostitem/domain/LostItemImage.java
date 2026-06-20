@@ -43,4 +43,12 @@ public class LostItemImage extends BaseTimeEntity {
         this.imageOrder = imageOrder;
         this.lostItem = lostItem;
     }
+
+    public static LostItemImage of(LostItem lostItem, String imageKey, Integer imageOrder) {
+        return new LostItemImage(imageKey, imageOrder, lostItem);
+    }
+
+    public void updateOrder(int newOrder) {
+        this.imageOrder = newOrder;
+    }
 }

@@ -1,23 +1,33 @@
 package com.greedy.zupzup.admin.presentation;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
 import com.greedy.zupzup.category.domain.Category;
 import com.greedy.zupzup.common.ControllerTest;
 import com.greedy.zupzup.lostitem.domain.LostItem;
 import com.greedy.zupzup.lostitem.domain.LostItemStatus;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
+import com.greedy.zupzup.lostitem.presentation.dto.ItemFeatureRequest;
+import com.greedy.zupzup.lostitem.repository.LostItemRepository;
 import com.greedy.zupzup.member.domain.Member;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
 class AdminLostItemControllerTest extends ControllerTest {
 
@@ -26,11 +36,30 @@ class AdminLostItemControllerTest extends ControllerTest {
     private String adminToken;
     private Category category;
 
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private LostItemRepository lostItemRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUpAdmin() {
         adminMember = givenAdmin("admin_pw");
         adminToken = givenAccessToken(adminMember);
         category = givenElectronicsCategory();
+    }
+
+    @BeforeEach
+    void setUpRestAssured() {
+        RestAssured.config = RestAssured.config()
+                .encoderConfig(
+                        io.restassured.config.EncoderConfig.encoderConfig()
+                                .defaultContentCharset("UTF-8")
+                );
     }
 
     @Nested
@@ -195,5 +224,99 @@ class AdminLostItemControllerTest extends ControllerTest {
                 softly.assertThat(quizQuestions).contains("어떤 브랜드의 제품인가요?", "제품의 색상은 무엇인가요?");
             });
         }
+    }
+
+    @Nested
+    @DisplayName("관리자 분실물 수정 API")
+    class AdminUpdateApi {
+
+        @Test
+        void 분실물_정보와_이미지를_수정하고_200_OK를_반환한다() throws Exception {
+            // given
+            LostItem item = givenPendingLostItemWithFeatures(category);
+            givenLostItemImages(item.getId(), List.of("img1", "img2"));
+
+            List<Long> keepImageIds = List.of(
+                    lostItemImageRepository.findByLostItemId(item.getId()).get(0).getId()
+            );
+
+            List<ItemFeatureRequest> features = List.of(
+                    new ItemFeatureRequest(1L, 1L),
+                    new ItemFeatureRequest(2L, 5L)
+            );
+
+            UpdateLostItemRequest request = new UpdateLostItemRequest(
+                    "수정된 설명",
+                    "학생회관",
+                    1L,
+                    "1층",
+                    category.getId(),
+                    features,
+                    keepImageIds
+            );
+
+            // when
+            ExtractableResponse<Response> res = RestAssured.given()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .contentType(ContentType.MULTIPART)
+                    .multiPart(
+                            "updateRequest",
+                            "updateRequest",
+                            objectMapper.writeValueAsBytes(request),
+                            "application/json"
+                    )
+                    .when()
+                    .put("/api/admin/lost-items/" + item.getId())
+                    .then()
+                    .extract();
+
+            // then
+            assertSoftly(s -> {
+                s.assertThat(res.statusCode()).isEqualTo(200);
+
+                LostItem updated = lostItemRepository.findById(item.getId()).orElseThrow();
+
+                s.assertThat(updated.getStatus()).isEqualTo(LostItemStatus.REGISTERED);
+                s.assertThat(updated.getDescription()).isEqualTo("수정된 설명");
+
+                List<Long> imageIds = lostItemImageRepository.findByLostItemId(item.getId())
+                        .stream()
+                        .map(img -> img.getId())
+                        .toList();
+
+                s.assertThat(imageIds).containsExactlyInAnyOrderElementsOf(keepImageIds);
+            });
+        }
+
+        @Test
+        void 이미_승인된_분실물을_수정하려고_하면_403_FORBIDDEN을_응답한다() throws Exception {
+            LostItem item = givenRegisteredLostItem(category);
+
+            UpdateLostItemRequest request = new UpdateLostItemRequest(
+                    "수정",
+                    "장소",
+                    1L,
+                    "상세",
+                    category.getId(),
+                    List.of(),
+                    List.of()
+            );
+
+            ExtractableResponse<Response> res = RestAssured.given()
+                    .cookie(ACCESS_TOKEN_NAME, adminToken)
+                    .contentType(ContentType.MULTIPART)
+                    .multiPart(
+                            "updateRequest",
+                            objectMapper.writeValueAsString(request),
+                            "application/json"
+                    )
+                    .when()
+                    .put("/api/admin/lost-items/" + item.getId())
+                    .then()
+                    .extract();
+
+            assertThat(res.statusCode()).isEqualTo(403);
+        }
+
     }
 }

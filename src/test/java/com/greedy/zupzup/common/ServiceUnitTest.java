@@ -1,10 +1,12 @@
 package com.greedy.zupzup.common;
 
+import com.greedy.zupzup.admin.lostitem.repository.AdminLostItemRepository;
 import com.greedy.zupzup.alert.repository.KeywordAlertRepository;
 import com.greedy.zupzup.category.repository.CategoryRepository;
 import com.greedy.zupzup.category.repository.FeatureOptionRepository;
 import com.greedy.zupzup.global.infrastructure.S3FileCleanupService;
 import com.greedy.zupzup.global.infrastructure.S3ImageFileManager;
+import com.greedy.zupzup.lostitem.application.LostItemStorageService;
 import com.greedy.zupzup.lostitem.repository.LostItemFeatureRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemImageRepository;
 import com.greedy.zupzup.lostitem.repository.LostItemRepository;
@@ -63,6 +65,12 @@ public abstract class ServiceUnitTest {
 
     @Mock
     protected EmptyQuizGenerationStrategy emptyQuizGenerationStrategy;
+
+    @Mock
+    protected AdminLostItemRepository adminLostItemRepository;
+
+    @Mock
+    protected LostItemStorageService lostItemStorageService;
 
     protected static void setId(Object target, Long id) {
         ReflectionTestUtils.setField(target, "id", id);

@@ -1,16 +1,16 @@
-package com.greedy.zupzup.admin.lostitem.application.dto;
+package com.greedy.zupzup.admin.lostitem.presentation.dto;
 
 import com.greedy.zupzup.category.domain.FeatureOption;
 import lombok.Builder;
 
 @Builder
-public record AdminFeatureOptionDto(
+public record LostItemFeatureOptionDto(
         Long id,
         String optionValue,
         String quizQuestion
 ) {
-    public static AdminFeatureOptionDto of(FeatureOption option) {
-        return new AdminFeatureOptionDto(
+    public static LostItemFeatureOptionDto of(FeatureOption option) {
+        return new LostItemFeatureOptionDto(
                 option.getId(),
                 option.getOptionValue(),
                 option.getFeature().getQuizQuestion()

@@ -50,6 +50,10 @@ public class LostItemFeature extends BaseTimeEntity {
         this.selectedOption = selectedOption;
     }
 
+    public static LostItemFeature of(LostItem lostItem, Feature feature, FeatureOption selectedOption) {
+        return new LostItemFeature(lostItem, feature, selectedOption);
+    }
+
     public Long getFeatureId() {
         return this.feature.getId();
     }

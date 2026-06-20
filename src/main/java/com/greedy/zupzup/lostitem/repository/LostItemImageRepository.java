@@ -40,4 +40,20 @@ public interface LostItemImageRepository extends JpaRepository<LostItemImage, Lo
             """)
     List<LostItemImage> findImagesForItems(@Param("lostItemIds") List<Long> lostItemIds);
 
+    @Query("""
+    select i
+    from LostItemImage i
+    where i.lostItem.id = :lostItemId
+    order by i.imageOrder asc
+""")
+    List<LostItemImage> findByLostItemId(@Param("lostItemId") Long lostItemId);
+
+    @Query("""
+    select count(i)
+    from LostItemImage i
+    where i.id in :ids
+      and i.lostItem.id = :lostItemId
+""")
+    long countByIdInAndLostItemId(@Param("ids") List<Long> ids, @Param("lostItemId") Long lostItemId);
+
 }

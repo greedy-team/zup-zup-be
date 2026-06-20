@@ -6,18 +6,26 @@ import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsRequest
 import com.greedy.zupzup.admin.lostitem.presentation.dto.ApproveLostItemsResponse;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsRequest;
 import com.greedy.zupzup.admin.lostitem.presentation.dto.RejectLostItemsResponse;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemRequest;
+import com.greedy.zupzup.admin.lostitem.presentation.dto.UpdateLostItemResponse;
 import com.greedy.zupzup.global.exception.ErrorResponse;
 import com.greedy.zupzup.lostitem.presentation.dto.LostItemListRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Admin - LostItem", description = "관리자 분실물 승인/거절/조회 API")
 public interface AdminLostItemControllerDocs {
@@ -180,4 +188,91 @@ public interface AdminLostItemControllerDocs {
     ResponseEntity<AdminPendingLostItemListResponse> listPending(
             @ParameterObject @Valid LostItemListRequest query
     );
+
+    @Operation(
+            summary = "보류 분실물 상세 정보 수정 및 승인",
+            description = """
+                    보류 상태의 분실물 정보를 수정하고, 정상 처리 시 상태를 REGISTERED로 변경합니다.
+                    - newImages: 새로 추가할 이미지 파일 리스트(선택)
+                    - updateRequest: 수정할 JSON 데이터(필수)
+                    """,
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(mediaType = "multipart/form-data")
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "수정 및 승인 성공",
+                    content = @Content(
+                            schema = @Schema(implementation = UpdateLostItemResponse.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "lostItemId": 1,
+                                              "message": "분실물 정보가 성공적으로 수정 및 승인되었습니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "권한 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 분실물",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    ResponseEntity<UpdateLostItemResponse> updateLostItem(
+            @Parameter(description = "분실물 ID", example = "1")
+            @PathVariable Long lostItemId,
+
+            @Parameter(
+                    description = "새 이미지 파일 리스트(선택). multipart/form-data의 newImages 파트로 전송합니다.",
+                    content = @Content(
+                            mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary")
+                    )
+            )
+            @RequestPart(value = "newImages", required = false)
+            List<MultipartFile> newImages,
+
+            @Parameter(
+                    description = "수정 JSON (keepImageIds 포함). multipart/form-data의 updateRequest 파트로 전송합니다.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UpdateLostItemRequest.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "description": "수정된 설명",
+                                              "depositArea": "학생회관",
+                                              "foundAreaId": 1,
+                                              "foundAreaDetail": "1층",
+                                              "categoryId": 10,
+                                              "featureOptions": [
+                                                { "featureId": 1, "optionId": 1 },
+                                                { "featureId": 2, "optionId": 5 }
+                                              ],
+                                              "keepImageIds": [10, 11]
+                                            }
+                                            """
+                            )
+                    )
+            )
+            @RequestPart("updateRequest")
+            @Valid
+            UpdateLostItemRequest updateRequest
+    );
+
 }

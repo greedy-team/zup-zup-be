@@ -31,9 +31,6 @@ class LostItemRegisterServiceTest extends ServiceUnitTest {
     @InjectMocks
     private LostItemRegisterService lostItemRegisterService;
 
-    @Mock
-    private LostItemStorageService lostItemStorageService;
-
     private CreateLostItemCommand createDummyCommand() {
         List<MultipartFile> images = createDummyImages(3);
         List<CreateImageCommand> imageCommands = images.stream()
